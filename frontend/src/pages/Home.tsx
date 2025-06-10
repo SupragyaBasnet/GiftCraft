@@ -106,6 +106,14 @@ const featuredProducts = [
     image: pillowcase1,
     description: 'Design a cozy pillowcase with your own style.',
   },
+  {
+    id: 45,
+    name: 'Photo Frame',
+    category: 'frames',
+    price: 2400,
+    image: photoframe1,
+    description: 'Create a beautiful custom photo frame for your memories',
+  },
 ];
 
 const testimonials = [
