@@ -5,6 +5,7 @@ import { DesignServices, ShoppingCart } from '@mui/icons-material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import { products, Product } from '../data/products';
+console.log('Products data on load:', products);
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { keyframes } from '@mui/system';
 
@@ -55,7 +56,7 @@ const ProductDetails: React.FC = () => {
       </Container>
     );
   }
-  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  const images = product.images && product.images.length > 0 ? product.images : [product.image || ''];
   const [mainIdx, setMainIdx] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   // Pick 2 other products from the same category, or any 2 others
@@ -74,7 +75,7 @@ const ProductDetails: React.FC = () => {
             <Box
               component="img"
               src={images[mainIdx]}
-              alt={product.name}
+              alt={product.name || ''}
               sx={{ width: '100%', maxWidth: 350, borderRadius: 4, boxShadow: 3, mb: 2, objectFit: 'contain', bgcolor: 'white' }}
             />
             {images.length > 1 && (
@@ -83,8 +84,8 @@ const ProductDetails: React.FC = () => {
                   <Box
                     key={idx}
                     component="img"
-                    src={img}
-                    alt={product.name + '-thumb-' + idx}
+                    src={img || ''}
+                    alt={product.name + '-thumb-' + idx || ''}
                     sx={{
                       width: 48,
                       height: 48,
@@ -102,15 +103,15 @@ const ProductDetails: React.FC = () => {
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Typography variant="h4" fontWeight={900} gutterBottom>{product.name}</Typography>
+          <Typography variant="h4" fontWeight={900} gutterBottom>{product.name || 'Product Name'}</Typography>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
             <Rating value={product.rating} precision={0.5} readOnly size="medium" />
-            <Typography variant="body2" color="text.secondary">({product.reviews})</Typography>
+            <Typography variant="body2" color="text.secondary">({product.reviews || 0})</Typography>
           </Stack>
           <Typography variant="h5" color="primary" fontWeight={700} sx={{ mb: 2 }}>
-            Rs. {product.price.toLocaleString('en-IN')}
+            Rs. {product.price ? product.price.toLocaleString('en-IN') : 'N/A'}
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>{product.description}</Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>{product.description || 'No description available.'}</Typography>
           <Typography variant="subtitle2" color="success.main" sx={{ mb: 2 }}>
             In Stock
           </Typography>

@@ -29,15 +29,15 @@ const featuredProducts = [
   {
     id: 1,
     name: 'Custom T-Shirt',
-    category: 'tshirt',
+    category: 'tshirts',
     price: 3200,
     image: tshirt1,
     description: 'Personalize your own t-shirt with custom designs and text',
   },
   {
-    id: 2,
+    id: 8,
     name: 'Photo Frame',
-    category: 'frame',
+    category: 'frames',
     price: 2400,
     image: photoframe1,
     description: 'Create a beautiful custom photo frame for your memories',
@@ -45,15 +45,15 @@ const featuredProducts = [
   {
     id: 3,
     name: 'Phone Cover',
-    category: 'phonecase',
+    category: 'phonecases',
     price: 1600,
     image: phonecase1,
     description: 'Design your own unique phone cover',
   },
   {
-    id: 4,
+    id: 2,
     name: 'Custom Mug',
-    category: 'mug',
+    category: 'mugs',
     price: 1200,
     image: mug1,
     description: "Start your day with a mug that's uniquely yours.",
@@ -61,7 +61,7 @@ const featuredProducts = [
   {
     id: 5,
     name: 'Custom Notebook',
-    category: 'notebook',
+    category: 'notebooks',
     price: 800,
     image: notebook1,
     description: 'Jot down your ideas in a notebook made just for you.',
@@ -69,7 +69,7 @@ const featuredProducts = [
   {
     id: 6,
     name: 'Custom Pen',
-    category: 'pen',
+    category: 'pens',
     price: 300,
     image: pen1,
     description: 'Write your story with a personalized pen.',
@@ -77,15 +77,15 @@ const featuredProducts = [
   {
     id: 7,
     name: 'Custom Keychain',
-    category: 'keychain',
+    category: 'keychains',
     price: 500,
     image: keychain1,
     description: 'Carry your memories with a personalized keychain.',
   },
   {
-    id: 8,
+    id: 4,
     name: 'Custom Water Bottle',
-    category: 'waterbottle',
+    category: 'waterbottles',
     price: 1500,
     image: waterbottle1,
     description: 'Stay hydrated with a custom-designed water bottle.',
@@ -93,7 +93,7 @@ const featuredProducts = [
   {
     id: 9,
     name: 'Custom Cap',
-    category: 'cap',
+    category: 'caps',
     price: 900,
     image: cap1,
     description: 'Top off your look with a personalized cap.',
@@ -101,7 +101,7 @@ const featuredProducts = [
   {
     id: 10,
     name: 'Custom Pillowcase',
-    category: 'pillowcase',
+    category: 'pillowcases',
     price: 1800,
     image: pillowcase1,
     description: 'Design a cozy pillowcase with your own style.',
@@ -420,7 +420,7 @@ const Home: React.FC = () => {
                     </Button>
                     <Button
                       component={RouterLink}
-                      to={`/product/${product.id.toString()}`}
+                      to={`/products/${product.id.toString()}`}
                       variant="outlined"
                       size="medium"
                       sx={{
