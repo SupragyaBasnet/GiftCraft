@@ -1,0 +1,528 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Avatar,
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tabs,
+  Tab,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Collapse,
+  Stack,
+  Snackbar,
+  Alert,
+  Rating,
+} from '@mui/material';
+import {
+  PhotoCamera,
+  PhotoLibrary,
+  Delete,
+  Close,
+  Home,
+  LocalShipping,
+  LocationOn,
+  Settings as SettingsIcon,
+  Logout as LogoutIcon,
+  ExpandMore,
+  ExpandLess,
+  Edit,
+  Star,
+} from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
+import CustomizedProductImage from '../components/CustomizedProductImage';
+
+// Mock data for addresses
+const mockAddresses = [
+  { id: 1, label: 'Home', address: '123 Main St, Kathmandu, Nepal' },
+  { id: 2, label: 'Office', address: '456 Business Rd, Lalitpur, Nepal' },
+];
+
+// Simple client-side price map (placeholder) - Needed for calculating and displaying item price
+const productPrices: Record<string, number> = {
+  tshirt: 500,
+  mug: 300,
+  phonecase: 800,
+  waterbottle: 600,
+  cap: 400,
+  notebook: 700,
+  pen: 200,
+  keychain: 200,
+  frame: 3000,
+  pillowcase: 900,
+};
+
+const Profile: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [tab, setTab] = useState(0);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<string[]>([]); // Initialize as an empty array of strings
+  const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
+
+  // Add state for order history
+  const [orderHistory, setOrderHistory] = useState<any[]>([]);
+
+  // Fetch order history from localStorage on component mount and extract unique addresses
+  useEffect(() => {
+    const savedOrderHistory = localStorage.getItem('giftcraftOrderHistory');
+    if (savedOrderHistory) {
+      try {
+        const parsedOrderHistory = JSON.parse(savedOrderHistory);
+        setOrderHistory(parsedOrderHistory);
+
+        // Extract unique addresses from order history and ensure they are strings
+        const uniqueAddresses = Array.from(new Set(parsedOrderHistory
+          .filter((order: any) => order.address) // Filter orders that have an address
+          .map((order: any) => order.address as string) // Extract addresses and explicitly cast to string
+        ));
+        setAddresses(uniqueAddresses); // Set the unique addresses in state
+
+      } catch (e) {
+        console.error('Failed to load order history or extract addresses from localStorage', e);
+        // Optionally clear invalid data
+        localStorage.removeItem('giftcraftOrderHistory');
+        setAddresses([]); // Set addresses to empty array on error
+      }
+    } else {
+      setAddresses([]); // Set addresses to empty array if no order history found
+    }
+  }, []); // Empty dependency array means this effect runs only once on mount
+
+  // Profile state (reuse your existing logic)
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showCameraDialog, setShowCameraDialog] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
+  // Tab change handler
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setTab(newValue);
+
+  // Address handlers
+  // Update the handleDeleteAddress to remove from the state array
+  const handleDeleteAddress = (addressToDelete: string) => {
+    setAddresses(addresses.filter(addr => addr !== addressToDelete));
+    setSnackbar({open: true, message: 'Address removed from list', severity: 'success'});
+  };
+
+  // Profile update handler (mock)
+  const handleProfileSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSnackbar({open: true, message: 'Profile updated!', severity: 'success'});
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleGalleryUpload = () => {
+    fileInputRef.current?.click();
+    handleMenuClose();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCameraOpen = () => {
+    setShowCameraDialog(true);
+    handleMenuClose();
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((mediaStream) => {
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      })
+      .catch((err) => {
+        console.error('Error accessing camera:', err);
+      });
+  };
+
+  const handleCameraClose = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setShowCameraDialog(false);
+  };
+
+  const handleCapturePhoto = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0);
+        setProfileImage(canvas.toDataURL('image/jpeg'));
+        handleCameraClose();
+      }
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setProfileImage(null);
+    handleMenuClose();
+  };
+
+  // Toggle expanded order details
+  const handleToggleExpand = (orderId: string) => {
+    setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  };
+
+  // --- Tab Panels ---
+  function TabPanel({ children, value, index }: { children: React.ReactNode, value: number, index: number }) {
+    return value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null;
+  }
+
+  return (
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      <Paper sx={{ p: { xs: 2, md: 4 }, borderRadius: 4 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} alignItems="flex-start">
+          {/* Sidebar/Profile summary */}
+          <Box sx={{ minWidth: 200, textAlign: 'center', mb: { xs: 2, sm: 0 } }}>
+            <Avatar
+              sx={{ width: 100, height: 100, fontSize: '2.5rem', mx: 'auto', mb: 2 }}
+              src={profileImage || undefined}
+            >
+              {!profileImage && user?.name.charAt(0)}
+            </Avatar>
+            <Typography variant="h6">{user?.name}</Typography>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>{user?.email}</Typography>
+            <Tabs
+              orientation={window.innerWidth < 600 ? 'horizontal' : 'vertical'}
+              value={tab}
+              onChange={handleTabChange}
+              variant="scrollable"
+              sx={{
+                borderRight: { sm: 1, md: 1, xs: 0, borderColor: 'divider' },
+                minWidth: 180,
+                mt: 2,
+                mb: { xs: 2, sm: 0 },
+              }}
+            >
+              <Tab icon={<Home />} iconPosition="start" label="Profile" />
+              <Tab icon={<LocalShipping />} iconPosition="start" label="Orders" />
+              <Tab icon={<LocationOn />} iconPosition="start" label="Addresses" />
+              <Tab icon={<SettingsIcon />} iconPosition="start" label="Settings" />
+            </Tabs>
+          </Box>
+          {/* Main content */}
+          <Box sx={{ flex: 1 }}>
+            {/* Profile Tab */}
+            <TabPanel value={tab} index={0}>
+              <Typography variant="h5" fontWeight={700} gutterBottom>Profile Overview</Typography>
+              <Box component="form" onSubmit={handleProfileSubmit} sx={{ mt: 2 }}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="name"
+                  label="Full Name"
+                  name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="phone"
+                  label="Phone Number"
+                  name="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <Box sx={{ mr: 1, color: 'text.secondary' }}>+977</Box>
+                    ),
+                  }}
+                />
+                <Button type="submit" variant="contained" sx={{ mt: 3, borderRadius: 2 }}>
+                  Save Changes
+                </Button>
+              </Box>
+            </TabPanel>
+            {/* Orders Tab */}
+            <TabPanel value={tab} index={1}>
+              <Typography variant="h5" fontWeight={700} gutterBottom>Order History</Typography>
+              <List>
+                {orderHistory.length === 0 ? (
+                  <Typography variant="body1" align="center">No orders found.</Typography>
+                ) : (
+                  orderHistory.map((order) => (
+                    <React.Fragment key={order.id}>
+                      <ListItem button onClick={() => handleToggleExpand(order.id)}>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body1" fontWeight={700}>Order ID: {order.id}</Typography>
+                          }
+                          secondary={
+                            <React.Fragment>
+                              <Typography component="span" variant="body2" color="text.primary">
+                                Date: {new Date(order.date).toLocaleDateString()}
+                              </Typography>
+                              <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'block' }}>
+                                Total: Rs. {order.total}
+                              </Typography>
+                              <Typography component="span" variant="body2" color="text.secondary" sx={{ display: 'block' }}>
+                                Status: {order.status}
+                              </Typography>
+                            </React.Fragment>
+                          }
+                        />
+                        {expandedOrder === order.id ? <ExpandLess /> : <ExpandMore />}
+                      </ListItem>
+                      <Collapse in={expandedOrder === order.id} timeout="auto" unmountOnExit>
+                        <Box sx={{ pl: 4, pr: 2, pb: 2, borderBottom: '1px solid #eee' }}>
+                          <Typography variant="subtitle1" fontWeight={700} gutterBottom>Items:</Typography>
+                          {/* Display order items - Assuming 'item' in order object has name, qty, price */} {/* Use CustomizedProductImage here */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                              {/* Use the CustomizedProductImage component to display the item */}
+                              <Box sx={{ width: 60, height: 60, mr: 2 }}> {/* Adjust size as needed */}
+                                {/* Pass item details to CustomizedProductImage */}
+                                <CustomizedProductImage 
+                                  baseImage={order.item.image} 
+                                  elements={order.item.elements || []} 
+                                  color={order.item.color || '#ffffff'} 
+                                  productType={order.item.productType}
+                                />
+                              </Box>
+                              <Box>
+                                 <Typography variant="body2" fontWeight={600}>
+                                   {order.item.productType.charAt(0).toUpperCase() + order.item.productType.slice(1).replace('-', ' ')}
+                                   {order.item.size ? ` - Size: ${order.item.size}` : ''}
+                                 </Typography>
+                                  <Typography variant="body2">Color: {order.item.color}</Typography>
+                                   {order.item.elements && order.item.elements.length > 0 && (
+                                     <Typography variant="body2">Elements: {order.item.elements.length} added</Typography>
+                                   )}
+                                 <Typography variant="body2">Price: Rs. {productPrices[order.item.productType] || 0}</Typography>
+                              </Box>
+                          </Box>
+
+                          {/* Display Address */}
+                          {order.address && (
+                            <Box sx={{ mt: 2 }}>
+                              <Typography variant="subtitle1" fontWeight={700}>Shipping Address:</Typography>
+                              <Typography variant="body2">{order.address}</Typography>
+                            </Box>
+                          )}
+
+                          {/* Display Review and Rating if available */}
+                          {order.review && (
+                            <Box sx={{ mt: 2 }}>
+                              <Typography variant="subtitle1" fontWeight={700}>Your Review:</Typography>
+                              <Rating name="read-only-rating" value={order.rating} readOnly />
+                              <Typography variant="body2">{order.review}</Typography>
+                            </Box>
+                          )}
+
+                          <Typography variant="subtitle1" fontWeight={700} gutterBottom sx={{ mt: 2 }}>Tracking:</Typography>
+                          {/* Display tracking information - Assuming 'tracking' in order object is an array */} {/* Mock Tracking data - Replace with real logic if needed */}
+                           <List dense disablePadding>
+                             {order.tracking && order.tracking.map((track: any, trackIndex: number) => (
+                                <ListItem key={trackIndex} disableGutters>
+                                  <ListItemText
+                                     primary={<Typography variant="body2" fontWeight={trackIndex === order.tracking.length - 1 ? 700 : 400}>{track.status}</Typography>}
+                                     secondary={<Typography variant="caption" color="text.secondary">{new Date(track.date).toLocaleString()}</Typography>}
+                                  />
+                                </ListItem>
+                             ))}
+                           </List>
+
+                        </Box>
+                      </Collapse>
+                      <Divider />
+                    </React.Fragment>
+                  ))
+                )}
+              </List>
+            </TabPanel>
+            {/* Addresses Tab */}
+            <TabPanel value={tab} index={2}>
+              <Typography variant="h5" fontWeight={700} gutterBottom>Address Book</Typography>
+              <List>
+                {addresses.length === 0 ? (
+                   <Typography variant="body1" align="center">No saved addresses found from orders.</Typography>
+                ) : (
+                  addresses.map((address, index) => (
+                    <ListItem key={index} secondaryAction={
+                      <IconButton edge="end" aria-label="delete address" onClick={() => handleDeleteAddress(address)}>
+                        <Delete />
+                      </IconButton>
+                    }>
+                      <ListItemText primary={`Address ${index + 1}`} secondary={address} />
+                    </ListItem>
+                  ))
+                )}
+              </List>
+              {/* Removed the Add Address button as it's for demo and we are showing addresses from orders */}
+              {/*
+              <Button variant="outlined" startIcon={<Edit />} sx={{ mt: 2 }} disabled>
+                Add Address (Demo)
+              </Button>
+              */}
+            </TabPanel>
+            {/* Settings Tab */}
+            <TabPanel value={tab} index={3}>
+              <Typography variant="h5" fontWeight={700} gutterBottom>Account Settings</Typography>
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ mt: 2, mb: 2 }}>
+                  Change Password
+                </Typography>
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  name="currentPassword"
+                  label="Current Password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  name="newPassword"
+                  label="New Password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirm New Password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 2, borderRadius: 2 }}
+                  onClick={() => setSnackbar({open: true, message: 'Password changed!', severity: 'success'})}
+                >
+                  Change Password
+                </Button>
+              </Box>
+              <Button variant="contained" color="error" startIcon={<LogoutIcon />} sx={{ mt: 2 }} onClick={logout}>
+                Logout
+              </Button>
+            </TabPanel>
+          </Box>
+        </Stack>
+      </Paper>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({...snackbar, open: false})}>
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
+      </Snackbar>
+
+      {/* Photo Upload Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleGalleryUpload}>
+          <PhotoLibrary sx={{ mr: 1 }} /> Upload from Gallery
+        </MenuItem>
+        <MenuItem onClick={handleCameraOpen}>
+          <PhotoCamera sx={{ mr: 1 }} /> Take Photo
+        </MenuItem>
+        {profileImage && (
+          <MenuItem onClick={handleRemovePhoto} sx={{ color: 'error.main' }}>
+            <Delete sx={{ mr: 1 }} /> Remove Photo
+          </MenuItem>
+        )}
+      </Menu>
+
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        accept="image/*"
+        onChange={handleFileChange}
+      />
+
+      {/* Camera Dialog */}
+      <Dialog open={showCameraDialog} onClose={handleCameraClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Take Photo</DialogTitle>
+        <DialogContent>
+          <Box sx={{ position: 'relative', width: '100%', paddingTop: '75%' }}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCameraClose} startIcon={<Close />}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCapturePhoto}
+            variant="contained"
+            color="primary"
+            startIcon={<PhotoCamera />}
+          >
+            Capture
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
+};
+
+export default Profile; 
