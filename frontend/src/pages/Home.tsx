@@ -35,7 +35,7 @@ const featuredProducts = [
     description: 'Personalize your own t-shirt with custom designs and text',
   },
   {
-    id: 8,
+    id: 9,
     name: 'Photo Frame',
     category: 'frames',
     price: 2400,
@@ -59,7 +59,7 @@ const featuredProducts = [
     description: "Start your day with a mug that's uniquely yours.",
   },
   {
-    id: 5,
+    id: 6,
     name: 'Custom Notebook',
     category: 'notebooks',
     price: 800,
@@ -67,7 +67,7 @@ const featuredProducts = [
     description: 'Jot down your ideas in a notebook made just for you.',
   },
   {
-    id: 6,
+    id: 7,
     name: 'Custom Pen',
     category: 'pens',
     price: 300,
@@ -75,7 +75,7 @@ const featuredProducts = [
     description: 'Write your story with a personalized pen.',
   },
   {
-    id: 7,
+    id: 8,
     name: 'Custom Keychain',
     category: 'keychains',
     price: 500,
@@ -91,7 +91,7 @@ const featuredProducts = [
     description: 'Stay hydrated with a custom-designed water bottle.',
   },
   {
-    id: 9,
+    id: 5,
     name: 'Custom Cap',
     category: 'caps',
     price: 900,
@@ -105,14 +105,6 @@ const featuredProducts = [
     price: 1800,
     image: pillowcase1,
     description: 'Design a cozy pillowcase with your own style.',
-  },
-  {
-    id: 45,
-    name: 'Photo Frame',
-    category: 'frames',
-    price: 2400,
-    image: photoframe1,
-    description: 'Create a beautiful custom photo frame for your memories',
   },
 ];
 

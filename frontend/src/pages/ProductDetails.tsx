@@ -5,7 +5,6 @@ import { DesignServices, ShoppingCart } from '@mui/icons-material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import { products, Product } from '../data/products';
-console.log('Products data on load:', products);
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { keyframes } from '@mui/system';
 
