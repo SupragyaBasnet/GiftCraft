@@ -8,13 +8,16 @@ import SaveIcon from '@mui/icons-material/Save';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import UndoIcon from '@mui/icons-material/Undo';
 import {
-  Box, Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, Slider, Tooltip, Typography
+  Box, Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, Slider, Tooltip, Typography, TextField
 } from '@mui/material';
 import { fabric } from 'fabric';
 import React, { useEffect, useRef, useState } from 'react';
 import planewhiteframe from '../assets/planewhiteframe.jpg';
 import planewhitemug from '../assets/planewhitemug.jpg';
 import planewhiteshirt from '../assets/planewhiteshirt.webp';
+import { Add, Remove } from "@mui/icons-material";
+import { useParams } from 'react-router-dom';
+import { products } from '../data/products';
 
 const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
 type Tool = 'brush' | 'text' | 'image' | 'shape' | 'delete' | 'select' | '';
@@ -28,6 +31,11 @@ const CustomizeProduct: React.FC = () => {
   const [productColor, setProductColor] = useState<string>('#fff');
   const [shirtSize, setShirtSize] = useState<string>('M');
   const [productType, setProductType] = useState<'tshirt' | 'mug' | 'frame'>('tshirt');
+  const { id } = useParams<{ id: string }>();
+  const product = products.find((p) => p.id === Number(id));
+  const [text, setText] = useState("");
+  const [image, setImage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
 
   const productImages: Record<string, string> = {
     tshirt: planewhiteshirt,
@@ -51,7 +59,7 @@ const CustomizeProduct: React.FC = () => {
 
   useEffect(() => {
     if (!fabricRef.current) return;
-    const overlay = fabricRef.current.getObjects('rect').find(obj => obj.get('data') === 'productColor');
+    const overlay = fabricRef.current.getObjects('rect').find((obj: fabric.Object) => obj.get('data') === 'productColor');
     if (overlay) fabricRef.current.remove(overlay);
     const rect = new fabric.Rect({
       left: 0, top: 0, width: 400, height: 500,
@@ -89,6 +97,18 @@ const CustomizeProduct: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleAddToCart = () => {
+    console.log("Added to cart:", { id, text, image, quantity });
+  };
+
+  const handleQuantityChange = (amount: number) => {
+    setQuantity((prev) => Math.max(1, prev + amount));
+  };
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+
   return (
     <Container maxWidth="xl" sx={{ py: 6 }}>
       <Typography variant="h3" align="center" fontWeight={900} gutterBottom>
@@ -113,6 +133,18 @@ const CustomizeProduct: React.FC = () => {
                 <MenuItem value="frame">Frame</MenuItem>
               </Select>
             </FormControl>
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>Quantity</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton onClick={() => handleQuantityChange(-1)} size="small">
+                  <Remove />
+                </IconButton>
+                <Typography variant="h6">{quantity}</Typography>
+                <IconButton onClick={() => handleQuantityChange(1)} size="small">
+                  <Add />
+                </IconButton>
+              </Box>
+            </Box>
             <Box>
               <Typography variant="body2" gutterBottom>Product Color</Typography>
               <input type="color" value={productColor} onChange={e => setProductColor(e.target.value)} style={{ width: 36, height: 36, border: 'none', background: 'none' }} />
@@ -175,6 +207,9 @@ const CustomizeProduct: React.FC = () => {
             <Tooltip title="Clear"><IconButton><ClearIcon /></IconButton></Tooltip>
             <Tooltip title="Save"><IconButton><SaveIcon /></IconButton></Tooltip>
           </Paper>
+          <Button variant="contained" color="primary" onClick={handleAddToCart} sx={{ mt: 2, width: '100%' }}>
+            Add to Cart
+          </Button>
         </Grid>
       </Grid>
     </Container>

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Typography, Container, Grid, Button, Rating, Stack, Paper } from '@mui/material';
-import { DesignServices, ShoppingCart } from '@mui/icons-material';
+import { Box, Typography, Container, Grid, Button, Rating, Stack, Paper, CircularProgress, Alert, IconButton } from '@mui/material';
+import { DesignServices, ShoppingCart, Add, Remove } from '@mui/icons-material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import { products, Product } from '../data/products';
@@ -46,15 +46,51 @@ const floatPop = keyframes`
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const product = products.find(p => p.id === Number(id));
-  if (!product) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const product = products.find(p => p.id === Number(id));
+        if (product) {
+          setProduct(product);
+        } else {
+          setError("Product not found");
+        }
+      } catch (e) {
+        setError("An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const handleQuantityChange = (amount: number) => {
+    setQuantity((prev) => Math.max(1, prev + amount));
+  };
+
+  if (loading) {
     return (
       <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
-        <Typography variant="h4" gutterBottom>Product Not Found</Typography>
+        <Typography variant="h4" gutterBottom>Loading...</Typography>
+      </Container>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
+        <Typography variant="h4" gutterBottom>Error: {error || 'Product not found'}</Typography>
         <Button component={RouterLink} to="/products" variant="contained">Back to Products</Button>
       </Container>
     );
   }
+
   const images = product.images && product.images.length > 0 ? product.images : [product.image || ''];
   const [mainIdx, setMainIdx] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -114,6 +150,16 @@ const ProductDetails: React.FC = () => {
           <Typography variant="subtitle2" color="success.main" sx={{ mb: 2 }}>
             In Stock
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
+            <Typography variant="h6" sx={{ mr: 2 }}>Quantity:</Typography>
+            <IconButton onClick={() => handleQuantityChange(-1)} size="small">
+              <Remove />
+            </IconButton>
+            <Typography variant="h6" sx={{ mx: 2 }}>{quantity}</Typography>
+            <IconButton onClick={() => handleQuantityChange(1)} size="small">
+              <Add />
+            </IconButton>
+          </Box>
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
             <Button
               variant="contained"

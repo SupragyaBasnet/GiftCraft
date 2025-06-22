@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Box, Paper, Button, TextField, Alert, Card, CardContent, CardActionArea, Dialog, DialogTitle, DialogContent, DialogActions, Rating } from '@mui/material';
-import { Payment as PaymentIcon, Save } from '@mui/icons-material';
+import { Payment as PaymentIcon, Save, Add, Remove } from '@mui/icons-material';
 import Confetti from 'react-confetti';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,6 +31,7 @@ const DELIVERY_CHARGE = 100; // Example fixed delivery charge
 
 const CheckoutPage: React.FC = () => {
   const [checkoutItem, setCheckoutItem] = useState<any>(null); // State to hold the item being checked out
+  const [quantity, setQuantity] = useState(1);
   const [address, setAddress] = useState('');
   const [addressError, setAddressError] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null); // New state for selected payment method
@@ -46,7 +47,9 @@ const CheckoutPage: React.FC = () => {
     const savedItem = localStorage.getItem('giftcraftCheckoutItem');
     if (savedItem) {
       try {
-        setCheckoutItem(JSON.parse(savedItem));
+        const item = JSON.parse(savedItem);
+        setCheckoutItem(item);
+        setQuantity(item.quantity || 1);
       } catch (e) {
         console.error('Failed to load checkout item from localStorage', e);
         // Optionally clear invalid data
@@ -71,7 +74,7 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  const itemSubtotal = productPrices[checkoutItem.productType] || 0;
+  const itemSubtotal = (productPrices[checkoutItem.productType] || 0) * quantity;
   const itemTotal = itemSubtotal + DELIVERY_CHARGE;
 
   const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +90,10 @@ const CheckoutPage: React.FC = () => {
     return true;
   };
 
+  const handleQuantityChange = (amount: number) => {
+    setQuantity((prev) => Math.max(1, prev + amount));
+  };
+
   // This function now confirms the order after address and payment are selected
   const handleConfirmOrder = () => {
     if (!validateAddress()) {
@@ -95,6 +102,7 @@ const CheckoutPage: React.FC = () => {
     // Address is valid and payment method is selected (button is enabled based on this)
     console.log('Final Order Details:', {
       item: checkoutItem,
+      quantity: quantity,
       address: address,
       paymentMethod: selectedPaymentMethod, // Use the selected payment method
       total: itemTotal,
@@ -108,7 +116,7 @@ const CheckoutPage: React.FC = () => {
     const newOrder = {
       id: Date.now(), // Simple unique ID for the order
       date: new Date().toISOString(), // Timestamp
-      item: checkoutItem, // Save the full checkout item details
+      item: { ...checkoutItem, quantity }, // Save the full checkout item details and quantity
       address: address, // Save the delivery address
       paymentMethod: selectedPaymentMethod, // Save the payment method
       total: itemTotal, // Save the total amount
@@ -248,14 +256,15 @@ const CheckoutPage: React.FC = () => {
                 </Box>
                 <Box>
                   <Typography variant="subtitle1" fontWeight={700}>
-                    {checkoutItem.productType.charAt(0).toUpperCase() + checkoutItem.productType.slice(1).replace('-', ' ')}
-                    {checkoutItem.size ? ` - Size: ${checkoutItem.size}` : ''}
+                    {checkoutItem.productType.charAt(0).toUpperCase() + checkoutItem.productType.slice(1)}
                   </Typography>
-                  {/* Display other item details like color and elements count */}
-                  <Typography variant="body2">Color: {checkoutItem.color}</Typography>
-                  {checkoutItem.elements && checkoutItem.elements.length > 0 && (
-                    <Typography variant="body2">Elements: {checkoutItem.elements.length} added</Typography>
-                  )}
+                  {/* Quantity Selector */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
+                    <Button size="small" onClick={() => handleQuantityChange(-1)}><Remove /></Button>
+                    <Typography sx={{ mx: 1 }}>{quantity}</Typography>
+                    <Button size="small" onClick={() => handleQuantityChange(1)}><Add /></Button>
+                  </Box>
                 </Box>
               </Box>
             </Box>

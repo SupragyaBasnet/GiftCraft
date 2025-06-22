@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup
+  Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup, Select
 } from '@mui/material';
-import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff } from '@mui/icons-material';
+import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { Rnd } from 'react-rnd';
 import { ChromePicker, ColorResult } from 'react-color';
 import Popover from '@mui/material/Popover';
+import { products } from "../data/products";
 
 // Import product images from products directory
 import tshirtFront from '../assets/products/whitetshirt-front.jpg';
@@ -118,7 +119,9 @@ const stickers = [
 
 // Removed productAspectRatios map based on simplification request
 
-const CanvasBox = styled(Box)(({ theme }) => ({
+const CanvasBox = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'enableRotating',
+})<{ enableRotating?: boolean }>(({ theme, enableRotating }) => ({
   position: 'relative',
   width: '100%',
   maxWidth: 350, // Revert to fixed width
@@ -423,57 +426,25 @@ const ProductCustomize: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('giftcraftUser'); // Assuming we store user data in localStorage
-    if (!isLoggedIn) {
-      // Save current customization to localStorage to restore after login
-      const currentCustomization = {
-        productType: selectedProduct,
-        viewIndex: hasArrayViews ? currentArrayIndex : currentView, // Use array index or view type
-        size: selectedProduct === 'notebook' ? selectedNotebookSize
-              : selectedProduct === 'tshirt' ? selectedTshirtSize
-              : selectedProduct === 'waterbottle' ? selectedWaterBottleSize
-              : undefined,
-        color: color,
-        // Clean up elements before saving
-        elements: elements.map(el => ({
-            id: el.id,
-            type: el.type,
-            content: el.content,
-            x: el.x,
-            y: el.y,
-            width: el.width,
-            height: el.height,
-             color: (el.type === 'text' && el.color) ? el.color : undefined // Include color only for text elements if present
-        })),
-        image: currentImage,
-      };
-      localStorage.setItem('giftcraftPendingCustomization', JSON.stringify(currentCustomization));
-      // Redirect to login page
-      navigate('/login');
-      return;
-    }
-
-    // If logged in, proceed with adding to cart
-    const customizedProduct = {
-      id: Date.now(),
+    const customizedItem = {
+      id: Date.now(), // Use timestamp for a simple unique ID
       productType: selectedProduct,
-      viewIndex: hasArrayViews ? currentArrayIndex : currentView, // Use array index or view type
-      size: selectedProduct === 'notebook' ? selectedNotebookSize
-            : selectedProduct === 'tshirt' ? selectedTshirtSize
-            : selectedProduct === 'waterbottle' ? selectedWaterBottleSize
-            : undefined,
-      color: color,
+      image: Array.isArray(productImages[selectedProduct]) 
+        ? (productImages[selectedProduct] as string[])[currentArrayIndex] 
+        : (productImages[selectedProduct] as ProductView)[currentView],
       elements: elements,
-      image: currentImage,
+      color: color,
+      size: selectedProduct === 'tshirt' ? selectedTshirtSize : (selectedProduct === 'notebook' ? selectedNotebookSize : undefined),
+      quantity: 1, // Default quantity to 1
     };
 
-    setCartItems((prevCartItems) => {
-      const newCartItems = [...prevCartItems, customizedProduct];
-      return newCartItems;
-    });
+    const existingCart = JSON.parse(localStorage.getItem('giftcraftCart') || '[]');
+    const updatedCart = [...existingCart, customizedItem];
+    
+    localStorage.setItem('giftcraftCart', JSON.stringify(updatedCart));
+    setCartItems(updatedCart); // Update local state to reflect change
 
-    setSnackbar({open: true, message: 'Product added to cart!', severity: 'success'});
+    setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
   };
 
   const handleBuyNow = () => {
@@ -587,7 +558,7 @@ const ProductCustomize: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
-  const [elements, setElements] = useState<Array<{ id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number }>>([]);
+  const [elements, setElements] = useState<Array<{ id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number; color?: string; }>>([]);
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>

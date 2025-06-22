@@ -9,6 +9,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { useNavigate } from 'react-router-dom';
 import CustomizedProductImage from '../components/CustomizedProductImage';
+import { Add, Remove } from '@mui/icons-material';
 
 // Simple client-side price map (placeholder)
 const productPrices: Record<string, number> = {
@@ -33,14 +34,14 @@ const CartPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Calculate total price including delivery charge
-  const subtotal = cartItems.reduce((sum, item) => sum + (productPrices[item.productType] || 0), 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (productPrices[item.productType] || 0) * item.quantity, 0);
   const total = subtotal + (subtotal > 0 ? DELIVERY_CHARGE : 0); // Add delivery charge only if there are items
 
   useEffect(() => {
     const savedCart = localStorage.getItem('giftcraftCart');
     if (savedCart) {
       try {
-        const parsedCart = JSON.parse(savedCart);
+        const parsedCart = JSON.parse(savedCart).map((item: any) => ({ ...item, quantity: item.quantity || 1 })); // Ensure quantity exists
         setCartItems(parsedCart);
         console.log('Cart data loaded from localStorage:', parsedCart); // Log loaded data
       } catch (e) {
@@ -52,6 +53,18 @@ const CartPage: React.FC = () => {
        console.log('No cart data found in localStorage.'); // Log if no data found
     }
   }, []); // Empty dependency array means this effect runs only once on mount
+
+  const handleQuantityChange = (id: number, amount: number) => {
+    setCartItems(prevCartItems => {
+      const newCartItems = prevCartItems.map(item =>
+        item.id === id
+          ? { ...item, quantity: Math.max(1, item.quantity + amount) }
+          : item
+      );
+      localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems));
+      return newCartItems;
+    });
+  };
 
   const handleRemoveItem = (id: number) => {
     setCartItems(prevCartItems => {
@@ -129,7 +142,16 @@ const CartPage: React.FC = () => {
                       </React.Fragment>
                     }
                   />
-                  {/* Add quantity controls etc here */}
+                  {/* Add quantity controls */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                    <IconButton size="small" onClick={() => handleQuantityChange(item.id, -1)}>
+                      <Remove />
+                    </IconButton>
+                    <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
+                    <IconButton size="small" onClick={() => handleQuantityChange(item.id, 1)}>
+                      <Add />
+                    </IconButton>
+                  </Box>
                    {/* Add individual Buy Now button */}
                    <Box sx={{ ml: 2 }}>
                      <Button
