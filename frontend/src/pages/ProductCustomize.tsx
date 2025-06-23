@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup, Select
 } from '@mui/material';
-import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove } from '@mui/icons-material';
+import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove, FormatShapes, Star } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { Rnd } from 'react-rnd';
 import { ChromePicker, ColorResult } from 'react-color';
@@ -65,10 +65,6 @@ interface Element {
   width: number;
   height: number;
   color?: string;
-  font?: string;
-  rotation?: number;
-  effect?: string; // e.g., 'glitter', 'shadow', etc.
-  layer?: number;
 }
 
 // Map product type to images
@@ -200,6 +196,23 @@ const hexToHsl = (hex: string) => {
   const hueDegrees = Math.round(h * 360);
   return { h: hueDegrees, s: s, l: l };
 };
+
+// Sample art/clipart SVGs or emojis
+const artLibrary = [
+  { label: 'Heart', content: '❤️' },
+  { label: 'Star', content: '⭐' },
+  { label: 'Balloon', content: '🎈' },
+  { label: 'Party Hat', content: '🥳' },
+  { label: 'Gift', content: '🎁' },
+  { label: 'Cake', content: '🎂' },
+];
+
+// Sample effects overlays (could be PNG/SVG URLs or emoji for demo)
+const effectsLibrary = [
+  { label: 'Glitter', content: '✨' },
+  { label: 'Sparkle', content: '💫' },
+  { label: 'Confetti', content: '🎉' },
+];
 
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
@@ -564,32 +577,48 @@ const ProductCustomize: React.FC = () => {
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
   const [elements, setElements] = useState<Element[]>([]);
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const [toolbarAnchor, setToolbarAnchor] = useState<null | HTMLElement>(null);
 
-  // Helper to update a single element
-  const updateElement = (id: string, changes: Partial<Element>) => {
-    setElements(els => els.map(el => el.id === id ? { ...el, ...changes } : el));
+  const handleAddArt = (artContent: string) => {
+    const newElement: Element = {
+      id: Date.now().toString(),
+      type: 'art',
+      content: artContent,
+      x: 60,
+      y: 60,
+      width: 60,
+      height: 60,
+    };
+    setElements([...elements, newElement]);
+    setSnackbar({ open: true, message: 'Art added!', severity: 'success' });
   };
 
-  // Helper to bring forward/backward
-  const bringForward = (id: string) => {
-    setElements(els => {
-      const idx = els.findIndex(el => el.id === id);
-      if (idx === -1 || idx === els.length - 1) return els;
-      const newEls = [...els];
-      [newEls[idx], newEls[idx + 1]] = [newEls[idx + 1], newEls[idx]];
-      return newEls;
-    });
+  const handleAddShape = (shape: 'rectangle' | 'circle' | 'stripe', color: string) => {
+    const newElement: Element = {
+      id: Date.now().toString(),
+      type: 'shape',
+      content: shape,
+      x: 70,
+      y: 70,
+      width: shape === 'stripe' ? 120 : 60,
+      height: shape === 'stripe' ? 20 : 60,
+      color,
+    };
+    setElements([...elements, newElement]);
+    setSnackbar({ open: true, message: `${shape.charAt(0).toUpperCase() + shape.slice(1)} added!`, severity: 'success' });
   };
-  const sendBackward = (id: string) => {
-    setElements(els => {
-      const idx = els.findIndex(el => el.id === id);
-      if (idx <= 0) return els;
-      const newEls = [...els];
-      [newEls[idx], newEls[idx - 1]] = [newEls[idx - 1], newEls[idx]];
-      return newEls;
-    });
+
+  const handleAddEffect = (effectContent: string) => {
+    const newElement: Element = {
+      id: Date.now().toString(),
+      type: 'art',
+      content: effectContent,
+      x: 0,
+      y: 0,
+      width: 350,
+      height: canvasHeight,
+    };
+    setElements([...elements, newElement]);
+    setSnackbar({ open: true, message: 'Effect added!', severity: 'success' });
   };
 
   return (
@@ -733,7 +762,6 @@ const ProductCustomize: React.FC = () => {
             height: canvasHeight,
             maxWidth: 350, // Revert to fixed maxWidth
           }}
-          onClick={() => setSelectedElementId(null)}
         >
           <Box
             component="img"
@@ -758,28 +786,27 @@ const ProductCustomize: React.FC = () => {
             <Rnd
               key={el.id}
               default={{ x: el.x, y: el.y, width: el.width, height: el.height }}
-              position={{ x: el.x, y: el.y }}
-              size={{ width: el.width, height: el.height }}
               bounds={'parent'}
-              enableResizing={selectedElementId === el.id}
-              disableDragging={false}
+              enableResizing={{ top: true, right: true, bottom: true, left: true, topRight: true, bottomRight: true, bottomLeft: true, topLeft: true }}
+              enableRotating={true}
+              onDragStop={(e, d) => {
+                const updatedElements = elements.map(elem => 
+                  elem.id === el.id ? { ...elem, x: d.x, y: d.y } : elem
+                );
+                setElements(updatedElements);
+              }}
+              onResizeStop={(e, direction, ref, delta, position) => {
+                const updatedElements = elements.map(elem => 
+                  elem.id === el.id ? { ...elem, width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position } : elem
+                );
+                setElements(updatedElements);
+              }}
               style={{
                 zIndex: 2,
                 background: 'transparent',
-                border: selectedElementId === el.id ? '2px solid #F46A6A' : 'none',
-                boxShadow: selectedElementId === el.id ? '0 0 8px #F46A6A55' : 'none',
-                transform: `rotate(${el.rotation || 0}deg)`
-              }}
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.stopPropagation();
-                setSelectedElementId(el.id);
-                setToolbarAnchor(e.currentTarget);
-              }}
-              onDragStop={(e, d) => {
-                updateElement(el.id, { x: d.x, y: d.y });
-              }}
-              onResizeStop={(e, direction, ref, delta, position) => {
-                updateElement(el.id, { width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position });
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               {el.type === 'image' && (
@@ -797,7 +824,7 @@ const ProductCustomize: React.FC = () => {
               {el.type === 'text' && (
                 <Typography
                   sx={{
-                    color: textColor,
+                    color: el.color || textColor,
                     fontWeight: 700,
                     textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                     width: '100%',
@@ -825,6 +852,32 @@ const ProductCustomize: React.FC = () => {
                 >
                   {el.content}
                 </Typography>
+              )}
+              {el.type === 'art' && (
+                <Typography
+                  sx={{
+                    fontSize: 40,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    filter: 'drop-shadow(0 2px 8px #FFD700)',
+                  }}
+                >
+                  {el.content}
+                </Typography>
+              )}
+              {el.type === 'shape' && (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    bgcolor: el.color,
+                    borderRadius: el.content === 'circle' ? '50%' : 0,
+                    ...(el.content === 'stripe' && { height: 20, width: '100%' }),
+                  }}
+                />
               )}
               <Button
                 size="small"
@@ -871,6 +924,9 @@ const ProductCustomize: React.FC = () => {
           <Tab icon={<TextFields />} label="Text" />
           <Tab icon={<EmojiEmotions />} label="Sticker" />
           <Tab icon={<AddPhotoAlternate />} label="Image" />
+          <Tab icon={<Palette />} label="Art" />
+          <Tab icon={<FormatShapes />} label="Shapes" />
+          <Tab icon={<Star />} label="Effects" />
         </Tabs>
         {tab === 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
@@ -948,6 +1004,27 @@ const ProductCustomize: React.FC = () => {
             )}
           </Box>
         )}
+        {tab === 4 && (
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
+            {artLibrary.map((art, i) => (
+              <Button key={i} onClick={() => handleAddArt(art.content)} sx={{ fontSize: 32 }}>{art.content}</Button>
+            ))}
+          </Box>
+        )}
+        {tab === 5 && (
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
+            <Button onClick={() => handleAddShape('rectangle', '#F46A6A')} sx={{ minWidth: 60, minHeight: 40, bgcolor: '#F46A6A', color: '#fff', borderRadius: 1 }}>Rectangle</Button>
+            <Button onClick={() => handleAddShape('circle', '#FFD700')} sx={{ minWidth: 60, minHeight: 40, bgcolor: '#FFD700', color: '#fff', borderRadius: '50%' }}>Circle</Button>
+            <Button onClick={() => handleAddShape('stripe', '#4CAF50')} sx={{ minWidth: 80, minHeight: 20, bgcolor: '#4CAF50', color: '#fff', borderRadius: 0 }}>Stripe</Button>
+          </Box>
+        )}
+        {tab === 6 && (
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
+            {effectsLibrary.map((effect, i) => (
+              <Button key={i} onClick={() => handleAddEffect(effect.content)} sx={{ fontSize: 32 }}>{effect.content}</Button>
+            ))}
+          </Box>
+        )}
 
         {/* Actions */}
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 3 }}>
@@ -970,56 +1047,6 @@ const ProductCustomize: React.FC = () => {
             Buy Now
           </Button>
         </Box>
-
-        {/* Floating toolbar for selected element */}
-        {selectedElementId && (
-          <Box sx={{
-            position: 'absolute',
-            top: 10,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            bgcolor: 'white',
-            boxShadow: 2,
-            borderRadius: 2,
-            p: 1,
-            display: 'flex',
-            gap: 1,
-            alignItems: 'center',
-          }}>
-            {/* Color picker for text/shapes */}
-            {elements.find(el => el.id === selectedElementId)?.type === 'text' && (
-              <input
-                type="color"
-                value={elements.find(el => el.id === selectedElementId)?.color || '#000000'}
-                onChange={e => updateElement(selectedElementId, { color: e.target.value })}
-                style={{ width: 28, height: 28, border: 'none', background: 'none' }}
-              />
-            )}
-            {/* Font picker for text */}
-            {elements.find(el => el.id === selectedElementId)?.type === 'text' && (
-              <Select
-                value={elements.find(el => el.id === selectedElementId)?.font || 'Arial'}
-                onChange={e => updateElement(selectedElementId, { font: e.target.value as string })}
-                size="small"
-                sx={{ minWidth: 80 }}
-              >
-                <MenuItem value="Arial">Arial</MenuItem>
-                <MenuItem value="Roboto">Roboto</MenuItem>
-                <MenuItem value="Comic Sans MS">Comic Sans</MenuItem>
-                <MenuItem value="Times New Roman">Times</MenuItem>
-                <MenuItem value="Courier New">Courier</MenuItem>
-              </Select>
-            )}
-            {/* Layer controls */}
-            <Button size="small" onClick={() => bringForward(selectedElementId)}>↑</Button>
-            <Button size="small" onClick={() => sendBackward(selectedElementId)}>↓</Button>
-            {/* Rotate */}
-            <Button size="small" onClick={() => updateElement(selectedElementId, { rotation: ((elements.find(el => el.id === selectedElementId)?.rotation || 0) + 15) % 360 })}>⟳</Button>
-            {/* Delete */}
-            <Button size="small" color="error" onClick={() => handleDeleteElement(selectedElementId)}>Delete</Button>
-          </Box>
-        )}
       </Paper>
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({...snackbar, open: false})}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
