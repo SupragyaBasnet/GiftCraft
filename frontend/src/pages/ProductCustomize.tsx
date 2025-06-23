@@ -1016,24 +1016,85 @@ const ProductCustomize: React.FC = () => {
               <input type="color" value={shapeBorderColor} onChange={e => setShapeBorderColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', background: 'none' }} />
               <Button variant={shapeFill ? 'contained' : 'outlined'} size="small" onClick={() => setShapeFill(f => !f)}>{shapeFill ? 'Filled' : 'No Fill'}</Button>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
-              <Button onClick={() => handleAddShape('rectangle', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: shapeFill ? shapeColor : 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 1 }}>Rectangle</Button>
-              <Button onClick={() => handleAddShape('circle', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: shapeFill ? shapeColor : 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: '50%' }}>Circle</Button>
-              <Button onClick={() => handleAddShape('stripe', true, shapeColor, shapeBorderColor)} sx={{ minWidth: 80, minHeight: 20, bgcolor: shapeColor, color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0 }}>Stripe</Button>
-              <Button onClick={() => handleAddShape('line-h', false, 'transparent', shapeBorderColor)} sx={{ minWidth: 80, minHeight: 8, bgcolor: 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0 }}>Line H</Button>
-              <Button onClick={() => handleAddShape('line-v', false, 'transparent', shapeBorderColor)} sx={{ minWidth: 8, minHeight: 80, bgcolor: 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0 }}>Line V</Button>
-              <Button onClick={() => handleAddShape('line-d', false, 'transparent', shapeBorderColor)} sx={{ minWidth: 80, minHeight: 8, bgcolor: 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0, transform: 'rotate(-45deg)' }}>Line D</Button>
-              <Button onClick={() => handleAddShape('triangle', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>
-                ▲
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 48px)', gap: 2, mb: 1 }}>
+              {/* Rectangle */}
+              <Button onClick={() => handleAddShape('rectangle', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <rect x="6" y="6" width="28" height="28" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" rx="4" />
+                </svg>
               </Button>
-              <Button onClick={() => handleAddShape('arrow', true, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>
-                ➔
+              {/* Circle */}
+              <Button onClick={() => handleAddShape('circle', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <ellipse cx="20" cy="20" rx="14" ry="14" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
               </Button>
-              <Button onClick={() => handleAddShape('pentagon', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>⬟</Button>
-              <Button onClick={() => handleAddShape('hexagon', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>⬢</Button>
-              <Button onClick={() => handleAddShape('star', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>★</Button>
-              <Button onClick={() => handleAddShape('heart', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>♥</Button>
-              <Button onClick={() => handleAddShape('diamond', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>◆</Button>
+              {/* Stripe */}
+              <Button onClick={() => handleAddShape('stripe', true, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <rect x="6" y="18" width="28" height="8" fill={shapeColor} stroke={shapeBorderColor} strokeWidth="3" rx="2" />
+                </svg>
+              </Button>
+              {/* Line H */}
+              <Button onClick={() => handleAddShape('line-h', false, 'transparent', shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <line x1="6" y1="20" x2="34" y2="20" stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Line V */}
+              <Button onClick={() => handleAddShape('line-v', false, 'transparent', shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <line x1="20" y1="6" x2="20" y2="34" stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Line D */}
+              <Button onClick={() => handleAddShape('line-d', false, 'transparent', shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <line x1="8" y1="32" x2="32" y2="8" stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Triangle */}
+              <Button onClick={() => handleAddShape('triangle', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <polygon points="20,8 34,32 6,32" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Arrow */}
+              <Button onClick={() => handleAddShape('arrow', true, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <polygon points="8,20 28,20 28,12 36,24 28,36 28,28 8,28" fill={shapeColor} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Pentagon */}
+              <Button onClick={() => handleAddShape('pentagon', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <polygon points="20,6 34,16 28,34 12,34 6,16" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Hexagon */}
+              <Button onClick={() => handleAddShape('hexagon', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <polygon points="20,6 34,14 34,26 20,34 6,26 6,14" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Star */}
+              <Button onClick={() => handleAddShape('star', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <polygon points="20,6 24,16 34,16 26,22 30,32 20,26 10,32 14,22 6,16 16,16" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Heart */}
+              <Button onClick={() => handleAddShape('heart', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                  <path d="M20 34 L8 22 A8 8 0 1 1 20 12 A8 8 0 1 1 32 22 Z" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
+              {/* Diamond */}
+              <Button onClick={() => handleAddShape('diamond', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+                <svg width="40" height="40">
+                  <polygon points="20,6 34,20 20,34 6,20" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
+                </svg>
+              </Button>
             </Box>
           </Box>
         )}
