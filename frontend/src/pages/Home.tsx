@@ -24,89 +24,11 @@ import keychain1 from '../assets/keychain1.webp';
 import cap1 from '../assets/cap1.jpg';
 import pillowcase1 from '../assets/pillowcase1.jpg';
 import waterbottle1 from '../assets/waterbottle1.jpeg';
+import { products } from '../data/products';
 
-const featuredProducts = [
-  {
-    id: 1,
-    name: 'Custom T-Shirt',
-    category: 'tshirts',
-    price: 3200,
-    image: tshirt1,
-    description: 'Personalize your own t-shirt with custom designs and text',
-  },
-  {
-    id: 9,
-    name: 'Photo Frame',
-    category: 'frames',
-    price: 2400,
-    image: photoframe1,
-    description: 'Create a beautiful custom photo frame for your memories',
-  },
-  {
-    id: 3,
-    name: 'Phone Cover',
-    category: 'phonecases',
-    price: 1600,
-    image: phonecase1,
-    description: 'Design your own unique phone cover',
-  },
-  {
-    id: 2,
-    name: 'Custom Mug',
-    category: 'mugs',
-    price: 1200,
-    image: mug1,
-    description: "Start your day with a mug that's uniquely yours.",
-  },
-  {
-    id: 6,
-    name: 'Custom Notebook',
-    category: 'notebooks',
-    price: 800,
-    image: notebook1,
-    description: 'Jot down your ideas in a notebook made just for you.',
-  },
-  {
-    id: 7,
-    name: 'Custom Pen',
-    category: 'pens',
-    price: 300,
-    image: pen1,
-    description: 'Write your story with a personalized pen.',
-  },
-  {
-    id: 8,
-    name: 'Custom Keychain',
-    category: 'keychains',
-    price: 500,
-    image: keychain1,
-    description: 'Carry your memories with a personalized keychain.',
-  },
-  {
-    id: 4,
-    name: 'Custom Water Bottle',
-    category: 'waterbottles',
-    price: 1500,
-    image: waterbottle1,
-    description: 'Stay hydrated with a custom-designed water bottle.',
-  },
-  {
-    id: 5,
-    name: 'Custom Cap',
-    category: 'caps',
-    price: 900,
-    image: cap1,
-    description: 'Top off your look with a personalized cap.',
-  },
-  {
-    id: 10,
-    name: 'Custom Pillowcase',
-    category: 'pillowcases',
-    price: 1800,
-    image: pillowcase1,
-    description: 'Design a cozy pillowcase with your own style.',
-  },
-];
+const featuredProductIds = [1, 9, 3, 2, 6, 7, 8, 4, 5, 10];
+
+const featuredProducts = products.filter(p => featuredProductIds.includes(p.id));
 
 const testimonials = [
   {
@@ -546,7 +468,7 @@ const Home: React.FC = () => {
             What Our Customers Say
           </Typography>
           <Grid container spacing={4} sx={{ mt: 2 }}>
-            {testimonials.map((testimonial, index) => (
+            {testimonials.map((testimonial: { name: string; comment: string; rating: number }, index: number) => (
               <Grid item key={index} xs={12} md={4}>
                 <Paper 
                   sx={{ 

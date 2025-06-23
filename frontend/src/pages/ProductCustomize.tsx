@@ -58,13 +58,17 @@ interface ProductView {
 // Define types for elements (should match the type in CustomizedProductImage.tsx)
 interface Element {
   id: string;
-  type: 'image' | 'text' | 'sticker';
+  type: 'image' | 'text' | 'sticker' | 'art' | 'shape';
   content: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  color?: string; // Add optional color property for text elements
+  color?: string;
+  font?: string;
+  rotation?: number;
+  effect?: string; // e.g., 'glitter', 'shadow', etc.
+  layer?: number;
 }
 
 // Map product type to images
@@ -445,6 +449,7 @@ const ProductCustomize: React.FC = () => {
     setCartItems(updatedCart); // Update local state to reflect change
 
     setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+    navigate('/cart'); // Redirect to cart page after adding
   };
 
   const handleBuyNow = () => {
@@ -558,7 +563,34 @@ const ProductCustomize: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
-  const [elements, setElements] = useState<Array<{ id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number; color?: string; }>>([]);
+  const [elements, setElements] = useState<Element[]>([]);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [toolbarAnchor, setToolbarAnchor] = useState<null | HTMLElement>(null);
+
+  // Helper to update a single element
+  const updateElement = (id: string, changes: Partial<Element>) => {
+    setElements(els => els.map(el => el.id === id ? { ...el, ...changes } : el));
+  };
+
+  // Helper to bring forward/backward
+  const bringForward = (id: string) => {
+    setElements(els => {
+      const idx = els.findIndex(el => el.id === id);
+      if (idx === -1 || idx === els.length - 1) return els;
+      const newEls = [...els];
+      [newEls[idx], newEls[idx + 1]] = [newEls[idx + 1], newEls[idx]];
+      return newEls;
+    });
+  };
+  const sendBackward = (id: string) => {
+    setElements(els => {
+      const idx = els.findIndex(el => el.id === id);
+      if (idx <= 0) return els;
+      const newEls = [...els];
+      [newEls[idx], newEls[idx - 1]] = [newEls[idx - 1], newEls[idx]];
+      return newEls;
+    });
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -701,6 +733,7 @@ const ProductCustomize: React.FC = () => {
             height: canvasHeight,
             maxWidth: 350, // Revert to fixed maxWidth
           }}
+          onClick={() => setSelectedElementId(null)}
         >
           <Box
             component="img"
@@ -725,27 +758,28 @@ const ProductCustomize: React.FC = () => {
             <Rnd
               key={el.id}
               default={{ x: el.x, y: el.y, width: el.width, height: el.height }}
-              bounds={'parent'} // Revert bounds to parent
-              enableResizing={{ top: true, right: true, bottom: true, left: true, topRight: true, bottomRight: true, bottomLeft: true, topLeft: true }}
-              enableRotating={true}
-              onDragStop={(e, d) => {
-                const updatedElements = elements.map(elem => 
-                  elem.id === el.id ? { ...elem, x: d.x, y: d.y } : elem
-                );
-                setElements(updatedElements);
-              }}
-              onResizeStop={(e, direction, ref, delta, position) => {
-                const updatedElements = elements.map(elem => 
-                  elem.id === el.id ? { ...elem, width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position } : elem
-                );
-                setElements(updatedElements);
-              }}
+              position={{ x: el.x, y: el.y }}
+              size={{ width: el.width, height: el.height }}
+              bounds={'parent'}
+              enableResizing={selectedElementId === el.id}
+              disableDragging={false}
               style={{
                 zIndex: 2,
                 background: 'transparent',
-                display: 'flex', // Center content within Rnd
-                alignItems: 'center', // Center content within Rnd
-                justifyContent: 'center', // Center content within Rnd
+                border: selectedElementId === el.id ? '2px solid #F46A6A' : 'none',
+                boxShadow: selectedElementId === el.id ? '0 0 8px #F46A6A55' : 'none',
+                transform: `rotate(${el.rotation || 0}deg)`
+              }}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                setSelectedElementId(el.id);
+                setToolbarAnchor(e.currentTarget);
+              }}
+              onDragStop={(e, d) => {
+                updateElement(el.id, { x: d.x, y: d.y });
+              }}
+              onResizeStop={(e, direction, ref, delta, position) => {
+                updateElement(el.id, { width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position });
               }}
             >
               {el.type === 'image' && (
@@ -936,6 +970,56 @@ const ProductCustomize: React.FC = () => {
             Buy Now
           </Button>
         </Box>
+
+        {/* Floating toolbar for selected element */}
+        {selectedElementId && (
+          <Box sx={{
+            position: 'absolute',
+            top: 10,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            bgcolor: 'white',
+            boxShadow: 2,
+            borderRadius: 2,
+            p: 1,
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+          }}>
+            {/* Color picker for text/shapes */}
+            {elements.find(el => el.id === selectedElementId)?.type === 'text' && (
+              <input
+                type="color"
+                value={elements.find(el => el.id === selectedElementId)?.color || '#000000'}
+                onChange={e => updateElement(selectedElementId, { color: e.target.value })}
+                style={{ width: 28, height: 28, border: 'none', background: 'none' }}
+              />
+            )}
+            {/* Font picker for text */}
+            {elements.find(el => el.id === selectedElementId)?.type === 'text' && (
+              <Select
+                value={elements.find(el => el.id === selectedElementId)?.font || 'Arial'}
+                onChange={e => updateElement(selectedElementId, { font: e.target.value as string })}
+                size="small"
+                sx={{ minWidth: 80 }}
+              >
+                <MenuItem value="Arial">Arial</MenuItem>
+                <MenuItem value="Roboto">Roboto</MenuItem>
+                <MenuItem value="Comic Sans MS">Comic Sans</MenuItem>
+                <MenuItem value="Times New Roman">Times</MenuItem>
+                <MenuItem value="Courier New">Courier</MenuItem>
+              </Select>
+            )}
+            {/* Layer controls */}
+            <Button size="small" onClick={() => bringForward(selectedElementId)}>↑</Button>
+            <Button size="small" onClick={() => sendBackward(selectedElementId)}>↓</Button>
+            {/* Rotate */}
+            <Button size="small" onClick={() => updateElement(selectedElementId, { rotation: ((elements.find(el => el.id === selectedElementId)?.rotation || 0) + 15) % 360 })}>⟳</Button>
+            {/* Delete */}
+            <Button size="small" color="error" onClick={() => handleDeleteElement(selectedElementId)}>Delete</Button>
+          </Box>
+        )}
       </Paper>
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({...snackbar, open: false})}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>

@@ -75,10 +75,9 @@ const CartPage: React.FC = () => {
   };
 
   const handleBuyNow = () => {
-    // In a real application, you would typically send the entire cart data to a backend to create an order and initiate payment
-    console.log('Initiating Buy Now for cart items:', cartItems); // Log entire cart for demonstration
-    // For this client-side demo, let's just open the payment dialog
-    setOpenPayment(true);
+    // Save the entire cart to localStorage for checkout
+    localStorage.setItem('giftcraftCheckoutCart', JSON.stringify(cartItems));
+    navigate('/checkout');
   };
 
   // Handle Buy Now for a single item

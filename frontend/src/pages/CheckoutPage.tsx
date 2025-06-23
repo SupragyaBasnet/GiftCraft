@@ -30,20 +30,41 @@ const productPrices: Record<string, number> = {
 const DELIVERY_CHARGE = 100; // Example fixed delivery charge
 
 const CheckoutPage: React.FC = () => {
-  const [checkoutItem, setCheckoutItem] = useState<any>(null); // State to hold the item being checked out
-  const [quantity, setQuantity] = useState(1);
+  const [checkoutItem, setCheckoutItem] = useState<any>(null); // Single item
+  const [checkoutCart, setCheckoutCart] = useState<any[] | null>(null); // Multiple items
+  const [quantities, setQuantities] = useState<{ [id: string]: number }>({}); // For cart items
+  const [quantity, setQuantity] = useState(1); // For single item
   const [address, setAddress] = useState('');
   const [addressError, setAddressError] = useState('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null); // New state for selected payment method
-  const [orderConfirmedMessage, setOrderConfirmedMessage] = useState(''); // State for confirmation message
-  const [openReviewModal, setOpenReviewModal] = useState(false); // State to control review modal visibility
-  const [reviewText, setReviewText] = useState(''); // State for review text
-  const [reviewRating, setReviewRating] = useState<number | null>(null); // State for review rating
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [orderConfirmedMessage, setOrderConfirmedMessage] = useState('');
+  const [openReviewModal, setOpenReviewModal] = useState(false);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewRating, setReviewRating] = useState<number | null>(null);
 
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Read the item details from localStorage
+    // Check for cart checkout first
+    const savedCart = localStorage.getItem('giftcraftCheckoutCart');
+    if (savedCart) {
+      try {
+        const cart = JSON.parse(savedCart);
+        setCheckoutCart(cart);
+        // Set default quantities for each item
+        const qtys: { [id: string]: number } = {};
+        cart.forEach((item: any) => {
+          qtys[item.id] = item.quantity || 1;
+        });
+        setQuantities(qtys);
+        return;
+      } catch (e) {
+        console.error('Failed to load checkout cart from localStorage', e);
+        localStorage.removeItem('giftcraftCheckoutCart');
+        navigate('/');
+      }
+    }
+    // Fallback to single item checkout
     const savedItem = localStorage.getItem('giftcraftCheckoutItem');
     if (savedItem) {
       try {
@@ -52,36 +73,38 @@ const CheckoutPage: React.FC = () => {
         setQuantity(item.quantity || 1);
       } catch (e) {
         console.error('Failed to load checkout item from localStorage', e);
-        // Optionally clear invalid data
         localStorage.removeItem('giftcraftCheckoutItem');
-        // If data is invalid or missing after potential successful order, redirect
-        navigate('/'); // Redirect to home/login page
+        navigate('/');
       }
     } else {
-      // If no checkout item is found in localStorage, redirect to home/login
       navigate('/');
     }
-  }, [navigate]); // Add navigate to dependency array
+  }, [navigate]);
 
-  if (!checkoutItem) {
-     // This will be briefly shown before the redirect in useEffect happens
-    return (
-      <Container maxWidth="md" sx={{ py: 6 }}>
-        <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h5">Redirecting...</Typography>
-        </Paper>
-      </Container>
-    );
+  // --- Price calculations ---
+  let itemSubtotal = 0;
+  let itemTotal = 0;
+  if (checkoutCart) {
+    itemSubtotal = checkoutCart.reduce((sum, item) => sum + (productPrices[item.productType] || 0) * (quantities[item.id] || 1), 0);
+    itemTotal = itemSubtotal + (itemSubtotal > 0 ? DELIVERY_CHARGE : 0);
+  } else if (checkoutItem) {
+    itemSubtotal = (productPrices[checkoutItem.productType] || 0) * quantity;
+    itemTotal = itemSubtotal + DELIVERY_CHARGE;
   }
 
-  const itemSubtotal = (productPrices[checkoutItem.productType] || 0) * quantity;
-  const itemTotal = itemSubtotal + DELIVERY_CHARGE;
+  // --- Quantity handlers ---
+  const handleQuantityChange = (amount: number) => {
+    setQuantity((prev) => Math.max(1, prev + amount));
+  };
+  const handleCartQuantityChange = (id: string, amount: number) => {
+    setQuantities((prev) => ({ ...prev, [id]: Math.max(1, (prev[id] || 1) + amount) }));
+  };
 
+  // --- Address and payment logic ---
   const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(event.target.value);
     setAddressError('');
   };
-
   const validateAddress = () => {
     if (!address.trim()) {
       setAddressError('Address is required');
@@ -89,64 +112,53 @@ const CheckoutPage: React.FC = () => {
     }
     return true;
   };
-
-  const handleQuantityChange = (amount: number) => {
-    setQuantity((prev) => Math.max(1, prev + amount));
+  const handlePaymentMethodSelect = (method: string) => {
+    setSelectedPaymentMethod(method);
   };
+  const isConfirmButtonEnabled = address.trim() !== '' && selectedPaymentMethod !== null;
 
-  // This function now confirms the order after address and payment are selected
+  // --- Order confirmation logic ---
   const handleConfirmOrder = () => {
-    if (!validateAddress()) {
-      return; // Stop if address is not valid
-    }
-    // Address is valid and payment method is selected (button is enabled based on this)
-    console.log('Final Order Details:', {
-      item: checkoutItem,
-      quantity: quantity,
-      address: address,
-      paymentMethod: selectedPaymentMethod, // Use the selected payment method
-      total: itemTotal,
-    });
-
-    // Get existing order history from localStorage
+    if (!validateAddress()) return;
     const existingOrderHistory = localStorage.getItem('giftcraftOrderHistory');
     let orderHistory = existingOrderHistory ? JSON.parse(existingOrderHistory) : [];
-
-    // Create a new order object with checkout item details and a placeholder for review
-    const newOrder = {
-      id: Date.now(), // Simple unique ID for the order
-      date: new Date().toISOString(), // Timestamp
-      item: { ...checkoutItem, quantity }, // Save the full checkout item details and quantity
-      address: address, // Save the delivery address
-      paymentMethod: selectedPaymentMethod, // Save the payment method
-      total: itemTotal, // Save the total amount
-      status: 'Processing', // Initial order status
-      review: null, // Placeholder for review text
-      rating: null, // Placeholder for rating
-    };
-
-    // Add the new order to the history
-    orderHistory.push(newOrder);
-
-    // Save the updated order history back to localStorage
-    localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
-
-    // Set the confirmation message to display the confirmation section
-    setOrderConfirmedMessage(`Your order has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
-    
-    // Clear the checkout item from localStorage after successful order
-    localStorage.removeItem('giftcraftCheckoutItem');
-    
-    // In a real app, you would integrate with payment gateway or backend here and handle success/failure
+    if (checkoutCart) {
+      // Multi-item order
+      const newOrder = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        items: checkoutCart.map(item => ({ ...item, quantity: quantities[item.id] || 1 })),
+        address,
+        paymentMethod: selectedPaymentMethod,
+        total: itemTotal,
+        status: 'Processing',
+        review: null,
+        rating: null,
+      };
+      orderHistory.push(newOrder);
+      localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
+      setOrderConfirmedMessage(`Your order for ${checkoutCart.length} items has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
+      localStorage.removeItem('giftcraftCheckoutCart');
+      localStorage.removeItem('giftcraftCart'); // Clear cart after order
+    } else if (checkoutItem) {
+      // Single item order (existing logic)
+      const newOrder = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        item: { ...checkoutItem, quantity },
+        address,
+        paymentMethod: selectedPaymentMethod,
+        total: itemTotal,
+        status: 'Processing',
+        review: null,
+        rating: null,
+      };
+      orderHistory.push(newOrder);
+      localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
+      setOrderConfirmedMessage(`Your order has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
+      localStorage.removeItem('giftcraftCheckoutItem');
+    }
   };
-
-  // This function now only selects the payment method
-  const handlePaymentMethodSelect = (method: string) => {
-    setSelectedPaymentMethod(method); // Set the selected payment method
-  };
-
-  // Determine if the Confirm Order button should be enabled
-  const isConfirmButtonEnabled = address.trim() !== '' && selectedPaymentMethod !== null;
 
   // Handle opening and closing the review modal
   const handleOpenReviewModal = () => {
@@ -188,6 +200,16 @@ const CheckoutPage: React.FC = () => {
     // Optionally clear the checkout item from localStorage if a review is the final step
     // localStorage.removeItem('giftcraftCheckoutItem'); // This is now handled in handleConfirmOrder
   };
+
+  if (!checkoutCart && !checkoutItem) {
+    return (
+      <Container maxWidth="md" sx={{ py: 6 }}>
+        <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h5">Redirecting...</Typography>
+        </Paper>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -244,29 +266,55 @@ const CheckoutPage: React.FC = () => {
             {/* Item Details Summary */}
             <Box sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>
               <Typography variant="h6" fontWeight={700}>Item Summary:</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                {/* Use the CustomizedProductImage component to display the item */}
-                <Box sx={{ width: 80, height: 80, mr: 2 }}> {/* Adjust size as needed */}
-                  <CustomizedProductImage 
-                    baseImage={checkoutItem.image} 
-                    elements={checkoutItem.elements || []} // Pass elements array, default to empty array if null/undefined
-                    color={checkoutItem.color || '#ffffff'} // Pass selected color, default to white
-                    productType={checkoutItem.productType} // Pass product type for styling
-                  />
-                </Box>
+              {checkoutCart ? (
                 <Box>
-                  <Typography variant="subtitle1" fontWeight={700}>
-                    {checkoutItem.productType.charAt(0).toUpperCase() + checkoutItem.productType.slice(1)}
-                  </Typography>
-                  {/* Quantity Selector */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                    <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
-                    <Button size="small" onClick={() => handleQuantityChange(-1)}><Remove /></Button>
-                    <Typography sx={{ mx: 1 }}>{quantity}</Typography>
-                    <Button size="small" onClick={() => handleQuantityChange(1)}><Add /></Button>
+                  {checkoutCart.map((item) => (
+                    <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                      <Box sx={{ width: 80, height: 80, mr: 2 }}>
+                        <CustomizedProductImage 
+                          baseImage={item.image} 
+                          elements={item.elements || []}
+                          color={item.color || '#ffffff'}
+                          productType={item.productType}
+                        />
+                      </Box>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={700}>
+                          {item.productType.charAt(0).toUpperCase() + item.productType.slice(1)}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                          <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
+                          <Button size="small" onClick={() => handleCartQuantityChange(item.id, -1)}><Remove /></Button>
+                          <Typography sx={{ mx: 1 }}>{quantities[item.id] || 1}</Typography>
+                          <Button size="small" onClick={() => handleCartQuantityChange(item.id, 1)}><Add /></Button>
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              ) : checkoutItem && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                  <Box sx={{ width: 80, height: 80, mr: 2 }}>
+                    <CustomizedProductImage 
+                      baseImage={checkoutItem.image} 
+                      elements={checkoutItem.elements || []}
+                      color={checkoutItem.color || '#ffffff'}
+                      productType={checkoutItem.productType}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      {checkoutItem.productType.charAt(0).toUpperCase() + checkoutItem.productType.slice(1)}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                      <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
+                      <Button size="small" onClick={() => handleQuantityChange(-1)}><Remove /></Button>
+                      <Typography sx={{ mx: 1 }}>{quantity}</Typography>
+                      <Button size="small" onClick={() => handleQuantityChange(1)}><Add /></Button>
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
+              )}
             </Box>
 
             {/* Price Breakdown */}
