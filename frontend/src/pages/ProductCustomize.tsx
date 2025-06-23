@@ -9,6 +9,10 @@ import { Rnd } from 'react-rnd';
 import { ChromePicker, ColorResult } from 'react-color';
 import Popover from '@mui/material/Popover';
 import { products } from "../data/products";
+import sampleArt1 from '../assets/art/sample-art1.png';
+import sampleArt2 from '../assets/art/sample-art2.png';
+import sampleEffect1 from '../assets/effects/sample-effect1.png';
+import sampleEffect2 from '../assets/effects/sample-effect2.png';
 
 // Import product images from products directory
 import tshirtFront from '../assets/products/whitetshirt-front.jpg';
@@ -65,6 +69,8 @@ interface Element {
   width: number;
   height: number;
   color?: string;
+  borderColor?: string;
+  fill?: boolean;
 }
 
 // Map product type to images
@@ -199,19 +205,14 @@ const hexToHsl = (hex: string) => {
 
 // Sample art/clipart SVGs or emojis
 const artLibrary = [
-  { label: 'Heart', content: '❤️' },
-  { label: 'Star', content: '⭐' },
-  { label: 'Balloon', content: '🎈' },
-  { label: 'Party Hat', content: '🥳' },
-  { label: 'Gift', content: '🎁' },
-  { label: 'Cake', content: '🎂' },
+  { label: 'Tree Art', content: sampleArt1 },
+  { label: 'Painting Art', content: sampleArt2 },
 ];
 
 // Sample effects overlays (could be PNG/SVG URLs or emoji for demo)
 const effectsLibrary = [
-  { label: 'Glitter', content: '✨' },
-  { label: 'Sparkle', content: '💫' },
-  { label: 'Confetti', content: '🎉' },
+  { label: 'Light Effect', content: sampleEffect1 },
+  { label: 'Fire Effect', content: sampleEffect2 },
 ];
 
 const ProductCustomize: React.FC = () => {
@@ -577,6 +578,15 @@ const ProductCustomize: React.FC = () => {
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
   const [elements, setElements] = useState<Element[]>([]);
+  const [shapeColor, setShapeColor] = useState('#F46A6A');
+  const [shapeBorderColor, setShapeBorderColor] = useState('#222222');
+  const [shapeFill, setShapeFill] = useState(true);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+
+  const updateElement = (id: string, changes: Partial<Element>) => {
+    setElements(els => els.map(el => el.id === id ? { ...el, ...changes } : el));
+  };
 
   const handleAddArt = (artContent: string) => {
     const newElement: Element = {
@@ -592,17 +602,27 @@ const ProductCustomize: React.FC = () => {
     setSnackbar({ open: true, message: 'Art added!', severity: 'success' });
   };
 
-  const handleAddShape = (shape: 'rectangle' | 'circle' | 'stripe', color: string) => {
+  const handleAddShape = (shape: 'rectangle' | 'circle' | 'stripe' | 'line-h' | 'line-v' | 'line-d' | 'triangle' | 'arrow' | 'pentagon' | 'hexagon' | 'star' | 'heart' | 'diamond', fill: boolean, fillColor: string, borderColor: string) => {
+    let width = 60, height = 60;
+    if (shape === 'stripe') { width = 120; height = 20; }
+    if (shape === 'line-h') { width = 100; height = 6; }
+    if (shape === 'line-v') { width = 6; height = 100; }
+    if (shape === 'line-d') { width = 100; height = 6; }
+    if (shape === 'arrow') { width = 80; height = 30; }
+    if (shape === 'triangle') { width = 60; height = 60; }
+    if (shape === 'pentagon' || shape === 'hexagon' || shape === 'star' || shape === 'heart' || shape === 'diamond') { width = 60; height = 60; }
     const newElement: Element = {
       id: Date.now().toString(),
       type: 'shape',
       content: shape,
       x: 70,
       y: 70,
-      width: shape === 'stripe' ? 120 : 60,
-      height: shape === 'stripe' ? 20 : 60,
-      color,
-    };
+      width,
+      height,
+      color: fillColor,
+      borderColor,
+      fill,
+    } as any;
     setElements([...elements, newElement]);
     setSnackbar({ open: true, message: `${shape.charAt(0).toUpperCase() + shape.slice(1)} added!`, severity: 'success' });
   };
@@ -785,41 +805,30 @@ const ProductCustomize: React.FC = () => {
           {elements.map((el) => (
             <Rnd
               key={el.id}
-              default={{ x: el.x, y: el.y, width: el.width, height: el.height }}
-              bounds={'parent'}
-              enableResizing={{ top: true, right: true, bottom: true, left: true, topRight: true, bottomRight: true, bottomLeft: true, topLeft: true }}
-              enableRotating={true}
-              onDragStop={(e, d) => {
-                const updatedElements = elements.map(elem => 
-                  elem.id === el.id ? { ...elem, x: d.x, y: d.y } : elem
-                );
-                setElements(updatedElements);
-              }}
-              onResizeStop={(e, direction, ref, delta, position) => {
-                const updatedElements = elements.map(elem => 
-                  elem.id === el.id ? { ...elem, width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position } : elem
-                );
-                setElements(updatedElements);
-              }}
+              size={{ width: el.width, height: el.height }}
+              position={{ x: el.x, y: el.y }}
+              bounds="parent"
+              enableResizing={true}
+              onDragStop={(e, d) => updateElement(el.id, { x: d.x, y: d.y })}
+              onResizeStop={(e, direction, ref, delta, position) => updateElement(el.id, { width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position })}
               style={{
                 zIndex: 2,
+                border: selectedElementId === el.id ? '2px solid #F46A6A' : 'none',
+                boxShadow: selectedElementId === el.id ? '0 0 8px #F46A6A55' : 'none',
                 background: 'transparent',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                cursor: 'move',
+              }}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                setSelectedElementId(el.id);
+                if (el.type === 'text') setEditText(el.content);
               }}
             >
               {el.type === 'image' && (
-                <Box
-                  component="img"
-                  src={el.content}
-                  alt="uploaded"
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-                  }} />
+                <Box component="img" src={el.content} alt="uploaded" sx={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
               )}
               {el.type === 'text' && (
                 <Typography
@@ -839,71 +848,56 @@ const ProductCustomize: React.FC = () => {
                 </Typography>
               )}
               {el.type === 'sticker' && (
-                <Typography
-                  sx={{
-                    fontSize: 40,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                  }}
-                >
-                  {el.content}
-                </Typography>
+                <Typography sx={{ fontSize: 40, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{el.content}</Typography>
               )}
               {el.type === 'art' && (
-                <Typography
-                  sx={{
-                    fontSize: 40,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    filter: 'drop-shadow(0 2px 8px #FFD700)',
-                  }}
-                >
-                  {el.content}
-                </Typography>
+                <Box component="img" src={el.content} alt="art" sx={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #FFD700)' }} />
               )}
               {el.type === 'shape' && (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    bgcolor: el.color,
-                    borderRadius: el.content === 'circle' ? '50%' : 0,
-                    ...(el.content === 'stripe' && { height: 20, width: '100%' }),
-                  }}
-                />
+                el.content === 'rectangle' ? (
+                  <Box sx={{ width: '100%', height: '100%', bgcolor: el.fill ? el.color : 'transparent', border: `2px solid ${el.borderColor}`, borderRadius: 1 }} />
+                ) : el.content === 'circle' ? (
+                  <Box sx={{ width: '100%', height: '100%', bgcolor: el.fill ? el.color : 'transparent', border: `2px solid ${el.borderColor}`, borderRadius: '50%' }} />
+                ) : el.content === 'stripe' ? (
+                  <Box sx={{ width: '100%', height: 20, bgcolor: el.color, border: `2px solid ${el.borderColor}` }} />
+                ) : el.content === 'line-h' ? (
+                  <Box sx={{ width: '100%', height: 6, bgcolor: 'transparent', borderBottom: `4px solid ${el.borderColor}` }} />
+                ) : el.content === 'line-v' ? (
+                  <Box sx={{ width: 6, height: '100%', bgcolor: 'transparent', borderRight: `4px solid ${el.borderColor}` }} />
+                ) : el.content === 'line-d' ? (
+                  <Box sx={{ width: '100%', height: 6, bgcolor: 'transparent', borderBottom: `4px solid ${el.borderColor}`, transform: 'rotate(-45deg)' }} />
+                ) : el.content === 'triangle' ? (
+                  <Box sx={{ width: 0, height: 0, borderLeft: '30px solid transparent', borderRight: '30px solid transparent', borderBottom: el.fill ? `60px solid ${el.color}` : 'none', borderTop: !el.fill ? `60px solid transparent` : 'none', borderBottomColor: el.fill ? el.color : 'transparent', borderTopColor: !el.fill ? el.borderColor : 'transparent', borderWidth: el.fill ? '0 30px 60px 30px' : '0 30px 0 30px' }} />
+                ) : el.content === 'arrow' ? (
+                  <Box sx={{ position: 'relative', width: 60, height: 40 }}>
+                    <Box sx={{ width: 0, height: 0, borderTop: '15px solid transparent', borderBottom: '15px solid transparent', borderLeft: `40px solid ${el.color}`, position: 'absolute', left: 0, top: 5 }} />
+                    <Box sx={{ width: 0, height: 0, borderTop: '30px solid transparent', borderBottom: '30px solid transparent', borderLeft: `20px solid ${el.color}`, position: 'absolute', left: 40, top: -10 }} />
+                  </Box>
+                ) : el.content === 'pentagon' ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 90,40 73,90 27,90 10,40" fill={el.fill ? el.color : 'transparent'} stroke={el.borderColor} strokeWidth="4" /></svg>
+                ) : el.content === 'hexagon' ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill={el.fill ? el.color : 'transparent'} stroke={el.borderColor} strokeWidth="4" /></svg>
+                ) : el.content === 'star' ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 61,39 92,39 66,59 76,89 50,70 24,89 34,59 8,39 39,39" fill={el.fill ? el.color : 'transparent'} stroke={el.borderColor} strokeWidth="4" /></svg>
+                ) : el.content === 'heart' ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 80 L20 50 A20 20 0 1 1 50 30 A20 20 0 1 1 80 50 Z" fill={el.fill ? el.color : 'transparent'} stroke={el.borderColor} strokeWidth="4" /></svg>
+                ) : el.content === 'diamond' ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 90,50 50,90 10,50" fill={el.fill ? el.color : 'transparent'} stroke={el.borderColor} strokeWidth="4" /></svg>
+                ) : null
               )}
-              <Button
-                size="small"
-                color="error"
-                onClick={() => handleDeleteElement(el.id)}
-                sx={{
-                  position: 'absolute',
-                  top: -8,
-                  right: -8,
-                  minWidth: 24,
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  p: 0,
-                  bgcolor: 'white',
-                  boxShadow: 1,
-                  '&:hover': {
-                    bgcolor: '#ffebee'
-                  }
-                }}
-              >
-                ×
-              </Button>
+              <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== el.id))} sx={{ position: 'absolute', top: -8, right: -8, minWidth: 24, width: 24, height: 24, borderRadius: '50%', p: 0, bgcolor: 'white', boxShadow: 1, '&:hover': { bgcolor: '#ffebee' } }}>×</Button>
             </Rnd>
           ))}
         </CanvasBox>
+
+        {/* Floating toolbar for editing text */}
+        {selectedElementId && elements.find(el => el.id === selectedElementId)?.type === 'text' && (
+          <Box sx={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 10, bgcolor: 'white', boxShadow: 2, borderRadius: 2, p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <TextField size="small" value={editText} onChange={e => setEditText(e.target.value)} onBlur={(e: React.FocusEvent<HTMLInputElement>) => updateElement(selectedElementId, { content: editText })} />
+            <input type="color" value={elements.find(el => el.id === selectedElementId)?.color || '#000000'} onChange={e => updateElement(selectedElementId, { color: e.target.value })} style={{ width: 28, height: 28, border: 'none', background: 'none' }} />
+            <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== selectedElementId))}>Delete</Button>
+          </Box>
+        )}
 
         {/* Save Button */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
@@ -1005,23 +999,50 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {tab === 4 && (
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
             {artLibrary.map((art, i) => (
-              <Button key={i} onClick={() => handleAddArt(art.content)} sx={{ fontSize: 32 }}>{art.content}</Button>
+              <Button key={i} onClick={() => handleAddArt(art.content)} sx={{ p: 0, minWidth: 60, minHeight: 60, border: '1px solid #eee', borderRadius: 2, bgcolor: '#fff' }}>
+                <Box component="img" src={art.content} alt={art.label} sx={{ width: 48, height: 48, objectFit: 'contain' }} />
+              </Button>
             ))}
           </Box>
         )}
         {tab === 5 && (
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
-            <Button onClick={() => handleAddShape('rectangle', '#F46A6A')} sx={{ minWidth: 60, minHeight: 40, bgcolor: '#F46A6A', color: '#fff', borderRadius: 1 }}>Rectangle</Button>
-            <Button onClick={() => handleAddShape('circle', '#FFD700')} sx={{ minWidth: 60, minHeight: 40, bgcolor: '#FFD700', color: '#fff', borderRadius: '50%' }}>Circle</Button>
-            <Button onClick={() => handleAddShape('stripe', '#4CAF50')} sx={{ minWidth: 80, minHeight: 20, bgcolor: '#4CAF50', color: '#fff', borderRadius: 0 }}>Stripe</Button>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Typography variant="body2">Fill:</Typography>
+              <input type="color" value={shapeColor} onChange={e => setShapeColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', background: 'none' }} />
+              <Typography variant="body2">Border:</Typography>
+              <input type="color" value={shapeBorderColor} onChange={e => setShapeBorderColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', background: 'none' }} />
+              <Button variant={shapeFill ? 'contained' : 'outlined'} size="small" onClick={() => setShapeFill(f => !f)}>{shapeFill ? 'Filled' : 'No Fill'}</Button>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
+              <Button onClick={() => handleAddShape('rectangle', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: shapeFill ? shapeColor : 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 1 }}>Rectangle</Button>
+              <Button onClick={() => handleAddShape('circle', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: shapeFill ? shapeColor : 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: '50%' }}>Circle</Button>
+              <Button onClick={() => handleAddShape('stripe', true, shapeColor, shapeBorderColor)} sx={{ minWidth: 80, minHeight: 20, bgcolor: shapeColor, color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0 }}>Stripe</Button>
+              <Button onClick={() => handleAddShape('line-h', false, 'transparent', shapeBorderColor)} sx={{ minWidth: 80, minHeight: 8, bgcolor: 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0 }}>Line H</Button>
+              <Button onClick={() => handleAddShape('line-v', false, 'transparent', shapeBorderColor)} sx={{ minWidth: 8, minHeight: 80, bgcolor: 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0 }}>Line V</Button>
+              <Button onClick={() => handleAddShape('line-d', false, 'transparent', shapeBorderColor)} sx={{ minWidth: 80, minHeight: 8, bgcolor: 'transparent', color: shapeBorderColor, border: `2px solid ${shapeBorderColor}`, borderRadius: 0, transform: 'rotate(-45deg)' }}>Line D</Button>
+              <Button onClick={() => handleAddShape('triangle', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>
+                ▲
+              </Button>
+              <Button onClick={() => handleAddShape('arrow', true, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>
+                ➔
+              </Button>
+              <Button onClick={() => handleAddShape('pentagon', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>⬟</Button>
+              <Button onClick={() => handleAddShape('hexagon', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>⬢</Button>
+              <Button onClick={() => handleAddShape('star', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>★</Button>
+              <Button onClick={() => handleAddShape('heart', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>♥</Button>
+              <Button onClick={() => handleAddShape('diamond', shapeFill, shapeColor, shapeBorderColor)} sx={{ minWidth: 60, minHeight: 40, bgcolor: 'transparent', color: shapeBorderColor, border: 'none', position: 'relative' }}>◆</Button>
+            </Box>
           </Box>
         )}
         {tab === 6 && (
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
             {effectsLibrary.map((effect, i) => (
-              <Button key={i} onClick={() => handleAddEffect(effect.content)} sx={{ fontSize: 32 }}>{effect.content}</Button>
+              <Button key={i} onClick={() => handleAddArt(effect.content)} sx={{ p: 0, minWidth: 60, minHeight: 60, border: '1px solid #eee', borderRadius: 2, bgcolor: '#fff' }}>
+                <Box component="img" src={effect.content} alt={effect.label} sx={{ width: 48, height: 48, objectFit: 'contain' }} />
+              </Button>
             ))}
           </Box>
         )}
