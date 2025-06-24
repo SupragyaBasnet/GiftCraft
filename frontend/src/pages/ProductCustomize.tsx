@@ -215,6 +215,13 @@ const effectsLibrary = [
   { label: 'Fire Effect', content: sampleEffect2 },
 ];
 
+// Dynamically import all PNGs from the art folder (Vite way)
+const artModules = import.meta.glob('../assets/art/*.png', { eager: true });
+const artImages = Object.entries(artModules).map(([path, mod]) => ({
+  src: (mod as any).default,
+  label: path.split('/').pop()?.replace(/\.[^/.]+$/, '').replace(/-/g, ' ').toUpperCase() || ''
+}));
+
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
   const navigate = useNavigate();
@@ -1000,10 +1007,13 @@ const ProductCustomize: React.FC = () => {
         )}
         {tab === 4 && (
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
-            {artLibrary.map((art, i) => (
-              <Button key={i} onClick={() => handleAddArt(art.content)} sx={{ p: 0, minWidth: 60, minHeight: 60, border: '1px solid #eee', borderRadius: 2, bgcolor: '#fff' }}>
-                <Box component="img" src={art.content} alt={art.label} sx={{ width: 48, height: 48, objectFit: 'contain' }} />
-              </Button>
+            {artImages.map((art, i) => (
+              <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 64 }}>
+                <Button onClick={() => handleAddArt(art.src)} sx={{ p: 0, minWidth: 60, minHeight: 60, border: '1px solid #eee', borderRadius: 2, bgcolor: '#fff' }}>
+                  <Box component="img" src={art.src} alt={art.label} sx={{ width: 48, height: 48, objectFit: 'contain' }} />
+                </Button>
+                <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{art.label}</Typography>
+              </Box>
             ))}
           </Box>
         )}
@@ -1030,9 +1040,9 @@ const ProductCustomize: React.FC = () => {
                 </svg>
               </Button>
               {/* Stripe */}
-              <Button onClick={() => handleAddShape('stripe', true, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+              <Button onClick={() => handleAddShape('stripe', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
                 <svg width="40" height="40">
-                  <rect x="6" y="18" width="28" height="8" fill={shapeColor} stroke={shapeBorderColor} strokeWidth="3" rx="2" />
+                  <rect x="6" y="18" width="28" height="8" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" rx="2" />
                 </svg>
               </Button>
               {/* Line H */}
@@ -1060,9 +1070,9 @@ const ProductCustomize: React.FC = () => {
                 </svg>
               </Button>
               {/* Arrow */}
-              <Button onClick={() => handleAddShape('arrow', true, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
+              <Button onClick={() => handleAddShape('arrow', shapeFill, shapeColor, shapeBorderColor)} sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: 'transparent' }}>
                 <svg width="40" height="40">
-                  <polygon points="8,20 28,20 28,12 36,24 28,36 28,28 8,28" fill={shapeColor} stroke={shapeBorderColor} strokeWidth="3" />
+                  <polygon points="8,20 28,20 28,12 36,24 28,36 28,28 8,28" fill={shapeFill ? shapeColor : 'none'} stroke={shapeBorderColor} strokeWidth="3" />
                 </svg>
               </Button>
               {/* Pentagon */}
