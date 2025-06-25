@@ -247,12 +247,66 @@ const toolsLibrary = [
   }
 ];
 
-// Dynamically import all PNGs from the art folder (Vite way)
-const artModules = import.meta.glob('../assets/art/*.png', { eager: true });
+// Dynamically import all PNG, JPG, JPEG, and WEBP images from the art folder (Vite way)
+const artModules = import.meta.glob('../assets/art/*.{png,jpg,jpeg,webp}', { eager: true });
 const artImages = Object.entries(artModules).map(([path, mod]) => ({
   src: (mod as any).default,
   label: path.split('/').pop()?.replace(/\.[^/.]+$/, '').replace(/-/g, ' ').toUpperCase() || ''
 }));
+
+// Add a few example art images from Unsplash/Pexels as demo art (remote URLs)
+const exampleArtImages = [
+  {
+    src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+    label: 'COLORFUL ABSTRACT',
+  },
+  {
+    src: 'https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&w=400',
+    label: 'PAINT SPLASH',
+  },
+  {
+    src: 'https://images.pexels.com/photos/370799/pexels-photo-370799.jpeg?auto=compress&w=400',
+    label: 'MODERN ART',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+    label: 'MOUNTAIN ART',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80',
+    label: 'VIBRANT SPLASH',
+  },
+  {
+    src: 'https://images.pexels.com/photos/459225/pexels-photo-459225.jpeg?auto=compress&w=400',
+    label: 'WATERCOLOR',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+    label: 'ABSTRACT FACE',
+  },
+  {
+    src: 'https://images.pexels.com/photos/1103971/pexels-photo-1103971.jpeg?auto=compress&w=400',
+    label: 'COLORFUL LINES',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80',
+    label: 'PASTEL ART',
+  },
+  {
+    src: 'https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400',
+    label: 'CANVAS PAINT',
+  },
+];
+// Filter out broken local art images (those with missing or broken src)
+const validArtImages = artImages.filter(img => img.src && !img.src.includes('undefined'));
+const allArtImages = [...exampleArtImages, ...validArtImages];
+
+// Helper to check if an image URL is valid (for remote and local images)
+function isImageUrlValid(url) {
+  // Exclude undefined, empty, or broken images
+  return url && !url.includes('undefined') && !url.includes('sample') && !url.includes('broken') && !url.endsWith('.svg');
+}
+const validAllArtImages = allArtImages.filter(img => isImageUrlValid(img.src));
 
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
@@ -922,13 +976,14 @@ const ProductCustomize: React.FC = () => {
                     justifyContent: 'center',
                     textAlign: 'center',
                     fontFamily: el.fontFamily || 'Arial, sans-serif',
+                    fontSize: `${Math.max(10, el.height * 0.7)}px`,
                   }}
                 >
                   {el.content}
                 </Typography>
               )}
               {el.type === 'sticker' && (
-                <Typography sx={{ fontSize: 40, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{el.content}</Typography>
+                <Typography sx={{ fontSize: `${Math.max(10, el.height * 0.8)}px`, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{el.content}</Typography>
               )}
               {el.type === 'art' && (
                 <Box component="img" src={el.content} alt="art" sx={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #FFD700)' }} />
@@ -1091,10 +1146,10 @@ const ProductCustomize: React.FC = () => {
         )}
         {tab === 4 && (
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
-            {artImages.map((art, i) => (
+            {validAllArtImages.map((art, i) => (
               <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 64 }}>
                 <Button onClick={() => handleAddArt(art.src)} sx={{ p: 0, minWidth: 60, minHeight: 60, border: '1px solid #eee', borderRadius: 2, bgcolor: '#fff' }}>
-                  <Box component="img" src={art.src} alt={art.label} sx={{ width: 48, height: 48, objectFit: 'contain' }} />
+                  <Box component="img" src={art.src} alt={art.label} sx={{ width: 48, height: 48, objectFit: 'cover' }} />
                 </Button>
                 <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{art.label}</Typography>
               </Box>
