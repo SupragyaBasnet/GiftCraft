@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup, Select
 } from '@mui/material';
-import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove, FormatShapes, Star } from '@mui/icons-material';
+import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove, FormatShapes, Star, Brush, Create, Edit } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { Rnd } from 'react-rnd';
 import { ChromePicker, ColorResult } from 'react-color';
@@ -13,6 +13,7 @@ import sampleArt1 from '../assets/art/sample-art1.png';
 import sampleArt2 from '../assets/art/sample-art2.png';
 import sampleEffect1 from '../assets/effects/sample-effect1.png';
 import sampleEffect2 from '../assets/effects/sample-effect2.png';
+import CanvasDraw from 'react-canvas-draw';
 
 // Import product images from products directory
 import tshirtFront from '../assets/products/whitetshirt-front.jpg';
@@ -205,14 +206,43 @@ const hexToHsl = (hex: string) => {
 
 // Sample art/clipart SVGs or emojis
 const artLibrary = [
-  { label: 'Tree Art', content: sampleArt1 },
-  { label: 'Painting Art', content: sampleArt2 },
+  {
+    label: 'Teamwork',
+    content: `data:image/svg+xml;utf8,<svg width='160' height='80' xmlns='http://www.w3.org/2000/svg'><text x='0' y='35' font-size='32' font-family='Arial' fill='%23555' font-style='italic'>t</text><text x='25' y='35' font-size='32' font-family='Arial' fill='%2348a9e6'>e</text><text x='55' y='35' font-size='32' font-family='Arial' fill='%2366bb6a'>a</text><text x='85' y='35' font-size='32' font-family='Arial' fill='%237e57c2'>m</text><text x='0' y='70' font-size='32' font-family='Arial' fill='%2348a9e6'>w</text><text x='40' y='70' font-size='32' font-family='Arial' fill='%23222' font-weight='bold'>o</text><text x='70' y='70' font-size='32' font-family='Arial' fill='%2366bb6a' font-weight='bold'>r</text><text x='95' y='70' font-size='32' font-family='Arial' fill='%237e57c2' font-weight='bold'>k</text></svg>`
+  },
+  {
+    label: 'Congrats',
+    content: `data:image/svg+xml;utf8,<svg width='180' height='60' xmlns='http://www.w3.org/2000/svg'><text x='0' y='35' font-size='32' font-family='Arial' fill='%23fbc02d' font-weight='bold'>CONGRATS</text><text x='0' y='55' font-size='16' font-family='Arial' fill='%23e57373'>I'M PROUD OF YOU!</text></svg>`
+  },
+  {
+    label: 'Strategy',
+    content: `data:image/svg+xml;utf8,<svg width='180' height='60' xmlns='http://www.w3.org/2000/svg'><text x='0' y='30' font-size='18' font-family='Georgia' fill='%23222'>financial</text><text x='0' y='55' font-size='32' font-family='Arial' fill='%2348a9e6' font-weight='bold'>STRATEGY</text></svg>`
+  },
+  {
+    label: 'Content that Clicks',
+    content: `data:image/svg+xml;utf8,<svg width='200' height='60' xmlns='http://www.w3.org/2000/svg'><text x='0' y='30' font-size='22' font-family='Brush Script MT' fill='%23999'>Content that</text><text x='0' y='55' font-size='32' font-family='Arial' fill='%2300b894' font-weight='bold'>CLICKS</text></svg>`
+  },
+  {
+    label: 'Moving Parts',
+    content: `data:image/svg+xml;utf8,<svg width='200' height='60' xmlns='http://www.w3.org/2000/svg'><text x='0' y='40' font-size='32' font-family='Monoton' fill='%23296fa8'>MOVING</text><text x='0' y='58' font-size='32' font-family='Monoton' fill='%23296fa8'>PARTS</text></svg>`
+  },
+  // Add more creative SVGs as you like
 ];
 
-// Sample effects overlays (could be PNG/SVG URLs or emoji for demo)
-const effectsLibrary = [
-  { label: 'Light Effect', content: sampleEffect1 },
-  { label: 'Fire Effect', content: sampleEffect2 },
+// Remove effectsLibrary and add toolsLibrary
+const toolsLibrary = [
+  {
+    label: 'Pencil',
+    content: `data:image/svg+xml;utf8,<svg width='48' height='48' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='32' width='28' height='6' rx='2' fill='%23bdbdbd'/><rect x='20' y='8' width='8' height='28' rx='2' fill='%23fbc02d'/><polygon points='24,4 28,8 20,8' fill='%23ff7043'/></svg>`
+  },
+  {
+    label: 'Pen',
+    content: `data:image/svg+xml;utf8,<svg width='48' height='48' xmlns='http://www.w3.org/2000/svg'><rect x='20' y='8' width='8' height='28' rx='2' fill='%2348a9e6'/><rect x='22' y='36' width='4' height='8' rx='1' fill='%23296fa8'/><polygon points='24,4 28,8 20,8' fill='%23007bff'/></svg>`
+  },
+  {
+    label: 'Paintbrush',
+    content: `data:image/svg+xml;utf8,<svg width='48' height='48' xmlns='http://www.w3.org/2000/svg'><rect x='22' y='8' width='4' height='24' rx='2' fill='%238d6e63'/><ellipse cx='24' cy='36' rx='8' ry='6' fill='%23ffb300'/><ellipse cx='24' cy='40' rx='4' ry='2' fill='%23ffd54f'/></svg>`
+  }
 ];
 
 // Dynamically import all PNGs from the art folder (Vite way)
@@ -590,6 +620,16 @@ const ProductCustomize: React.FC = () => {
   const [shapeFill, setShapeFill] = useState(true);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [drawingTool, setDrawingTool] = useState<'paintbrush' | 'pen' | 'pencil'>('paintbrush');
+  const [drawingColor, setDrawingColor] = useState('#222');
+  const [canvasRef, setCanvasRef] = useState<any>(null);
+
+  // Tool settings
+  const toolSettings = {
+    paintbrush: { brushRadius: 6, color: drawingColor },
+    pen: { brushRadius: 2, color: drawingColor },
+    pencil: { brushRadius: 1, color: '#888' },
+  };
 
   const updateElement = (id: string, changes: Partial<Element>) => {
     setElements(els => els.map(el => el.id === id ? { ...el, ...changes } : el));
@@ -787,7 +827,8 @@ const ProductCustomize: React.FC = () => {
           sx={{
             mb: 3,
             height: canvasHeight,
-            maxWidth: 350, // Revert to fixed maxWidth
+            maxWidth: 350,
+            position: 'relative',
           }}
         >
           <Box
@@ -805,10 +846,21 @@ const ProductCustomize: React.FC = () => {
               pointerEvents: 'none',
               p: 2,
               ...getProductStyle(selectedProduct),
-              // Apply hue-rotate filter based on selected color
-              filter: color === '#ffffff' ? 'none' : `sepia(1) saturate(500%) hue-rotate(${(hexToHsl(color).h - hexToHsl('#808080').h)}deg)`, // Use sepia and lower saturation, calculate difference from gray hue
+              filter: color === '#ffffff' ? 'none' : `sepia(1) saturate(500%) hue-rotate(${(hexToHsl(color).h - hexToHsl('#808080').h)}deg)`,
             }}
           />
+          <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
+            <CanvasDraw
+              ref={setCanvasRef}
+              brushRadius={toolSettings[drawingTool].brushRadius}
+              brushColor={toolSettings[drawingTool].color}
+              canvasWidth={350}
+              canvasHeight={canvasHeight}
+              hideGrid={true}
+              lazyRadius={0}
+              style={{ width: '100%', height: '100%', background: 'transparent' }}
+            />
+          </Box>
           {elements.map((el) => (
             <Rnd
               key={el.id}
@@ -819,7 +871,7 @@ const ProductCustomize: React.FC = () => {
               onDragStop={(e, d) => updateElement(el.id, { x: d.x, y: d.y })}
               onResizeStop={(e, direction, ref, delta, position) => updateElement(el.id, { width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position })}
               style={{
-                zIndex: 2,
+                zIndex: 3,
                 border: selectedElementId === el.id ? '2px solid #F46A6A' : 'none',
                 boxShadow: selectedElementId === el.id ? '0 0 8px #F46A6A55' : 'none',
                 background: 'transparent',
@@ -927,7 +979,7 @@ const ProductCustomize: React.FC = () => {
           <Tab icon={<AddPhotoAlternate />} label="Image" />
           <Tab icon={<Palette />} label="Art" />
           <Tab icon={<FormatShapes />} label="Shapes" />
-          <Tab icon={<Star />} label="Effects" />
+          <Tab icon={<Brush />} label="Tools" />
         </Tabs>
         {tab === 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
@@ -1109,13 +1161,19 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {tab === 6 && (
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
-            {effectsLibrary.map((effect, i) => (
-              <Button key={i} onClick={() => handleAddArt(effect.content)} sx={{ p: 0, minWidth: 60, minHeight: 60, border: '1px solid #eee', borderRadius: 2, bgcolor: '#fff' }}>
-                <Box component="img" src={effect.content} alt={effect.label} sx={{ width: 48, height: 48, objectFit: 'contain' }} />
-              </Button>
-            ))}
-          </Box>
+          <>
+            <Box sx={{ mb: 2, textAlign: 'center' }}>
+              <Typography variant="subtitle1" fontWeight={700} mb={1}>Draw on your product:</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 1 }}>
+                <Button startIcon={<Brush />} variant={drawingTool === 'paintbrush' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('paintbrush'); setDrawingColor('#222'); }}>Paint Brush</Button>
+                <Button startIcon={<Create />} variant={drawingTool === 'pen' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('pen'); setDrawingColor('#007bff'); }}>Pen</Button>
+                <Button startIcon={<Edit />} variant={drawingTool === 'pencil' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('pencil'); setDrawingColor('#888'); }}>Pencil</Button>
+                <input type="color" value={drawingColor} onChange={e => setDrawingColor(e.target.value)} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer' }} disabled={drawingTool === 'pencil'} title="Pick color" />
+                <Button onClick={() => canvasRef && canvasRef.undo()}>Undo</Button>
+                <Button onClick={() => canvasRef && canvasRef.clear()}>Clear</Button>
+              </Box>
+            </Box>
+          </>
         )}
 
         {/* Actions */}
