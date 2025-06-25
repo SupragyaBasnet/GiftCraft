@@ -14,6 +14,7 @@ import sampleArt2 from '../assets/art/sample-art2.png';
 import sampleEffect1 from '../assets/effects/sample-effect1.png';
 import sampleEffect2 from '../assets/effects/sample-effect2.png';
 import CanvasDraw from 'react-canvas-draw';
+import Slider from '@mui/material/Slider';
 
 // Import product images from products directory
 import tshirtFront from '../assets/products/whitetshirt-front.jpg';
@@ -623,12 +624,13 @@ const ProductCustomize: React.FC = () => {
   const [drawingTool, setDrawingTool] = useState<'paintbrush' | 'pen' | 'pencil'>('paintbrush');
   const [drawingColor, setDrawingColor] = useState('#222');
   const [canvasRef, setCanvasRef] = useState<any>(null);
+  const [brushSize, setBrushSize] = useState(6);
 
   // Tool settings
   const toolSettings = {
-    paintbrush: { brushRadius: 6, color: drawingColor },
-    pen: { brushRadius: 2, color: drawingColor },
-    pencil: { brushRadius: 1, color: '#888' },
+    paintbrush: { brushRadius: brushSize, color: drawingColor },
+    pen: { brushRadius: brushSize, color: drawingColor },
+    pencil: { brushRadius: brushSize, color: drawingColor },
   };
 
   const updateElement = (id: string, changes: Partial<Element>) => {
@@ -849,18 +851,20 @@ const ProductCustomize: React.FC = () => {
               filter: color === '#ffffff' ? 'none' : `sepia(1) saturate(500%) hue-rotate(${(hexToHsl(color).h - hexToHsl('#808080').h)}deg)`,
             }}
           />
-          <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
-            <CanvasDraw
-              ref={setCanvasRef}
-              brushRadius={toolSettings[drawingTool].brushRadius}
-              brushColor={toolSettings[drawingTool].color}
-              canvasWidth={350}
-              canvasHeight={canvasHeight}
-              hideGrid={true}
-              lazyRadius={0}
-              style={{ width: '100%', height: '100%', background: 'transparent' }}
-            />
-          </Box>
+          {tab === 6 && (
+            <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
+              <CanvasDraw
+                ref={setCanvasRef}
+                brushRadius={toolSettings[drawingTool].brushRadius}
+                brushColor={toolSettings[drawingTool].color}
+                canvasWidth={350}
+                canvasHeight={canvasHeight}
+                hideGrid={true}
+                lazyRadius={0}
+                style={{ width: '100%', height: '100%', background: 'transparent' }}
+              />
+            </Box>
+          )}
           {elements.map((el) => (
             <Rnd
               key={el.id}
@@ -1164,11 +1168,21 @@ const ProductCustomize: React.FC = () => {
           <>
             <Box sx={{ mb: 2, textAlign: 'center' }}>
               <Typography variant="subtitle1" fontWeight={700} mb={1}>Draw on your product:</Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 1 }}>
-                <Button startIcon={<Brush />} variant={drawingTool === 'paintbrush' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('paintbrush'); setDrawingColor('#222'); }}>Paint Brush</Button>
-                <Button startIcon={<Create />} variant={drawingTool === 'pen' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('pen'); setDrawingColor('#007bff'); }}>Pen</Button>
-                <Button startIcon={<Edit />} variant={drawingTool === 'pencil' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('pencil'); setDrawingColor('#888'); }}>Pencil</Button>
-                <input type="color" value={drawingColor} onChange={e => setDrawingColor(e.target.value)} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer' }} disabled={drawingTool === 'pencil'} title="Pick color" />
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 1, alignItems: 'center' }}>
+                <Button startIcon={<Brush />} variant={drawingTool === 'paintbrush' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('paintbrush'); }}>Paint Brush</Button>
+                <Button startIcon={<Create />} variant={drawingTool === 'pen' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('pen'); }}>Pen</Button>
+                <Button startIcon={<Edit />} variant={drawingTool === 'pencil' ? 'contained' : 'outlined'} onClick={() => { setDrawingTool('pencil'); }}>Pencil</Button>
+                <input type="color" value={drawingColor} onChange={e => setDrawingColor(e.target.value)} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer' }} title="Pick color" />
+                <Box sx={{ width: 120, mx: 2 }}>
+                  <Slider
+                    min={1}
+                    max={30}
+                    value={brushSize}
+                    onChange={(_, v) => setBrushSize(Number(v))}
+                    aria-labelledby="brush-size-slider"
+                  />
+                  <Typography variant="caption">Size: {brushSize}</Typography>
+                </Box>
                 <Button onClick={() => canvasRef && canvasRef.undo()}>Undo</Button>
                 <Button onClick={() => canvasRef && canvasRef.clear()}>Clear</Button>
               </Box>
