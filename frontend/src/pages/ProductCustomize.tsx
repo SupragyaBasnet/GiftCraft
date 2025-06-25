@@ -73,6 +73,7 @@ interface Element {
   color?: string;
   borderColor?: string;
   fill?: boolean;
+  fontFamily?: string;
 }
 
 // Map product type to images
@@ -419,14 +420,15 @@ const ProductCustomize: React.FC = () => {
 
   const handleAddText = () => {
     if (text) {
-      const newElement: { id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number } = {
+      const newElement: { id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number; fontFamily?: string } = {
         id: Date.now().toString(),
         type: 'text',
         content: text,
         x: 50,
         y: 50,
         width: 200,
-        height: 50
+        height: 50,
+        fontFamily: selectedFont,
       };
       setElements([...elements, newElement]);
       setText('');
@@ -472,7 +474,8 @@ const ProductCustomize: React.FC = () => {
           y: el.y,
           width: el.width,
           height: el.height,
-          color: (el.type === 'text' && el.color) ? el.color : undefined // Include color only for text elements if present
+          color: (el.type === 'text' && el.color) ? el.color : undefined, // Include color only for text elements if present
+          fontFamily: el.fontFamily,
       })),
       image: currentImage, // Capture the image URL that was customized
     };
@@ -526,7 +529,8 @@ const ProductCustomize: React.FC = () => {
             y: el.y,
             width: el.width,
             height: el.height,
-            color: (el.type === 'text' && el.color) ? el.color : undefined // Include color only for text elements if present
+            color: (el.type === 'text' && el.color) ? el.color : undefined, // Include color only for text elements if present
+            fontFamily: el.fontFamily,
         })),
         image: currentImage,
       };
@@ -689,6 +693,18 @@ const ProductCustomize: React.FC = () => {
     setElements([...elements, newElement]);
     setSnackbar({ open: true, message: 'Effect added!', severity: 'success' });
   };
+
+  // Add state for font selection
+  const [selectedFont, setSelectedFont] = useState('Arial');
+  const fontOptions = [
+    { label: 'Arial', value: 'Arial, sans-serif' },
+    { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
+    { label: 'Courier New', value: '"Courier New", Courier, monospace' },
+    { label: 'Comic Sans MS', value: '"Comic Sans MS", cursive, sans-serif' },
+    { label: 'Georgia', value: 'Georgia, serif' },
+    { label: 'Verdana', value: 'Verdana, Geneva, sans-serif' },
+    { label: 'Monospace', value: 'monospace' },
+  ];
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -905,6 +921,7 @@ const ProductCustomize: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     textAlign: 'center',
+                    fontFamily: el.fontFamily || 'Arial, sans-serif',
                   }}
                 >
                   {el.content}
@@ -1022,7 +1039,7 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {tab === 1 && (
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 2, alignItems: 'center' }}>
             <TextField
               label="Text"
               value={text}
@@ -1036,6 +1053,17 @@ const ProductCustomize: React.FC = () => {
               }}
               sx={{ minWidth: 200 }}
             />
+            <TextField
+              select
+              label="Font"
+              value={selectedFont}
+              onChange={e => setSelectedFont(e.target.value)}
+              sx={{ minWidth: 160 }}
+            >
+              {fontOptions.map((font) => (
+                <MenuItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>{font.label}</MenuItem>
+              ))}
+            </TextField>
             <Button variant="contained" onClick={handleAddText}>Add Text</Button>
           </Box>
         )}
