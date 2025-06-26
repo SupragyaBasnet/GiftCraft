@@ -13,6 +13,7 @@ interface Element {
   width: number;
   height: number;
   color?: string; // Add optional color property for text elements
+  textStyle?: string; // Add optional textStyle property
 }
 
 interface CustomizedProductImageProps {
@@ -189,22 +190,51 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
               }} />
           )}
           {el.type === 'text' && (
-            <Typography
-              sx={{
-                color: el.color || '#F46A6A', // Use saved color if available, fallback to default
-                fontWeight: 700,
-                textShadow: '0 1px 2px rgba(0,0,0,0.05)', // Lighter shadow
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                fontSize: Math.min(el.width / el.content.length * 1.2, el.height * 0.8) // Basic attempt to scale text
-              }}
-            >
-              {el.content}
-            </Typography>
+            el.textStyle === 'arcUp' ? (
+              <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                <defs>
+                  <path id={`arcUp-${el.id}`} d={`M10,${el.height-10} Q${el.width/2},0 ${el.width-10},${el.height-10}`} fill="none" />
+                </defs>
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="middle">
+                  <textPath xlinkHref={`#arcUp-${el.id}`} startOffset="50%">{el.content}</textPath>
+                </text>
+              </svg>
+            ) : el.textStyle === 'arcDown' ? (
+              <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                <defs>
+                  <path id={`arcDown-${el.id}`} d={`M10,10 Q${el.width/2},${el.height} ${el.width-10},10`} fill="none" />
+                </defs>
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="middle">
+                  <textPath xlinkHref={`#arcDown-${el.id}`} startOffset="50%">{el.content}</textPath>
+                </text>
+              </svg>
+            ) : el.textStyle === 'wavy' ? (
+              <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                <defs>
+                  <path id={`wavy-${el.id}`} d={`M10,${el.height/2} Q${el.width/4},${el.height/2-15} ${el.width/2},${el.height/2} T${el.width-10},${el.height/2}`} fill="none" />
+                </defs>
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="middle">
+                  <textPath xlinkHref={`#wavy-${el.id}`} startOffset="50%">{el.content}</textPath>
+                </text>
+              </svg>
+            ) : (
+              <Typography
+                sx={{
+                  color: el.color || '#F46A6A',
+                  fontWeight: 700,
+                  textShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  fontSize: Math.min(el.width / el.content.length * 1.2, el.height * 0.8)
+                }}
+              >
+                {el.content}
+              </Typography>
+            )
           )}
           {el.type === 'sticker' && (
             <Typography

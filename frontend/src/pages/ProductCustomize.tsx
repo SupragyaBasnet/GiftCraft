@@ -74,6 +74,7 @@ interface Element {
   borderColor?: string;
   fill?: boolean;
   fontFamily?: string;
+  textStyle?: 'straight' | 'arcUp' | 'arcDown' | 'wavy';
 }
 
 // Map product type to images
@@ -503,7 +504,7 @@ const ProductCustomize: React.FC = () => {
 
   const handleAddText = () => {
     if (text) {
-      const newElement: { id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number; fontFamily?: string } = {
+      const newElement = {
         id: Date.now().toString(),
         type: 'text',
         content: text,
@@ -512,6 +513,7 @@ const ProductCustomize: React.FC = () => {
         width: 200,
         height: 50,
         fontFamily: selectedFont,
+        textStyle,
       };
       setElements([...elements, newElement]);
       setText('');
@@ -559,6 +561,7 @@ const ProductCustomize: React.FC = () => {
           height: el.height,
           color: (el.type === 'text' && el.color) ? el.color : undefined, // Include color only for text elements if present
           fontFamily: el.fontFamily,
+          textStyle: el.textStyle,
       })),
       image: currentImage, // Capture the image URL that was customized
     };
@@ -614,6 +617,7 @@ const ProductCustomize: React.FC = () => {
             height: el.height,
             color: (el.type === 'text' && el.color) ? el.color : undefined, // Include color only for text elements if present
             fontFamily: el.fontFamily,
+            textStyle: el.textStyle,
         })),
         image: currentImage,
       };
@@ -712,6 +716,7 @@ const ProductCustomize: React.FC = () => {
   const [drawingColor, setDrawingColor] = useState('#222');
   const [canvasRef, setCanvasRef] = useState<any>(null);
   const [brushSize, setBrushSize] = useState(6);
+  const [textStyle, setTextStyle] = useState<'straight' | 'arcUp' | 'arcDown' | 'wavy'>('straight');
 
   // Tool settings
   const toolSettings = {
@@ -1059,6 +1064,17 @@ const ProductCustomize: React.FC = () => {
           <Box sx={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 10, bgcolor: 'white', boxShadow: 2, borderRadius: 2, p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
             <TextField size="small" value={editText} onChange={e => setEditText(e.target.value)} onBlur={(e: React.FocusEvent<HTMLInputElement>) => updateElement(selectedElementId, { content: editText })} />
             <input type="color" value={elements.find(el => el.id === selectedElementId)?.color || '#000000'} onChange={e => updateElement(selectedElementId, { color: e.target.value })} style={{ width: 28, height: 28, border: 'none', background: 'none' }} />
+            <Select
+              size="small"
+              value={elements.find(el => el.id === selectedElementId)?.textStyle || 'straight'}
+              onChange={e => updateElement(selectedElementId, { textStyle: e.target.value })}
+              sx={{ minWidth: 100 }}
+            >
+              <MenuItem value="straight">Straight</MenuItem>
+              <MenuItem value="arcUp">Arc Up</MenuItem>
+              <MenuItem value="arcDown">Arc Down</MenuItem>
+              <MenuItem value="wavy">Wavy</MenuItem>
+            </Select>
             <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== selectedElementId))}>Delete</Button>
           </Box>
         )}
