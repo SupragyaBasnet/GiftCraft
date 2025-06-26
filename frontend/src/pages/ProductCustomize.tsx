@@ -1001,28 +1001,28 @@ const ProductCustomize: React.FC = () => {
                 el.textStyle === 'arcUp' ? (
                   <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
                     <defs>
-                      <path id={`arcUp-preview-${el.id}`} d={`M10,${el.height-10} Q${el.width/2},${-el.height/1.5} ${el.width-10},${el.height-10}`} fill="none" />
+                      <path id={`arcUp-preview-${el.id}`} d={`M20,${el.height-20} Q${el.width/2},${-el.height/2} ${el.width-20},${el.height-20}`} fill="none" />
                     </defs>
-                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
-                      <textPath xlinkHref={`#arcUp-preview-${el.id}`} startOffset="0%">{el.content}</textPath>
+                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, Math.min(el.height * 0.4, el.width / el.content.length))} textAnchor="middle">
+                      <textPath xlinkHref={`#arcUp-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
                     </text>
                   </svg>
                 ) : el.textStyle === 'arcDown' ? (
                   <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
                     <defs>
-                      <path id={`arcDown-preview-${el.id}`} d={`M10,10 Q${el.width/2},${el.height*1.5} ${el.width-10},10`} fill="none" />
+                      <path id={`arcDown-preview-${el.id}`} d={`M20,20 Q${el.width/2},${el.height*1.2} ${el.width-20},20`} fill="none" />
                     </defs>
-                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
-                      <textPath xlinkHref={`#arcDown-preview-${el.id}`} startOffset="0%">{el.content}</textPath>
+                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, Math.min(el.height * 0.4, el.width / el.content.length))} textAnchor="middle">
+                      <textPath xlinkHref={`#arcDown-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
                     </text>
                   </svg>
                 ) : el.textStyle === 'wavy' ? (
                   <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
                     <defs>
-                      <path id={`wavy-preview-${el.id}`} d={`M10,${el.height/2} Q${el.width/6},${el.height/2-30} ${el.width/3},${el.height/2} T${el.width-10},${el.height/2}`} fill="none" />
+                      <path id={`wavy-preview-${el.id}`} d={`M20,${el.height/2} Q${el.width/4},${el.height/2-20} ${el.width/2},${el.height/2} T${el.width-20},${el.height/2}`} fill="none" />
                     </defs>
-                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
-                      <textPath xlinkHref={`#wavy-preview-${el.id}`} startOffset="0%">{el.content}</textPath>
+                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, Math.min(el.height * 0.4, el.width / el.content.length))} textAnchor="middle">
+                      <textPath xlinkHref={`#wavy-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
                     </text>
                   </svg>
                 ) : (
