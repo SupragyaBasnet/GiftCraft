@@ -998,23 +998,52 @@ const ProductCustomize: React.FC = () => {
                 <Box component="img" src={el.content} alt="uploaded" sx={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
               )}
               {el.type === 'text' && (
-                <Typography
-                  sx={{
-                    color: el.color || textColor,
-                    fontWeight: 700,
-                    textShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    fontFamily: el.fontFamily || 'Arial, sans-serif',
-                    fontSize: `${Math.max(10, el.height * 0.7)}px`,
-                  }}
-                >
-                  {el.content}
-                </Typography>
+                el.textStyle === 'arcUp' ? (
+                  <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                    <defs>
+                      <path id={`arcUp-preview-${el.id}`} d={`M10,${el.height-10} Q${el.width/2},${-el.height/1.5} ${el.width-10},${el.height-10}`} fill="none" />
+                    </defs>
+                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                      <textPath xlinkHref={`#arcUp-preview-${el.id}`} startOffset="0%">{el.content}</textPath>
+                    </text>
+                  </svg>
+                ) : el.textStyle === 'arcDown' ? (
+                  <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                    <defs>
+                      <path id={`arcDown-preview-${el.id}`} d={`M10,10 Q${el.width/2},${el.height*1.5} ${el.width-10},10`} fill="none" />
+                    </defs>
+                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                      <textPath xlinkHref={`#arcDown-preview-${el.id}`} startOffset="0%">{el.content}</textPath>
+                    </text>
+                  </svg>
+                ) : el.textStyle === 'wavy' ? (
+                  <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                    <defs>
+                      <path id={`wavy-preview-${el.id}`} d={`M10,${el.height/2} Q${el.width/6},${el.height/2-30} ${el.width/3},${el.height/2} T${el.width-10},${el.height/2}`} fill="none" />
+                    </defs>
+                    <text fill={el.color || textColor} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                      <textPath xlinkHref={`#wavy-preview-${el.id}`} startOffset="0%">{el.content}</textPath>
+                    </text>
+                  </svg>
+                ) : (
+                  <Typography
+                    sx={{
+                      color: el.color || textColor,
+                      fontWeight: 700,
+                      textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      fontFamily: el.fontFamily || 'Arial, sans-serif',
+                      fontSize: `${Math.max(10, el.height * 0.7)}px`,
+                    }}
+                  >
+                    {el.content}
+                  </Typography>
+                )
               )}
               {el.type === 'sticker' && (
                 <Typography sx={{ fontSize: `${Math.max(10, el.height * 0.8)}px`, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{el.content}</Typography>
