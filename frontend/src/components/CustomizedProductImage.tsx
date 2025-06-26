@@ -193,28 +193,28 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
             el.textStyle === 'arcUp' ? (
               <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
                 <defs>
-                  <path id={`arcUp-${el.id}`} d={`M10,${el.height-10} Q${el.width/2},0 ${el.width-10},${el.height-10}`} fill="none" />
+                  <path id={`arcUp-${el.id}`} d={`M10,${el.height-10} Q${el.width/2},${-el.height/1.5} ${el.width-10},${el.height-10}`} fill="none" />
                 </defs>
-                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="middle">
-                  <textPath xlinkHref={`#arcUp-${el.id}`} startOffset="50%">{el.content}</textPath>
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                  <textPath xlinkHref={`#arcUp-${el.id}`} startOffset="0%">{el.content}</textPath>
                 </text>
               </svg>
             ) : el.textStyle === 'arcDown' ? (
               <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
                 <defs>
-                  <path id={`arcDown-${el.id}`} d={`M10,10 Q${el.width/2},${el.height} ${el.width-10},10`} fill="none" />
+                  <path id={`arcDown-${el.id}`} d={`M10,10 Q${el.width/2},${el.height*1.5} ${el.width-10},10`} fill="none" />
                 </defs>
-                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="middle">
-                  <textPath xlinkHref={`#arcDown-${el.id}`} startOffset="50%">{el.content}</textPath>
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                  <textPath xlinkHref={`#arcDown-${el.id}`} startOffset="0%">{el.content}</textPath>
                 </text>
               </svg>
             ) : el.textStyle === 'wavy' ? (
               <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
                 <defs>
-                  <path id={`wavy-${el.id}`} d={`M10,${el.height/2} Q${el.width/4},${el.height/2-15} ${el.width/2},${el.height/2} T${el.width-10},${el.height/2}`} fill="none" />
+                  <path id={`wavy-${el.id}`} d={`M10,${el.height/2} Q${el.width/6},${el.height/2-30} ${el.width/3},${el.height/2} T${el.width-10},${el.height/2}`} fill="none" />
                 </defs>
-                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="middle">
-                  <textPath xlinkHref={`#wavy-${el.id}`} startOffset="50%">{el.content}</textPath>
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                  <textPath xlinkHref={`#wavy-${el.id}`} startOffset="0%">{el.content}</textPath>
                 </text>
               </svg>
             ) : (

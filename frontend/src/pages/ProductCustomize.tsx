@@ -504,7 +504,7 @@ const ProductCustomize: React.FC = () => {
 
   const handleAddText = () => {
     if (text) {
-      const newElement = {
+      const newElement: Element = {
         id: Date.now().toString(),
         type: 'text',
         content: text,
@@ -1067,7 +1067,7 @@ const ProductCustomize: React.FC = () => {
             <Select
               size="small"
               value={elements.find(el => el.id === selectedElementId)?.textStyle || 'straight'}
-              onChange={e => updateElement(selectedElementId, { textStyle: e.target.value })}
+              onChange={e => updateElement(selectedElementId, { textStyle: e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy' })}
               sx={{ minWidth: 100 }}
             >
               <MenuItem value="straight">Straight</MenuItem>
@@ -1139,32 +1139,46 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {tab === 1 && (
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 2, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <TextField
               label="Text"
               value={text}
               onChange={e => setText(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} style={{ width: 24, height: 24, border: 'none', background: 'none' }} />
-                  </InputAdornment>
-                )
-              }}
-              sx={{ minWidth: 200 }}
+              size="small"
+              sx={{ minWidth: 180 }}
             />
-            <TextField
-              select
-              label="Font"
-              value={selectedFont}
-              onChange={e => setSelectedFont(e.target.value)}
-              sx={{ minWidth: 160 }}
-            >
-              {fontOptions.map((font) => (
-                <MenuItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>{font.label}</MenuItem>
-              ))}
-            </TextField>
-            <Button variant="contained" onClick={handleAddText}>Add Text</Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <input
+                type="color"
+                value={textColor}
+                onChange={e => setTextColor(e.target.value)}
+                style={{ width: 28, height: 28, border: 'none', background: 'none' }}
+              />
+              <Select
+                size="small"
+                value={selectedFont}
+                onChange={e => setSelectedFont(e.target.value)}
+                sx={{ minWidth: 140 }}
+              >
+                <MenuItem value="Arial">Arial</MenuItem>
+                <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
+                <MenuItem value="Monospace">Monospace</MenuItem>
+                <MenuItem value="Cursive">Cursive</MenuItem>
+              </Select>
+              <Select
+                size="small"
+                value={textStyle}
+                onChange={e => setTextStyle(e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy')}
+                sx={{ minWidth: 120 }}
+              >
+                <MenuItem value="straight">Straight</MenuItem>
+                <MenuItem value="arcUp">Arc Up</MenuItem>
+                <MenuItem value="arcDown">Arc Down</MenuItem>
+                <MenuItem value="wavy">Wavy</MenuItem>
+              </Select>
+            </Box>
+            <Button variant="contained" onClick={handleAddText} sx={{ ml: 1 }}>Add Text</Button>
           </Box>
         )}
         {tab === 2 && (
