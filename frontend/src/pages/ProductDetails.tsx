@@ -54,7 +54,7 @@ const ProductDetails: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const product = products.find(p => p.id === Number(id));
+  const product = products.find(p => p.id === Number(id));
         if (product) {
           setProduct(product);
         } else {

@@ -296,9 +296,38 @@ const exampleArtImages = [
     src: 'https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400',
     label: 'CANVAS PAINT',
   },
+  // New galaxy, moon, glitter, and cosmic themed images
+  {
+    src: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=400&q=80',
+    label: 'GALAXY SKY',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&w=400&q=80',
+    label: 'MOON NIGHT',
+  },
+  {
+    src: 'https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400',
+    label: 'GLITTER CANVAS',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
+    label: 'COSMIC DREAM',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1468421870903-4df1664ac249?auto=format&fit=crop&w=400&q=80',
+    label: 'PURPLE GALAXY',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+    label: 'MOONLIT NIGHT',
+  },
+  {
+    src: 'https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400',
+    label: 'SPARKLE ART',
+  },
 ];
-// Filter out broken local art images (those with missing or broken src)
-const validArtImages = artImages.filter(img => img.src && !img.src.includes('undefined'));
+// Filter out all art images whose label contains 'ABSTRA'
+const validArtImages = artImages.filter(img => img.src && !img.src.includes('undefined') && !img.label.includes('ABSTRA'));
 const allArtImages = [...exampleArtImages, ...validArtImages];
 
 // Helper to check if an image URL is valid (for remote and local images)
@@ -541,12 +570,12 @@ const ProductCustomize: React.FC = () => {
   const handleAddToCart = () => {
     const customizedItem = {
       id: Date.now(), // Use timestamp for a simple unique ID
-      productType: selectedProduct,
+        productType: selectedProduct,
       image: Array.isArray(productImages[selectedProduct]) 
         ? (productImages[selectedProduct] as string[])[currentArrayIndex] 
         : (productImages[selectedProduct] as ProductView)[currentView],
       elements: elements,
-      color: color,
+        color: color,
       size: selectedProduct === 'tshirt' ? selectedTshirtSize : (selectedProduct === 'notebook' ? selectedNotebookSize : undefined),
       quantity: 1, // Default quantity to 1
     };

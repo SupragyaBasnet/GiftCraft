@@ -142,7 +142,7 @@ const CheckoutPage: React.FC = () => {
       localStorage.removeItem('giftcraftCart'); // Clear cart after order
     } else if (checkoutItem) {
       // Single item order (existing logic)
-      const newOrder = {
+    const newOrder = {
         id: Date.now(),
         date: new Date().toISOString(),
         item: { ...checkoutItem, quantity },
@@ -152,11 +152,11 @@ const CheckoutPage: React.FC = () => {
         status: 'Processing',
         review: null,
         rating: null,
-      };
-      orderHistory.push(newOrder);
-      localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
-      setOrderConfirmedMessage(`Your order has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
-      localStorage.removeItem('giftcraftCheckoutItem');
+    };
+    orderHistory.push(newOrder);
+    localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
+    setOrderConfirmedMessage(`Your order has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
+    localStorage.removeItem('giftcraftCheckoutItem');
     }
   };
 
@@ -293,19 +293,19 @@ const CheckoutPage: React.FC = () => {
                   ))}
                 </Box>
               ) : checkoutItem && (
-                <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                   <Box sx={{ width: 80, height: 80, mr: 2 }}>
-                    <CustomizedProductImage 
-                      baseImage={checkoutItem.image} 
+                  <CustomizedProductImage 
+                    baseImage={checkoutItem.image} 
                       elements={checkoutItem.elements || []}
                       color={checkoutItem.color || '#ffffff'}
                       productType={checkoutItem.productType}
-                    />
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight={700}>
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={700}>
                       {checkoutItem.productType.charAt(0).toUpperCase() + checkoutItem.productType.slice(1)}
-                    </Typography>
+                  </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                       <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
                       <Button size="small" onClick={() => handleQuantityChange(-1)}><Remove /></Button>
