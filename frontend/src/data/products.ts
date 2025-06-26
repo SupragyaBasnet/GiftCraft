@@ -9,10 +9,17 @@ import mug3 from '../assets/mug3.jpg';
 import mug4 from '../assets/mug4.jpeg';
 import mug5 from '../assets/mug5.jpg';
 import mug from '../assets/mug.jpeg';
-import phonecase1 from '../assets/phonecase1.jpg';
-import phonecase2 from '../assets/phonecase2.webp';
-import phonecase3 from '../assets/phonecase3.webp';
+import phonecase1 from '../assets/phonecase1.webp';
+import phonecase2 from '../assets/phonecase2.jpeg';
+import phonecase3 from '../assets/phonecase3.jpg';
 import phonecase4 from '../assets/phonecase4.webp';
+import phonecaseiphone10 from '../assets/products/phonecaseiphone10.jpg';
+import phonecaseiphone11 from '../assets/products/phonecaseiphone11.jpg';
+import phonecaseiphone12 from '../assets/products/phonecaseiphone12.jpg';
+import phonecaseiphone13promax from '../assets/products/phonecaseiphone13promax and 12 pro max.jpg';
+import phonecaseiphone14 from '../assets/products/phonecaseiphone14.jpg';
+import phonecases21ultra from '../assets/products/phonecases21ultra.jpg';
+import phonecases23ultra from '../assets/products/phonecases23 ultra.jpg';
 import waterbottle1 from '../assets/waterbottle1.jpeg';
 import waterbottle2 from '../assets/waterbottle2.jpeg';
 import waterbottle3 from '../assets/waterbottle3.webp';
@@ -199,69 +206,102 @@ export const products: Product[] = [
   },
   {
     id: 3,
-    name: 'Basic Phone Case',
+    name: 'Phone Case',
     price: 1600,
     image: phonecase1,
     images: [phonecase1, phonecase2, phonecase3, phonecase4],
-    description: 'Design your own unique phone case',
+    description: 'Personalized photo phone case',
     category: 'phonecases',
     rating: 4.3,
     reviews: 76,
   },
   {
     id: 17,
-    name: 'Premium Phone Case',
-    price: 2000,
+    name: 'Phone Case',
+    price: 1700,
     image: phonecase2,
-    images: [phonecase2, phonecase1, phonecase3, phonecase4],
-    description: 'High-quality protective case with custom design',
+    images: [phonecase1, phonecase2, phonecase3, phonecase4],
+    description: 'Minimalist signature case',
     category: 'phonecases',
     rating: 4.5,
     reviews: 58,
   },
   {
     id: 18,
-    name: 'Slim Phone Case',
+    name: 'Phone Case',
     price: 1800,
     image: phonecase3,
-    images: [phonecase3, phonecase1, phonecase2, phonecase4],
-    description: 'Slim-fit case with personalized artwork',
+    images: [phonecase1, phonecase2, phonecase3, phonecase4],
+    description: 'Modern minimalist case',
     category: 'phonecases',
     rating: 4.4,
     reviews: 45,
   },
   {
     id: 43,
-    name: 'Rugged Phone Case',
-    price: 2200,
+    name: 'Phone Case',
+    price: 1850,
     image: phonecase4,
-    images: [phonecase4, phonecase1, phonecase2, phonecase3],
-    description: 'Heavy-duty protection with custom design',
+    images: [phonecase1, phonecase2, phonecase3, phonecase4],
+    description: 'Minimalist signature case',
     category: 'phonecases',
     rating: 4.6,
     reviews: 39,
   },
   {
     id: 44,
-    name: 'Wallet Phone Case',
-    price: 2400,
+    name: 'Phone Case',
+    price: 2000,
     image: phonecase1,
     images: [phonecase1, phonecase2, phonecase3, phonecase4],
-    description: 'Case with card slots and custom design',
+    description: 'Minimalist signature case',
     category: 'phonecases',
-    rating: 4.5,
+    rating: 4.7,
     reviews: 33,
   },
   {
     id: 45,
-    name: 'Clear Phone Case',
-    price: 1900,
+    name: 'Phone Case',
+    price: 2100,
     image: phonecase2,
-    images: [phonecase2, phonecase1, phonecase3, phonecase4],
-    description: 'Transparent case with custom artwork',
+    images: [phonecase1, phonecase2, phonecase3, phonecase4],
+    description: 'Minimalist signature case',
     category: 'phonecases',
-    rating: 4.4,
+    rating: 4.8,
     reviews: 28,
+  },
+  {
+    id: 46,
+    name: 'Large Capacity Mug',
+    price: 1600,
+    image: mug4,
+    images: [mug4, mug1, mug2, mug3, mug5],
+    description: 'Extra large mug for your favorite beverages',
+    category: 'mugs',
+    rating: 4.5,
+    reviews: 52,
+  },
+  {
+    id: 47,
+    name: 'Gift Set Mug',
+    price: 2000,
+    image: mug5,
+    images: [mug5, mug1, mug2, mug3, mug4],
+    description: 'Mug set with matching coaster and spoon',
+    category: 'mugs',
+    rating: 4.7,
+    reviews: 48,
+  },
+  {
+    id: 48,
+    name: 'Artistic Mug',
+    price: 1700,
+    image: mug,
+    images: [mug, mug1, mug2, mug3, mug4, mug5],
+    description: 'Hand-painted design with unique patterns',
+    category: 'mugs',
+    rating: 4.6,
+    reviews: 42,
   },
   {
     id: 4,

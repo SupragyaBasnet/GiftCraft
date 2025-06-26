@@ -18,7 +18,7 @@ import Slider from '@mui/material/Slider';
 
 // Import product images from products directory
 import tshirtFront from '../assets/products/whitetshirt-front.jpg';
-import tshirtBack from '../assets/products/whitetshirt-back.jpg';
+import tshirtBack from '../assets/products/whitetshirt-back.png';
 import penFront from '../assets/products/planepen.png';
 import planepen1 from '../assets/products/planepen1.jpg';
 import notebookFront from '../assets/products/notebook.jpg';
@@ -49,6 +49,20 @@ import pillowcase3 from '../assets/pillowcase3.jpg';
 import whitepillowFront from '../assets/products/whitepillow-front.webp';
 import whitepillowBack from '../assets/products/whitepillow-back.webp';
 
+import phonecaseiphone8plus from '../assets/products/phonecaseiphone 8 plus.jpg';
+import phonecaseiphone10 from '../assets/products/phonecaseiphone10.jpg';
+import phonecaseiphone11 from '../assets/products/phonecaseiphone11.jpg';
+import phonecaseiphone12 from '../assets/products/phonecaseiphone12.jpg';
+import phonecaseiphone13promax from '../assets/products/phonecaseiphone13promax and 12 pro max.jpg';
+import phonecaseiphone14 from '../assets/products/phonecaseiphone14.jpg';
+import phonecases21ultra from '../assets/products/phonecases21ultra.jpg';
+import phonecases23ultra from '../assets/products/phonecases23 ultra.jpg';
+
+import keychainJpg from '../assets/products/keychain.jpg';
+import planewhitekeychain from '../assets/products/planewhitekeychain.jpg';
+import planemetalkeychain from '../assets/products/planemetalkeychain.jpg';
+import planemetalkeychain1 from '../assets/products/planemetalkeychain1.jpg';
+
 // Assuming this is the correct filename
 
 // Define product types
@@ -75,6 +89,7 @@ interface Element {
   fill?: boolean;
   fontFamily?: string;
   textStyle?: 'straight' | 'arcUp' | 'arcDown' | 'wavy';
+  shape?: 'rectangle' | 'circle' | 'oval' | 'heart' | 'star';
 }
 
 // Map product type to images
@@ -100,13 +115,22 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     frame2,
     frame3,
   ],
-  phonecase: [ // Use array for multiple phonecase options
-    iphone11Plane,
-    iphone13Plane,
+  phonecase: [
+    phonecaseiphone8plus,
+    phonecaseiphone10,
+    phonecaseiphone11,
+    phonecaseiphone12,
+    phonecaseiphone13promax,
+    phonecaseiphone14,
+    phonecases21ultra,
+    phonecases23ultra,
   ],
-  keychain: [ // Use array for multiple keychain images
+  keychain: [
+    keychainJpg,
+    planewhitekeychain,
+    planemetalkeychain,
+    planemetalkeychain1,
     circleKeychain,
-    squareKeychain,
     keychainLeather,
   ],
   waterbottle: [ // Use array for multiple water bottle views
@@ -338,6 +362,18 @@ function isImageUrlValid(url) {
 }
 const validAllArtImages = allArtImages.filter(img => isImageUrlValid(img.src));
 
+// Phonecase model labels for the new images
+const phonecaseLabels = [
+  'iPhone 8 Plus',
+  'iPhone 10',
+  'iPhone 11',
+  'iPhone 12',
+  'iPhone 13 Pro Max / 12 Pro Max',
+  'iPhone 14',
+  'Samsung S21 Ultra',
+  'Samsung S23 Ultra',
+];
+
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
   const navigate = useNavigate();
@@ -486,14 +522,15 @@ const ProductCustomize: React.FC = () => {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        const newElement: { id: string; type: 'image' | 'text' | 'sticker'; content: string; x: number; y: number; width: number; height: number } = {
+        const newElement: Element = {
           id: Date.now().toString(),
           type: 'image',
           content: ev.target?.result as string,
           x: 50,
           y: 50,
           width: 120,
-          height: 120
+          height: 120,
+          shape: 'rectangle',
         };
         setElements([...elements, newElement]);
         setSnackbar({open: true, message: 'Image uploaded successfully!', severity: 'success'});
@@ -738,6 +775,7 @@ const ProductCustomize: React.FC = () => {
       y: 60,
       width: 60,
       height: 60,
+      shape: 'rectangle',
     };
     setElements([...elements, newElement]);
     setSnackbar({ open: true, message: 'Art added!', severity: 'success' });
@@ -794,6 +832,8 @@ const ProductCustomize: React.FC = () => {
     { label: 'Monospace', value: 'monospace' },
   ];
 
+  const [selectedPhonecaseIndex, setSelectedPhonecaseIndex] = useState(0);
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
@@ -803,31 +843,53 @@ const ProductCustomize: React.FC = () => {
         
         {/* View Options */}
         {hasArrayViews ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 3 }}>
             <Typography variant="subtitle1" fontWeight={700} mb={1}>Select View:</Typography>
-            {(productImages[selectedProduct] as string[]).map((image: string, index: number) => (
-              <Box
-                key={index}
-                component="img"
-                src={image}
-                alt={`${selectedProduct} View ${index + 1}`}
-                sx={{
-                  width: 60,
-                  height: 60,
-                  objectFit: 'contain',
-                  borderRadius: 1,
-                  border: index === currentArrayIndex ? '2px solid #F46A6A' : '1px solid #ccc',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  bgcolor: 'white',
-                  p: 0.5,
-                  '&:hover': {
-                    borderColor: '#F46A6A',
-                  }
+            {/* Remove dropdown for keychain */}
+            {selectedProduct === 'phonecase' && (
+              <TextField
+                select
+                label="Phone Model"
+                value={selectedPhonecaseIndex}
+                onChange={e => {
+                  setSelectedPhonecaseIndex(Number(e.target.value));
+                  setCurrentArrayIndex(Number(e.target.value));
                 }}
-                onClick={() => setCurrentArrayIndex(index)}
-              />
-            ))}
+                sx={{ minWidth: 180, mb: 2 }}
+              >
+                {phonecaseLabels.map((label, idx) => (
+                  <MenuItem key={label} value={idx}>{label}</MenuItem>
+                ))}
+              </TextField>
+            )}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              {(productImages[selectedProduct] as string[]).map((image: string, index: number) => (
+                <Box
+                  key={index}
+                  component="img"
+                  src={image}
+                  alt={`${selectedProduct} View ${index + 1}`}
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    objectFit: 'contain',
+                    borderRadius: 1,
+                    border: index === currentArrayIndex ? '2px solid #F46A6A' : '1px solid #ccc',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    bgcolor: 'white',
+                    p: 0.5,
+                    '&:hover': {
+                      borderColor: '#F46A6A',
+                    }
+                  }}
+                  onClick={() => {
+                    setCurrentArrayIndex(index);
+                    if (selectedProduct === 'phonecase') setSelectedPhonecaseIndex(index);
+                  }}
+                />
+              ))}
+            </Box>
           </Box>
         ) : hasMultipleViews ? ( /* Existing View Toggle for products with front/back/side */
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
@@ -980,7 +1042,7 @@ const ProductCustomize: React.FC = () => {
               onResizeStop={(e, direction, ref, delta, position) => updateElement(el.id, { width: parseInt(ref.style.width), height: parseInt(ref.style.height), ...position })}
               style={{
                 zIndex: 3,
-                border: selectedElementId === el.id ? '2px solid #F46A6A' : 'none',
+                border: selectedElementId === el.id ? '2px solid #F46A6A' : '2px dashed orange',
                 boxShadow: selectedElementId === el.id ? '0 0 8px #F46A6A55' : 'none',
                 background: 'transparent',
                 display: 'flex',
@@ -991,11 +1053,28 @@ const ProductCustomize: React.FC = () => {
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
                 setSelectedElementId(el.id);
+                console.log('Element clicked:', el.id, el.type);
                 if (el.type === 'text') setEditText(el.content);
               }}
             >
               {el.type === 'image' && (
-                <Box component="img" src={el.content} alt="uploaded" sx={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                <Box
+                  component="img"
+                  src={el.content}
+                  alt="uploaded"
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                    borderRadius: el.shape === 'circle' ? '50%' : 0,
+                    clipPath:
+                      el.shape === 'oval' ? 'ellipse(50% 40% at 50% 50%)' :
+                      el.shape === 'heart' ? 'path("M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z")' :
+                      el.shape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' :
+                      undefined,
+                  }}
+                />
               )}
               {el.type === 'text' && (
                 el.textStyle === 'arcUp' ? (
@@ -1049,7 +1128,23 @@ const ProductCustomize: React.FC = () => {
                 <Typography sx={{ fontSize: `${Math.max(10, el.height * 0.8)}px`, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{el.content}</Typography>
               )}
               {el.type === 'art' && (
-                <Box component="img" src={el.content} alt="art" sx={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #FFD700)' }} />
+                <Box
+                  component="img"
+                  src={el.content}
+                  alt="art"
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 2px 8px #FFD700)',
+                    borderRadius: el.shape === 'circle' ? '50%' : 0,
+                    clipPath:
+                      el.shape === 'oval' ? 'ellipse(50% 40% at 50% 50%)' :
+                      el.shape === 'heart' ? 'path("M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z")' :
+                      el.shape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' :
+                      undefined,
+                  }}
+                />
               )}
               {el.type === 'shape' && (
                 el.content === 'rectangle' ? (
@@ -1089,25 +1184,52 @@ const ProductCustomize: React.FC = () => {
         </CanvasBox>
 
         {/* Floating toolbar for editing text */}
-        {selectedElementId && elements.find(el => el.id === selectedElementId)?.type === 'text' && (
-          <Box sx={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 10, bgcolor: 'white', boxShadow: 2, borderRadius: 2, p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField size="small" value={editText} onChange={e => setEditText(e.target.value)} onBlur={(e: React.FocusEvent<HTMLInputElement>) => updateElement(selectedElementId, { content: editText })} />
-            <input type="color" value={elements.find(el => el.id === selectedElementId)?.color || '#000000'} onChange={e => updateElement(selectedElementId, { color: e.target.value })} style={{ width: 28, height: 28, border: 'none', background: 'none' }} />
-            <Select
-              size="small"
-              value={elements.find(el => el.id === selectedElementId)?.textStyle || 'straight'}
-              onChange={e => updateElement(selectedElementId, { textStyle: e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy' })}
-              sx={{ minWidth: 100 }}
-            >
-              <MenuItem value="straight">Straight</MenuItem>
-              <MenuItem value="arcUp">Arc Up</MenuItem>
-              <MenuItem value="arcDown">Arc Down</MenuItem>
-              <MenuItem value="wavy">Wavy</MenuItem>
-            </Select>
-            <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== selectedElementId))}>Delete</Button>
-          </Box>
-        )}
-
+        {selectedElementId && (() => {
+          const selectedEl = elements.find(el => el.id === selectedElementId);
+          console.log('Selected element:', selectedEl);
+          if (!selectedEl) return null;
+          if (selectedEl.type === 'text') {
+            return (
+              <Box sx={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, bgcolor: 'white', boxShadow: 2, borderRadius: 2, p: 1, display: 'flex', gap: 1, alignItems: 'center', border: '2px solid #1976d2' }}>
+                <TextField size="small" value={editText} onChange={e => setEditText(e.target.value)} onBlur={(e: React.FocusEvent<HTMLInputElement>) => updateElement(selectedElementId, { content: editText })} />
+                <input type="color" value={selectedEl.color || '#000000'} onChange={e => updateElement(selectedElementId, { color: e.target.value })} style={{ width: 28, height: 28, border: 'none', background: 'none' }} />
+                <Select
+                  size="small"
+                  value={selectedEl.textStyle || 'straight'}
+                  onChange={e => updateElement(selectedElementId, { textStyle: e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy' })}
+                  sx={{ minWidth: 100 }}
+                >
+                  <MenuItem value="straight">Straight</MenuItem>
+                  <MenuItem value="arcUp">Arc Up</MenuItem>
+                  <MenuItem value="arcDown">Arc Down</MenuItem>
+                  <MenuItem value="wavy">Wavy</MenuItem>
+                </Select>
+                <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== selectedElementId))}>Delete</Button>
+              </Box>
+            );
+          } else if (selectedEl.type === 'image' || selectedEl.type === 'art') {
+            console.log('Rendering shape picker for:', selectedEl.id, selectedEl.type);
+            return (
+              <Box sx={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, bgcolor: 'white', boxShadow: 2, borderRadius: 2, p: 1, display: 'flex', gap: 1, alignItems: 'center', border: '2px solid #d32f2f' }}>
+                <div style={{ color: '#d32f2f', fontWeight: 700 }}>Shape Picker Toolbar</div>
+                <Select
+                  size="small"
+                  value={selectedEl.shape || 'rectangle'}
+                  onChange={e => updateElement(selectedElementId, { shape: e.target.value as 'rectangle' | 'circle' | 'oval' | 'heart' | 'star' })}
+                  sx={{ minWidth: 100 }}
+                >
+                  <MenuItem value="rectangle">Rectangle</MenuItem>
+                  <MenuItem value="circle">Circle</MenuItem>
+                  <MenuItem value="oval">Oval</MenuItem>
+                  <MenuItem value="heart">Heart</MenuItem>
+                  <MenuItem value="star">Star</MenuItem>
+                </Select>
+                <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== selectedElementId))}>Delete</Button>
+              </Box>
+            );
+          }
+          return null;
+        })()}
         {/* Save Button */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <Button
