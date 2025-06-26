@@ -62,6 +62,7 @@ import keychainJpg from '../assets/products/keychain.jpg';
 import planewhitekeychain from '../assets/products/planewhitekeychain.jpg';
 import planemetalkeychain from '../assets/products/planemetalkeychain.jpg';
 import planemetalkeychain1 from '../assets/products/planemetalkeychain1.jpg';
+import planewhitecap from '../assets/products/planewhitecap.jpg';
 
 // Assuming this is the correct filename
 
@@ -138,8 +139,8 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     bottleWhite2,
     bottleWhite3,
   ],
-  cap: { // Use single image object for cap
-    front: cap1
+  cap: {
+    front: planewhitecap
   },
   pillowcase: { // Use object for front/back pillowcase views
     front: whitepillowFront,
@@ -999,24 +1000,31 @@ const ProductCustomize: React.FC = () => {
             position: 'relative',
           }}
         >
-          <Box
-            component="img"
-            src={currentImage}
-            alt="product"
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              zIndex: 1,
-              pointerEvents: 'none',
-              p: 2,
-              ...getProductStyle(selectedProduct),
-              filter: color === '#ffffff' ? 'none' : `sepia(1) saturate(500%) hue-rotate(${(hexToHsl(color).h - hexToHsl('#808080').h)}deg)`,
-            }}
-          />
+          {selectedProduct === 'cap' ? (
+            <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+              <Box sx={{ position: 'absolute', width: '100%', height: '100%', bgcolor: color, borderRadius: 2, zIndex: 1 }} />
+              <Box component="img" src={planewhitecap} alt="cap" sx={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 2 }} />
+            </Box>
+          ) : (
+            <Box
+              component="img"
+              src={currentImage}
+              alt="product"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1,
+                pointerEvents: 'none',
+                p: 2,
+                ...getProductStyle(selectedProduct),
+                filter: color === '#ffffff' ? 'none' : `sepia(1) saturate(500%) hue-rotate(${(hexToHsl(color).h - hexToHsl('#808080').h)}deg)`,
+              }}
+            />
+          )}
           {tab === 6 && (
             <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
               <CanvasDraw

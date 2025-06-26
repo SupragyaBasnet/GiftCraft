@@ -9,18 +9,6 @@ import { Link as RouterLink, useSearchParams, useNavigate } from 'react-router-d
 import MenuIcon from '@mui/icons-material/Menu';
 import { products, Product } from '../data/products';
 
-// Define Product type
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  category: string;
-  rating: number;
-  reviews: number;
-}
-
 // Only use products with a defined price for filtering, sorting, and min/max calculations
 const baseProducts = products.filter(
   (product: any) => typeof product.price === 'number' && product.category !== 'calendars' && product.category !== 'bags'
@@ -233,7 +221,7 @@ const Products: React.FC = () => {
                           component="img"
                           image={product.image}
                           alt={product.name}
-                          sx={{ width: '100%', maxWidth: 180, height: 180, objectFit: 'contain', mx: 'auto', bgcolor: 'white', borderRadius: 2, mt: 2, mb: 1 }}
+                          sx={{ width: 180, height: 180, objectFit: 'contain', mx: 'auto', bgcolor: 'white', borderRadius: 2, mt: 2, mb: 1 }}
                         />
                         <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 0 }}>
                           <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#111', fontSize: '1.2rem' }}>
