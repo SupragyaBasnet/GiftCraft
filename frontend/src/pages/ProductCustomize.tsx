@@ -15,6 +15,7 @@ import sampleEffect1 from '../assets/effects/sample-effect1.png';
 import sampleEffect2 from '../assets/effects/sample-effect2.png';
 import CanvasDraw from 'react-canvas-draw';
 import Slider from '@mui/material/Slider';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
 
 // Import product images from products directory
 import tshirtFront from '../assets/products/whitetshirt-front.jpg';
@@ -32,7 +33,7 @@ import frame2 from '../assets/products/frame2.jpg';
 import frame3 from '../assets/products/frame3.jpg';
 
 // Import the three new water bottle images
-import bottle1White from '../assets/products/bottle-white1.jpg';
+import bottle1White from '../assets/products/bottle-white1.png';
 import bottleWhite2 from '../assets/products/bottle-white2.jpg';
 import bottleWhite3 from '../assets/products/bottle-white3.jpg';
 
@@ -92,6 +93,7 @@ interface Element {
   textStyle?: 'straight' | 'arcUp' | 'arcDown' | 'wavy';
   shape?: 'rectangle' | 'circle' | 'oval' | 'heart' | 'star';
   shapeSize?: number;
+  rotation?: number;
 }
 
 // Map product type to images
@@ -1042,7 +1044,7 @@ const ProductCustomize: React.FC = () => {
                 pointerEvents: 'none',
                 p: 2,
                 ...getProductStyle(selectedProduct),
-                filter: color === '#ffffff' ? 'none' : `sepia(1) saturate(500%) hue-rotate(${(hexToHsl(color).h - hexToHsl('#808080').h)}deg)`,
+                filter: color === '#ffffff' ? 'none' : `brightness(0) saturate(100%) sepia(1) hue-rotate(${hexToHsl(color).h}deg) saturate(500%)`,
               }}
             />
           )}
@@ -1078,6 +1080,7 @@ const ProductCustomize: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'move',
+                transform: `rotate(${el.rotation || 0}deg)`,
               }}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
@@ -1251,6 +1254,53 @@ const ProductCustomize: React.FC = () => {
                     </Box>
                   </Popover>
                 </>
+              )}
+              {selectedElementId === el.id && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: -36,
+                    transform: 'translateX(-50%)',
+                    zIndex: 20,
+                    cursor: 'grab',
+                    bgcolor: 'white',
+                    borderRadius: '50%',
+                    boxShadow: 2,
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px solid #F46A6A',
+                    p: 0,
+                    userSelect: 'none',
+                  }}
+                  onMouseDown={e => {
+                    e.stopPropagation();
+                    const startY = e.clientY;
+                    const startX = e.clientX;
+                    const rect = e.currentTarget.parentElement?.getBoundingClientRect();
+                    const centerX = rect ? rect.left + rect.width / 2 : startX;
+                    const centerY = rect ? rect.top + rect.height / 2 : startY;
+                    const startAngle = el.rotation || 0;
+                    function onMouseMove(ev: MouseEvent) {
+                      const dx = ev.clientX - centerX;
+                      const dy = ev.clientY - centerY;
+                      let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+                      if (angle < 0) angle += 360;
+                      updateElement(el.id, { rotation: angle });
+                    }
+                    function onMouseUp() {
+                      window.removeEventListener('mousemove', onMouseMove);
+                      window.removeEventListener('mouseup', onMouseUp);
+                    }
+                    window.addEventListener('mousemove', onMouseMove);
+                    window.addEventListener('mouseup', onMouseUp);
+                  }}
+                >
+                  <RotateRightIcon fontSize="small" sx={{ color: '#F46A6A' }} />
+                </Box>
               )}
             </Rnd>
           ))}
