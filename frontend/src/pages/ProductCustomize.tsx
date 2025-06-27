@@ -91,6 +91,7 @@ interface Element {
   fontFamily?: string;
   textStyle?: 'straight' | 'arcUp' | 'arcDown' | 'wavy';
   shape?: 'rectangle' | 'circle' | 'oval' | 'heart' | 'star';
+  shapeSize?: number;
 }
 
 // Map product type to images
@@ -1097,9 +1098,9 @@ const ProductCustomize: React.FC = () => {
                     filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
                     borderRadius: el.shape === 'circle' ? '50%' : 0,
                     clipPath:
-                      el.shape === 'oval' ? 'ellipse(50% 40% at 50% 50%)' :
-                      el.shape === 'heart' ? 'path("M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z")' :
-                      el.shape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' :
+                      el.shape === 'oval' ? `ellipse(${(el.shapeSize||100)/2}% ${(el.shapeSize||100)*0.4/1}% at 50% 50%)` :
+                      el.shape === 'heart' ? `path('M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z') scale(${(el.shapeSize||100)/100})` :
+                      el.shape === 'star' ? `polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%) scale(${(el.shapeSize||100)/100})` :
                       undefined,
                   }}
                 />
@@ -1167,9 +1168,9 @@ const ProductCustomize: React.FC = () => {
                     filter: 'drop-shadow(0 2px 8px #FFD700)',
                     borderRadius: el.shape === 'circle' ? '50%' : 0,
                     clipPath:
-                      el.shape === 'oval' ? 'ellipse(50% 40% at 50% 50%)' :
-                      el.shape === 'heart' ? 'path("M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z")' :
-                      el.shape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' :
+                      el.shape === 'oval' ? `ellipse(${(el.shapeSize||100)/2}% ${(el.shapeSize||100)*0.4/1}% at 50% 50%)` :
+                      el.shape === 'heart' ? `path('M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z') scale(${(el.shapeSize||100)/100})` :
+                      el.shape === 'star' ? `polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%) scale(${(el.shapeSize||100)/100})` :
                       undefined,
                   }}
                 />
@@ -1223,17 +1224,31 @@ const ProductCustomize: React.FC = () => {
                     anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                     transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                   >
-                    <ToggleButtonGroup
-                      value={el.shape || 'rectangle'}
-                      exclusive
-                      onChange={(_, value) => { if (value) { updateElement(el.id, { shape: value }); setShapeAnchorEl(null); } }}
-                      size="small"
-                      sx={{ p: 1 }}
-                    >
-                      {shapeOptions.map(opt => (
-                        <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
-                      ))}
-                    </ToggleButtonGroup>
+                    <Box sx={{ p: 2, minWidth: 180 }}>
+                      <ToggleButtonGroup
+                        value={el.shape || 'rectangle'}
+                        exclusive
+                        onChange={(_, value) => { if (value) { updateElement(el.id, { shape: value }); } }}
+                        size="small"
+                        sx={{ mb: 2 }}
+                      >
+                        {shapeOptions.map(opt => (
+                          <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
+                        ))}
+                      </ToggleButtonGroup>
+                      {(el.shape && el.shape !== 'rectangle') && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="caption" sx={{ mb: 1, display: 'block' }}>Shape Size</Typography>
+                          <Slider
+                            min={50}
+                            max={100}
+                            value={el.shapeSize || 100}
+                            onChange={(_, value) => updateElement(el.id, { shapeSize: value as number })}
+                            valueLabelDisplay="auto"
+                          />
+                        </Box>
+                      )}
+                    </Box>
                   </Popover>
                 </>
               )}
