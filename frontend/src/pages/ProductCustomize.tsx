@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup, Select
+  Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup, Select, Popover
 } from '@mui/material';
 import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove, FormatShapes, Star, Brush, Create, Edit } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { Rnd } from 'react-rnd';
 import { ChromePicker, ColorResult } from 'react-color';
-import Popover from '@mui/material/Popover';
+import FormatShapesIcon from '@mui/icons-material/FormatShapes';
 import { products } from "../data/products";
 import sampleArt1 from '../assets/art/sample-art1.png';
 import sampleArt2 from '../assets/art/sample-art2.png';
@@ -835,6 +835,16 @@ const ProductCustomize: React.FC = () => {
 
   const [selectedPhonecaseIndex, setSelectedPhonecaseIndex] = useState(0);
 
+  const shapeOptions = [
+    { value: 'rectangle', label: 'Rectangle' },
+    { value: 'circle', label: 'Circle' },
+    { value: 'oval', label: 'Oval' },
+    { value: 'heart', label: 'Heart' },
+    { value: 'star', label: 'Star' },
+  ];
+
+  const [shapeAnchorEl, setShapeAnchorEl] = useState<null | HTMLElement>(null);
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
@@ -1001,10 +1011,20 @@ const ProductCustomize: React.FC = () => {
           }}
         >
           {selectedProduct === 'cap' ? (
-            <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-              <Box sx={{ position: 'absolute', width: '100%', height: '100%', bgcolor: color, borderRadius: 2, zIndex: 1 }} />
-              <Box component="img" src={planewhitecap} alt="cap" sx={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 2 }} />
-            </Box>
+            <Box component="img"
+              src={planewhitecap}
+              alt="cap"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                filter: color !== '#ffffff' ? `brightness(0) saturate(100%) sepia(1) hue-rotate(${hexToHsl(color).h}deg) saturate(500%)` : 'none',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 2,
+              }}
+            />
           ) : (
             <Box
               component="img"
@@ -1187,6 +1207,36 @@ const ProductCustomize: React.FC = () => {
                 ) : null
               )}
               <Button size="small" color="error" onClick={() => setElements(elements.filter(e => e.id !== el.id))} sx={{ position: 'absolute', top: -8, right: -8, minWidth: 24, width: 24, height: 24, borderRadius: '50%', p: 0, bgcolor: 'white', boxShadow: 1, '&:hover': { bgcolor: '#ffebee' } }}>×</Button>
+              {(el.type === 'image' || el.type === 'art') && (
+                <>
+                  <IconButton
+                    size="small"
+                    sx={{ position: 'absolute', top: -32, left: '50%', transform: 'translateX(-50%)', zIndex: 10, bgcolor: 'white', boxShadow: 1 }}
+                    onClick={e => { setShapeAnchorEl(e.currentTarget); setSelectedElementId(el.id); }}
+                  >
+                    <FormatShapesIcon fontSize="small" />
+                  </IconButton>
+                  <Popover
+                    open={Boolean(shapeAnchorEl) && selectedElementId === el.id}
+                    anchorEl={shapeAnchorEl}
+                    onClose={() => setShapeAnchorEl(null)}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                  >
+                    <ToggleButtonGroup
+                      value={el.shape || 'rectangle'}
+                      exclusive
+                      onChange={(_, value) => { if (value) { updateElement(el.id, { shape: value }); setShapeAnchorEl(null); } }}
+                      size="small"
+                      sx={{ p: 1 }}
+                    >
+                      {shapeOptions.map(opt => (
+                        <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
+                      ))}
+                    </ToggleButtonGroup>
+                  </Popover>
+                </>
+              )}
             </Rnd>
           ))}
         </CanvasBox>
