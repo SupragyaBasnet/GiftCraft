@@ -50,11 +50,13 @@ const ProductDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [mainIdx, setMainIdx] = useState(0);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-  const product = products.find(p => p.id === Number(id));
+        const product = products.find(p => p.id === Number(id));
         if (product) {
           setProduct(product);
         } else {
@@ -92,8 +94,6 @@ const ProductDetails: React.FC = () => {
   }
 
   const images = product.images && product.images.length > 0 ? product.images : [product.image || ''];
-  const [mainIdx, setMainIdx] = useState(0);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
   // Pick 2 other products from the same category, or any 2 others
   let relatedProducts = products.filter(p => p.id !== product.id && p.category === product.category);
   if (relatedProducts.length < 2) {
