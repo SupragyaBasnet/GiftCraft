@@ -1085,7 +1085,6 @@ const ProductCustomize: React.FC = () => {
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
                 setSelectedElementId(el.id);
-                console.log('Element clicked:', el.id, el.type);
                 if (el.type === 'text') setEditText(el.content);
               }}
             >
@@ -1260,7 +1259,7 @@ const ProductCustomize: React.FC = () => {
                   sx={{
                     position: 'absolute',
                     left: '50%',
-                    top: -36,
+                    bottom: -36,
                     transform: 'translateX(-50%)',
                     zIndex: 20,
                     cursor: 'grab',
@@ -1278,18 +1277,16 @@ const ProductCustomize: React.FC = () => {
                   }}
                   onMouseDown={e => {
                     e.stopPropagation();
-                    const startY = e.clientY;
-                    const startX = e.clientX;
                     const rect = e.currentTarget.parentElement?.getBoundingClientRect();
-                    const centerX = rect ? rect.left + rect.width / 2 : startX;
-                    const centerY = rect ? rect.top + rect.height / 2 : startY;
-                    const startAngle = el.rotation || 0;
+                    const centerX = rect ? rect.left + rect.width / 2 : e.clientX;
+                    const centerY = rect ? rect.top + rect.height / 2 : e.clientY;
                     function onMouseMove(ev: MouseEvent) {
                       const dx = ev.clientX - centerX;
                       const dy = ev.clientY - centerY;
                       let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
                       if (angle < 0) angle += 360;
                       updateElement(el.id, { rotation: angle });
+                      console.log('Rotating', el.id, angle);
                     }
                     function onMouseUp() {
                       window.removeEventListener('mousemove', onMouseMove);
