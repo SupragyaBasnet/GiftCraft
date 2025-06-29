@@ -14,23 +14,22 @@ import mug2 from "../assets/mug2.jpg";
 import mug3 from "../assets/mug3.jpg";
 import mug4 from "../assets/mug4.jpg";
 import mug5 from "../assets/mug5.jpg";
-import notebook1 from "../assets/notebook1.jpg";
+import notebook1 from "../assets/notebook1.jpeg";
 import notebook2 from "../assets/notebook2.jpeg";
 import notebook3 from "../assets/notebook3.jpg";
-import notebook4webp from "../assets/notebook4.webp";
-import notebook5 from "../assets/notebook5.jpg";
-import notebookBack from '../assets/products/notebookback.jpeg';
+import notebook4webp from "../assets/notebook4.jpg";
+import notebook5 from "../assets/notebook5.webp";
 import pen1 from "../assets/pen1.webp";
 import pen2 from "../assets/pen2.jpeg";
-import pen3 from "../assets/pen3.jpeg";
+import pen3 from "../assets/pen3.png";
 import phonecase1 from "../assets/phonecase1.webp";
 import phonecase2 from "../assets/phonecase2.jpeg";
 import phonecase3 from "../assets/phonecase3.jpg";
 import phonecase4 from "../assets/phonecase4.webp";
 import photoframe1 from "../assets/photoframe1.jpg";
-import photoframe2 from "../assets/photoframe2.jpeg";
+import photoframe2 from "../assets/photoframe2.jpg";
 import photoframe3 from "../assets/photoframe3.jpg";
-import photoframe4 from "../assets/photoframe4.jpeg";
+import photoframe4 from "../assets/photoframe4.jpg";
 import pillowcase1 from "../assets/pillowcase1.jpg";
 import pillowcase2 from "../assets/pillowcase2.webp";
 import pillowcase3 from "../assets/pillowcase3.jpg";
@@ -430,17 +429,6 @@ export const products: Product[] = [
     reviews: 28,
   },
   {
-    id: 54,
-    name: "Journal",
-    price: 800,
-    image: notebook1,
-    images: [notebook1, notebook2, notebook3, notebook4webp, notebook5],
-    description: "Personal journal with custom design",
-    category: "notebooks",
-    rating: 4.5,
-    reviews: 25,
-  },
-  {
     id: 7,
     name: "Basic Pen",
     price: 200,
@@ -472,39 +460,6 @@ export const products: Product[] = [
     category: "pens",
     rating: 4.4,
     reviews: 19,
-  },
-  {
-    id: 55,
-    name: "Fountain Pen",
-    price: 800,
-    image: pen1,
-    images: [pen1, pen2, pen3],
-    description: "Elegant fountain pen with custom engraving",
-    category: "pens",
-    rating: 4.6,
-    reviews: 15,
-  },
-  {
-    id: 56,
-    name: "Ballpoint Pen",
-    price: 300,
-    image: pen2,
-    images: [pen2, pen1, pen3],
-    description: "Smooth-writing pen with custom design",
-    category: "pens",
-    rating: 4.2,
-    reviews: 22,
-  },
-  {
-    id: 57,
-    name: "Executive Pen",
-    price: 500,
-    image: pen3,
-    images: [pen3, pen1, pen2],
-    description: "Professional pen with premium finish",
-    category: "pens",
-    rating: 4.4,
-    reviews: 18,
   },
   {
     id: 27,
@@ -604,17 +559,6 @@ export const products: Product[] = [
     category: "frames",
     rating: 4.6,
     reviews: 52,
-  },
-  {
-    id: 62,
-    name: "Tabletop Frame",
-    price: 2800,
-    image: frame,
-    images: [frame, photoframe1, photoframe2, photoframe3, photoframe4],
-    description: "Elegant tabletop frame with custom design",
-    category: "frames",
-    rating: 4.5,
-    reviews: 48,
   },
   {
     id: 64,
