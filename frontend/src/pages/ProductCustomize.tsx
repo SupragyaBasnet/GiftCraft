@@ -1,36 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Container, Box, Typography, Grid, Button, Paper, Tabs, Tab, TextField, InputAdornment, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, ToggleButton, ToggleButtonGroup, Select, Popover
-} from '@mui/material';
-import { AddPhotoAlternate, ColorLens, TextFields, EmojiEmotions, ShoppingCart, Payment, Palette, FlipCameraIos, CompareArrows, Save, Visibility, VisibilityOff, Add, Remove, FormatShapes, Star, Brush, Create, Edit } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import { Rnd } from 'react-rnd';
-import { ChromePicker, ColorResult } from 'react-color';
+import { AddPhotoAlternate, Brush, ColorLens, Create, Edit, EmojiEmotions, FormatShapes, Palette, Payment, Save, ShoppingCart, TextFields } from '@mui/icons-material';
 import FormatShapesIcon from '@mui/icons-material/FormatShapes';
-import { products } from "../data/products";
-import sampleArt1 from '../assets/art/sample-art1.png';
-import sampleArt2 from '../assets/art/sample-art2.png';
-import sampleEffect1 from '../assets/effects/sample-effect1.png';
-import sampleEffect2 from '../assets/effects/sample-effect2.png';
-import CanvasDraw from 'react-canvas-draw';
-import Slider from '@mui/material/Slider';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
+import { Alert, Box, Button, Container, IconButton, MenuItem, Paper, Popover, Select, Snackbar, Tab, Tabs, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import Slider from '@mui/material/Slider';
+import { styled } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
+import CanvasDraw from 'react-canvas-draw';
+import { ChromePicker, ColorResult } from 'react-color';
+import { Rnd } from 'react-rnd';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Import product images from products directory
-import tshirtFront from '../assets/products/whitetshirt-front.jpg';
-import tshirtBack from '../assets/products/whitetshirt-back.png';
-import penFront from '../assets/products/planepen.png';
-import planepen1 from '../assets/products/planepen1.jpg';
-import notebookFront from '../assets/products/notebook.jpg';
-import notebookBack from '../assets/products/notebook.jpg'; // Assuming back is same as front
-import mugFrontImage from '../assets/products/front-mug.png';
-import mugSideImage from '../assets/products/side-mug.png';
-import iphone11Plane from '../assets/products/iphone11-plane.jpg';
-import iphone13Plane from '../assets/products/iphone13-plane.jpg';
 import frame1 from '../assets/products/frame1.jpeg';
 import frame2 from '../assets/products/frame2.jpg';
 import frame3 from '../assets/products/frame3.jpg';
+import mugFrontImage from '../assets/products/front-mug.png';
+import  notebookFront from '../assets/products/notebook.jpg';
+import notebookBack from '../assets/products/notebookback.jpeg';
+import penFront from '../assets/products/planepen.png';
+import planepen1 from '../assets/products/planepen1.jpg';
+import mugSideImage from '../assets/products/side-mug.png';
+import tshirtBack from '../assets/products/whitetshirt-back.png';
+import tshirtFront from '../assets/products/whitetshirt-front.jpg';
 
 // Import the three new water bottle images
 import bottle1White from '../assets/products/bottle-white1.png';
@@ -39,16 +30,11 @@ import bottleWhite3 from '../assets/products/bottle-white3.jpg';
 
 // Import the three new keychain images
 import circleKeychain from '../assets/products/circle-keychain.jpg';
-import squareKeychain from '../assets/products/square-keychain.jpg';
 import keychainLeather from '../assets/products/keychain-leather.jpg';
 
 // Import requested images from ../assets/
-import cap1 from '../assets/products/whitecap1.jpg';
-import pillowcase1 from '../assets/pillowcase1.jpg';
-import pillowcase2 from '../assets/pillowcase2.webp';
-import pillowcase3 from '../assets/pillowcase3.jpg';
-import whitepillowFront from '../assets/products/whitepillow-front.webp';
 import whitepillowBack from '../assets/products/whitepillow-back.webp';
+import whitepillowFront from '../assets/products/whitepillow-front.webp';
 
 import phonecaseiphone8plus from '../assets/products/phonecaseiphone 8 plus.jpg';
 import phonecaseiphone10 from '../assets/products/phonecaseiphone10.jpg';
@@ -60,10 +46,10 @@ import phonecases21ultra from '../assets/products/phonecases21ultra.jpg';
 import phonecases23ultra from '../assets/products/phonecases23 ultra.jpg';
 
 import keychainJpg from '../assets/products/keychain.jpg';
-import planewhitekeychain from '../assets/products/planewhitekeychain.jpg';
 import planemetalkeychain from '../assets/products/planemetalkeychain.jpg';
 import planemetalkeychain1 from '../assets/products/planemetalkeychain1.jpg';
 import planewhitecap from '../assets/products/planewhitecap.jpg';
+import planewhitekeychain from '../assets/products/planewhitekeychain.jpg';
 
 // Assuming this is the correct filename
 
@@ -104,7 +90,7 @@ const productImages: Record<ProductType, ProductView | string[]> = {
   },
   notebook: {
     front: notebookFront,
-    back: notebookBack
+    back: notebookBack // use the new image for the back
   },
   pen: [ // Use array for multiple pen options
     penFront,
