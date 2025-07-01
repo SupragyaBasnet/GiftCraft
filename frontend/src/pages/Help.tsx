@@ -51,43 +51,51 @@ const Help: React.FC = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: { xs: 3, md: 5 }, borderRadius: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center" fontWeight={700} sx={{ mb: 1, fontSize: { xs: '2rem', md: '2.4rem' } }}>
+      <Box sx={{ bgcolor: 'rgba(244,106,106,0.05)', borderRadius: 5, p: { xs: 2, md: 4 }, boxShadow: '0 4px 24px rgba(224,85,85,0.07)' }}>
+        <Typography variant="h3" component="h1" align="center" gutterBottom fontWeight={800} sx={{ mb: 0, fontSize: { xs: '2rem', md: '2.2rem' } }}>
           Help & Support
         </Typography>
-        <div className="heading-dash" style={{ marginTop: 0, marginBottom: 16 }} />
+        <div className="heading-dash" />
 
-        <Box sx={{ mb: 5 }}>
-          <Typography variant="h5" component="h2" gutterBottom fontWeight={600} sx={{ mb: 2 }}>
+        <Box sx={{ mb: 5, mt: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom fontWeight={600} sx={{ mb: 2, textAlign: 'center' }}>
             Frequently Asked Questions
           </Typography>
-          {faqItems.map((item) => (
-            <Accordion
-              key={item.id}
-              expanded={expanded === item.id}
-              onChange={handleChange(item.id)}
-              sx={{ mb: 1, borderRadius: 2, '&.Mui-expanded': { margin: '8px 0' } }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`${item.id}-content`}
-                id={`${item.id}-header`}
+          <Box>
+            {faqItems.map((item) => (
+              <Accordion
+                key={item.id}
+                expanded={expanded === item.id}
+                onChange={handleChange(item.id)}
+                sx={{
+                  mb: 2,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(224,85,85,0.06)',
+                  bgcolor: 'white',
+                  '&.Mui-expanded': { margin: '12px 0' },
+                  '&:before': { display: 'none' }
+                }}
               >
-                <Typography variant="subtitle1" fontWeight={600}>{item.question}</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography variant="body1" color="text.secondary">{item.answer}</Typography>
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`${item.id}-content`}
+                  id={`${item.id}-header`}
+                >
+                  <Typography variant="subtitle1" fontWeight={600}>{item.question}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Typography variant="body1" color="text.secondary">{item.answer}</Typography>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
         </Box>
 
-        <Box sx={{ textAlign: 'center', mt: 5 }}>
-
-          <Typography variant="body1" sx={{ mb: 3 }}>
-            If you have any other questions or need assistance, feel free to reach out to us.
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 6 }}>
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 3, bgcolor: 'white', boxShadow: '0 2px 8px rgba(224,85,85,0.06)', minWidth: 320, textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              If you have any other questions or need assistance, feel free to reach out to us.
+            </Typography>
             <Link href="/contact" underline="none">
               <Box component="span" sx={{ display: 'inline-block' }}>
                 <Paper elevation={2} sx={{ px: 4, py: 1.5, bgcolor: 'primary.main', color: 'white', borderRadius: 2, fontWeight: 600, fontSize: '1.1rem', cursor: 'pointer', '&:hover': { bgcolor: 'primary.dark' } }}>
@@ -95,9 +103,9 @@ const Help: React.FC = () => {
                 </Paper>
               </Box>
             </Link>
-          </Box>
+          </Paper>
         </Box>
-      </Paper>
+      </Box>
     </Container>
   );
 };

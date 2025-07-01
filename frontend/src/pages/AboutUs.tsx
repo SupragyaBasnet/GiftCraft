@@ -24,7 +24,7 @@ const fadeIn = {
 const AboutUs: React.FC = () => {
   const theme = useTheme();
   return (
-    <Box sx={{ bgcolor: '#fff6f6', minHeight: '100vh', py: { xs: 4, md: 8 } }}>
+    <Box sx={{ minHeight: '100vh', py: { xs: 4, md: 8 } }}>
       {/* Hero Section */}
       <Container maxWidth="lg">
         <Paper
@@ -34,7 +34,7 @@ const AboutUs: React.FC = () => {
             mb: 8,
             borderRadius: 6,
             background: 'linear-gradient(135deg, #ffeaea 0%, #fff6f6 100%)',
-            boxShadow: '0 8px 32px rgba(224,85,85,0.08)',
+           
           }}
         >
           <Grid container spacing={4} alignItems="center" justifyContent="center">
@@ -45,15 +45,15 @@ const AboutUs: React.FC = () => {
             </Grid>
             <Grid item xs={12} md={7}>
               <Typography
-                variant="h2"
+                variant="h3"
                 component="h1"
-                align="left"
-                sx={{ fontWeight: 900, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' }, color: '#222', mb: 1 }}
+                align="center"
+                sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0, color: '#222' }}
               >
                 About GiftCraft
               </Typography>
-              <Box sx={{ width: 56, height: 5, bgcolor: 'rgb(224,85,85)', borderRadius: 2, mb: 3 }} />
-              <Typography variant="h6" sx={{ color: '#333', maxWidth: 600 }}>
+              <div className="heading-dash" />
+              <Typography variant="h6" sx={{ color: '#333', maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
                 GiftCraft is your destination for thoughtful, personalized gifts that tell your story. Whether you're celebrating birthdays, anniversaries, or any special occasion, we help you design unique products with ease.
               </Typography>
             </Grid>

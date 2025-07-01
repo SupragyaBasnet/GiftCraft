@@ -111,7 +111,7 @@ const ProductDetails: React.FC = () => {
               component="img"
               src={images[mainIdx]}
               alt={product.name || ''}
-              sx={{ width: '100%', maxWidth: 350, borderRadius: 4, boxShadow: 3, mb: 2, objectFit: 'contain', bgcolor: 'white' }}
+              sx={{ width: 350, height: 350, borderRadius: 4, boxShadow: 3, mb: 2, objectFit: 'contain', bgcolor: 'white', p: 0, m: 0, display: 'block' }}
             />
             {images.length > 1 && (
               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 1 }}>

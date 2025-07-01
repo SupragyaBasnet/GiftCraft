@@ -216,11 +216,11 @@ const CheckoutPage: React.FC = () => {
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
         {/* Conditionally render Checkout title */}
         {!orderConfirmedMessage && (
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: 900, fontSize: { xs: '2rem', md: '2.4rem' }, color: '#111', mb: 1 }}>
+          <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, color: '#111', mb: 0 }}>
             Proceed to Checkout
           </Typography>
         )}
-        <div className="heading-dash" style={{ marginTop: 0, marginBottom: 16 }} />
+        <div className="heading-dash" />
 
         {/* Order Confirmed Section - Shown when order is confirmed */}
         {orderConfirmedMessage ? (

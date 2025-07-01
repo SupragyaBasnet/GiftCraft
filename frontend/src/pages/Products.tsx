@@ -114,10 +114,10 @@ const Products: React.FC = () => {
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh'}}>
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
-        <Typography variant="h3" component="h1" align="center" sx={{ fontWeight: 900, fontSize: { xs: '2rem', md: '2.4rem' }, color: '#111', mb: 1 }}>
+        <Typography variant="h3" component="h1" align="center" sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, color: '#111', mb: 0 }}>
           Browse Products
         </Typography>
-        <div className="heading-dash" style={{ marginTop: 0, marginBottom: 16 }} />
+        <div className="heading-dash" />
         <Grid container spacing={4}>
           {/* Sidebar (desktop) */}
           {!isMobile && (

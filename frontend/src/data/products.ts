@@ -2,7 +2,7 @@ import cap1 from "../assets/cap1.webp";
 import cap2 from "../assets/cap2.jpg";
 import cap3 from "../assets/cap3.jpg";
 import cap4 from "../assets/cap4.webp";
-import frame from "../assets/frame.jpg";
+// import frame from "../assets/frame.jpg";
 import keychain1 from "../assets/keychain1.jpeg";
 import keychain2 from "../assets/keychain2.webp";
 import keychain3 from "../assets/keychain3.webp";
@@ -506,7 +506,7 @@ export const products: Product[] = [
     name: "Classic Photo Frame",
     price: 2400,
     image: photoframe1,
-    images: [photoframe1, photoframe2, photoframe3, photoframe4, frame],
+    images: [photoframe1, photoframe2, photoframe3, photoframe4],
     description: "Create a beautiful custom photo frame for your memories",
     category: "frames",
     rating: 4.8,
@@ -517,7 +517,7 @@ export const products: Product[] = [
     name: "Premium Photo Frame",
     price: 3000,
     image: photoframe2,
-    images: [photoframe2, photoframe1, photoframe3, photoframe4, frame],
+    images: [photoframe2, photoframe1, photoframe3, photoframe4],
     description: "High-quality wooden frame with custom design",
     category: "frames",
     rating: 4.9,
@@ -528,7 +528,7 @@ export const products: Product[] = [
     name: "Digital Photo Frame",
     price: 4500,
     image: photoframe3,
-    images: [photoframe3, photoframe1, photoframe2, photoframe4, frame],
+    images: [photoframe3, photoframe1, photoframe2, photoframe4],
     description: "Digital frame with multiple photo display",
     category: "frames",
     rating: 4.7,
@@ -539,7 +539,7 @@ export const products: Product[] = [
     name: "Collage Frame",
     price: 3500,
     image: photoframe4,
-    images: [photoframe4, photoframe1, photoframe2, photoframe3, frame],
+    images: [photoframe4, photoframe1, photoframe2, photoframe3],
     description: "Frame for multiple photos with custom design",
     category: "frames",
     rating: 4.6,

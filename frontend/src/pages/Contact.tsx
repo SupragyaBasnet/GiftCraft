@@ -4,34 +4,34 @@ import { Email, Phone, LocationOn } from '@mui/icons-material';
 
 const Contact: React.FC = () => {
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h3" gutterBottom sx={{ fontWeight: 900, fontSize: { xs: '2rem', md: '2.4rem' }, color: '#111', mb: 1 }}>
-          Contact Us
-        </Typography>
-        <div className="heading-dash" style={{ marginTop: 0, marginBottom: 16 }} />
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          We'd love to hear from you! Fill out the form below or reach us directly at:
-        </Typography>
-        <Box sx={{ mb: 3 }}>
-          <Grid container spacing={1} alignItems="center">
-            <Grid item><Phone fontSize="small" /></Grid>
-            <Grid item><Typography variant="body2"><a href="tel:+9779816315056" className="contact-link">+977 9816315056</a></Typography></Grid>
-          </Grid>
-          <Grid container spacing={1} alignItems="center">
-            <Grid item><Email fontSize="small" /></Grid>
-            <Grid item><Typography variant="body2"><a href="mailto:info@giftcraft.com" className="contact-link">info@giftcraft.com</a></Typography></Grid>
-          </Grid>
-          <Grid container spacing={1} alignItems="center">
-            <Grid item><LocationOn fontSize="small" /></Grid>
-            <Grid item><Typography variant="body2"><a href="https://www.google.com/maps/search/?api=1&query=Dhumrabari,+Kathmandu" target="_blank" rel="noopener noreferrer" className="contact-link">Dhumrabarahi, Kathmandu</a></Typography></Grid>
-          </Grid>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          Business hours: 9:00 AM - 5:00 PM, Sunday to Friday
-        </Typography>
-      </Paper>
-    </Container>
+    <Box sx={{ bgcolor: 'rgba(244,106,106,0.05)', minHeight: '100vh', py: 8 }}>
+      <Container maxWidth="sm">
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 4, boxShadow: '0 4px 24px rgba(224,85,85,0.07)', mt: 4, mb: 4, textAlign: 'center' }}>
+          <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, color: '#111', mb: 0 }}>
+            Contact Us
+          </Typography>
+          <div className="heading-dash" />
+         
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Phone fontSize="small" />
+              <a href="tel:+9779816315056" className="contact-link" style={{ fontSize: '1rem' }}>+977 9816315056</a>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Email fontSize="small" />
+              <a href="mailto:info@giftcraft.com" className="contact-link" style={{ fontSize: '1rem' }}>info@giftcraft.com</a>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LocationOn fontSize="small" />
+              <a href="https://www.google.com/maps/search/?api=1&query=Dhumrabari,+Kathmandu" target="_blank" rel="noopener noreferrer" className="contact-link" style={{ fontSize: '1rem' }}>Dhumrabarahi, Kathmandu</a>
+            </Box>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Business hours: 9:00 AM - 5:00 PM, Sunday to Friday
+          </Typography>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

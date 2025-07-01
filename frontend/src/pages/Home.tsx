@@ -145,9 +145,8 @@ const Home: React.FC = () => {
         <Typography
           variant="h3"
           component="h2"
-          gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 6, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' } }}
+          sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0 }}
         >
           Why Choose GiftCraft?
         </Typography>
@@ -273,9 +272,8 @@ const Home: React.FC = () => {
         <Typography
           variant="h3"
           component="h2"
-          gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 6, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' } }}
+          sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0 }}
         >
           Featured Products
         </Typography>
@@ -347,9 +345,8 @@ const Home: React.FC = () => {
         <Typography
           variant="h3"
           component="h2"
-          gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 3, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
+          sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0 }}
         >
           How It Works
         </Typography>
@@ -440,9 +437,8 @@ const Home: React.FC = () => {
           <Typography
             variant="h3"
             component="h2"
-            gutterBottom
             align="center"
-            sx={{ fontWeight: 900, color: '#111', mb: 6, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
+            sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0 }}
           >
             What Our Customers Say
           </Typography>
@@ -482,9 +478,8 @@ const Home: React.FC = () => {
         <Typography
           variant="h3"
           component="h2"
-          gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 4, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
+          sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0 }}
         >
           Ready to Create Something Special?
         </Typography>
