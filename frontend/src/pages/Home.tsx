@@ -151,6 +151,7 @@ const Home: React.FC = () => {
         >
           Why Choose GiftCraft?
         </Typography>
+        <div className="heading-dash" />
         <Grid container spacing={4} sx={{ mt: 2 }}>
           <Grid item xs={12} md={3}>
             <Paper 
@@ -278,6 +279,7 @@ const Home: React.FC = () => {
         >
           Featured Products
         </Typography>
+        <div className="heading-dash" />
         <Grid container spacing={4} sx={{ mt: 2 }}>
           {featuredProducts.map((product) => (
             <Grid item key={product.id} xs={12} sm={6} md={3}>
@@ -347,10 +349,11 @@ const Home: React.FC = () => {
           component="h2"
           gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 3, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' } }}
+          sx={{ fontWeight: 900, color: '#111', mb: 3, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
         >
           How It Works
         </Typography>
+        <div className="heading-dash" />
         <Grid container spacing={4} sx={{ mt: 2 }}>
           {[
             {
@@ -439,10 +442,11 @@ const Home: React.FC = () => {
             component="h2"
             gutterBottom
             align="center"
-            sx={{ fontWeight: 900, color: '#111', mb: 6, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' } }}
+            sx={{ fontWeight: 900, color: '#111', mb: 6, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
           >
             What Our Customers Say
           </Typography>
+          <div className="heading-dash" />
           <Grid container spacing={4} sx={{ mt: 2 }}>
             {testimonials.map((testimonial: { name: string; comment: string; rating: number }, index: number) => (
               <Grid item key={index} xs={12} md={4}>
@@ -480,10 +484,11 @@ const Home: React.FC = () => {
           component="h2"
           gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 4, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' } }}
+          sx={{ fontWeight: 900, color: '#111', mb: 4, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
         >
           Ready to Create Something Special?
         </Typography>
+        <div className="heading-dash" />
         <Typography variant="body1" paragraph color="text.secondary">
           Start customizing your perfect gift today
         </Typography>

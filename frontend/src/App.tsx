@@ -20,6 +20,7 @@ import Register from './pages/Register';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import Help from './pages/Help';
+import Contact from './pages/Contact';
 
 const theme = createTheme({
   palette: {
@@ -87,6 +88,7 @@ const App: React.FC = () => {
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/contact" element={<Contact />} />
                 </Routes>
               </Box>
               <Footer />

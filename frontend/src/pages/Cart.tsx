@@ -42,9 +42,10 @@ const Cart: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h3" gutterBottom sx={{ fontWeight: 900, fontSize: { xs: '2rem', md: '2.4rem' }, color: '#111', mb: 1 }}>
         Your Cart
       </Typography>
+      <div className="heading-dash" style={{ marginTop: 0, marginBottom: 16 }} />
       <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
           {items.map((item) => (

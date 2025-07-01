@@ -58,37 +58,22 @@ const Footer: React.FC = () => {
               <Link href="/help" color="inherit" underline="hover" sx={{ color: '#111' }}>
                 Help
               </Link>
+              <Link href="/contact" color="inherit" underline="hover" sx={{ color: '#111' }}>
+                Contact Us
+              </Link>
             </Box>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="h6" gutterBottom sx={{ color: '#111', fontWeight: 700, mb: 2 }}>
-              Contact Us
+              Our Values
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Phone fontSize="small" />
-                <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>+977 9816315056</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Email fontSize="small" />
-                <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>info@giftcraft.com</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LocationOn fontSize="small" />
-                <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>Dharmabari, Kathmandu</Typography>
-              </Box>
+              <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>• Customer Delight</Typography>
+              <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>• Creativity & Personalization</Typography>
+              <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>• Quality & Trust</Typography>
+              <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>• Fast & Friendly Service</Typography>
             </Box>
-            <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-              <IconButton color="inherit" sx={{ color: '#111' }}>
-                <Facebook />
-              </IconButton>
-              <IconButton color="inherit" sx={{ color: '#111' }}>
-                <Twitter />
-              </IconButton>
-              <IconButton color="inherit" sx={{ color: '#111' }}>
-                <Instagram />
-              </IconButton>
-            </Box>
+          
           </Grid>
         </Grid>
         <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>

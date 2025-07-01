@@ -45,16 +45,17 @@ const Help: React.FC = () => {
     {
       id: 'panel5',
       question: 'How can I contact customer support?',
-      answer: 'You can reach our customer support team via email at support@giftcraft.com or by phone at +977-9800000000 during business hours (9:00 AM - 5:00 PM, Sunday to Friday).'
+      answer: 'You can reach our customer support team via email at support@giftcraft.com or by phone at +977-9816315056 during business hours (9:00 AM - 5:00 PM, Sunday to Friday).'
     },
   ];
 
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: { xs: 3, md: 5 }, borderRadius: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center" fontWeight={700} sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom align="center" fontWeight={700} sx={{ mb: 1, fontSize: { xs: '2rem', md: '2.4rem' } }}>
           Help & Support
         </Typography>
+        <div className="heading-dash" style={{ marginTop: 0, marginBottom: 16 }} />
 
         <Box sx={{ mb: 5 }}>
           <Typography variant="h5" component="h2" gutterBottom fontWeight={600} sx={{ mb: 2 }}>
@@ -82,24 +83,18 @@ const Help: React.FC = () => {
         </Box>
 
         <Box sx={{ textAlign: 'center', mt: 5 }}>
-          <Typography variant="h5" component="h2" gutterBottom fontWeight={600} sx={{ mb: 2 }}>
-            Contact Us
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
+
+          <Typography variant="body1" sx={{ mb: 3 }}>
             If you have any other questions or need assistance, feel free to reach out to us.
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-            <Link href="mailto:support@giftcraft.com" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-              <EmailIcon />
-              <Typography variant="body1">support@giftcraft.com</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link href="/contact" underline="none">
+              <Box component="span" sx={{ display: 'inline-block' }}>
+                <Paper elevation={2} sx={{ px: 4, py: 1.5, bgcolor: 'primary.main', color: 'white', borderRadius: 2, fontWeight: 600, fontSize: '1.1rem', cursor: 'pointer', '&:hover': { bgcolor: 'primary.dark' } }}>
+                  Contact Us
+                </Paper>
+              </Box>
             </Link>
-            <Link href="tel:+9779800000000" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-              <PhoneIcon />
-              <Typography variant="body1">+977-9800000000</Typography>
-            </Link>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Business Hours: Sunday - Friday, 9:00 AM - 5:00 PM (NPT)
-            </Typography>
           </Box>
         </Box>
       </Paper>

@@ -45,10 +45,11 @@ const PaymentMethods: React.FC = () => {
           component="h2"
           gutterBottom
           align="center"
-          sx={{ fontWeight: 900, color: '#111', mb: 6, letterSpacing: '-1px', fontSize: { xs: '2.2rem', md: '2.8rem' } }}
+          sx={{ fontWeight: 900, color: '#111', mb: 2, letterSpacing: '-1px', fontSize: { xs: '2rem', md: '2.4rem' } }}
         >
           Payment Methods
         </Typography>
+        <div className="heading-dash" />
         <Grid container spacing={4}>
           {methods.map((method, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
