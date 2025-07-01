@@ -64,8 +64,16 @@ import circleKeychain from "../assets/products/circle-keychain.jpg";
 import keychainLeather from "../assets/products/keychain-leather.jpg";
 
 // Import requested images from ../assets/
-import whitepillowBack from "../assets/products/whitepillow-back.webp";
-import whitepillowFront from "../assets/products/whitepillow-front.webp";
+import squareBack from "../assets/products/whitepillow-back.webp";
+import squareFront from "../assets/products/whitepillow-front.webp";
+import heartshapedFront from "../assets/products/heartshaped-front.jpg";
+import heartshapedBack from "../assets/products/heartshaped-back.jpg";
+import starshapedFront from "../assets/products/starshaped-front.jpg";
+import starshapedBack from "../assets/products/starshaped-back.jpg";
+import circleshapedFront from "../assets/products/circleshaped-front.jpg";
+import circleshapedBack from "../assets/products/circleshaped-back.jpg";
+
+
 
 import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
 import phonecaseiphone10 from "../assets/products/phonecaseiphone10.jpg";
@@ -81,6 +89,7 @@ import planemetalkeychain from "../assets/products/planemetalkeychain.jpg";
 import planemetalkeychain1 from "../assets/products/planemetalkeychain1.jpg";
 import planewhitecap from "../assets/products/planewhitecap.jpg";
 import planewhitekeychain from "../assets/products/planewhitekeychain.jpg";
+
 
 // Assuming this is the correct filename
 
@@ -176,11 +185,17 @@ const productImages: Record<ProductType, ProductView | string[]> = {
   cap: {
     front: planewhitecap,
   },
-  pillowcase: {
-    // Use object for front/back pillowcase views
-    front: whitepillowFront,
-    back: whitepillowBack,
-  },
+  pillowcase: [
+    heartshapedFront,
+    heartshapedBack,
+    starshapedFront,
+    starshapedBack,
+    squareFront,
+    squareBack,
+    circleshapedFront,
+    circleshapedBack,
+  ],
+  
 };
 
 const stickers = ["🎉", "❤️", "🌟", "🎁", "😊", "🔥", "🥳", "💐", "👑", "🍰"];
@@ -393,6 +408,7 @@ const exampleArtImages = [
     label: "SPARKLE ART",
   },
 ];
+
 // Filter out all art images whose label contains 'ABSTRA'
 const validArtImages = artImages.filter(
   (img) =>
@@ -578,9 +594,8 @@ const ProductCustomize: React.FC = () => {
   };
 
   // Check if the current product has back or side views defined (for object type)
-  const isProductViewObject =
-    typeof productImages[selectedProduct] === "object" &&
-    !Array.isArray(productImages[selectedProduct]);
+  const isProductViewObject = typeof productImages[selectedProduct] === "object" && !Array.isArray(productImages[selectedProduct]);
+
   const hasBackView =
     isProductViewObject &&
     (productImages[selectedProduct] as ProductView)?.back !== undefined;

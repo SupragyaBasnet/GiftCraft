@@ -31,8 +31,14 @@ import photoframe2 from "../assets/photoframe2.jpg";
 import photoframe3 from "../assets/photoframe3.jpg";
 import photoframe4 from "../assets/photoframe4.jpg";
 import pillowcase1 from "../assets/pillowcase1.jpg";
-import pillowcase2 from "../assets/pillowcase2.webp";
+import pillowcase2 from "../assets/pillowcase2.jpg";
 import pillowcase3 from "../assets/pillowcase3.jpg";
+import pillowcase4 from "../assets/pillowcase4.jpg";
+import pillowcase5 from "../assets/pillowcase5.jpg";
+import pillowcase6 from "../assets/pillowcase6.jpg";
+import pillowcase7 from "../assets/pillowcase7.jpg";
+import pillowcase8 from "../assets/pillowcase8.jpg";
+import pillowcase9 from "../assets/pillowcase9.jpg";
 import tshirt1 from "../assets/tshirt1.jpeg";
 import tshirt2 from "../assets/tshirt2.jpeg";
 import tshirt3 from "../assets/tshirt3.jpg";
@@ -43,6 +49,7 @@ import waterbottle2 from "../assets/waterbottle2.jpg";
 import waterbottle3 from "../assets/waterbottle3.jpg";
 import waterbottle4 from "../assets/waterbottle4.jpg";
 import waterbottle5 from "../assets/waterbottle5.jpg";
+
 
 export interface Product {
   id: number;
@@ -593,4 +600,50 @@ export const products: Product[] = [
     rating: 4.3,
     reviews: 18,
   },
+  {
+    id: 67,
+    name: "Seasonal Pillow Case",
+    price: 1100,
+    image: pillowcase4,
+    images: [pillowcase3, pillowcase1, pillowcase2],
+    description: "Themed pillow case for different seasons",
+    category: "pillowcases",
+    rating: 4.3,
+    reviews: 18,
+  },
+  {
+    id: 68,
+    name: "Seasonal Pillow Case",
+    price: 1100,
+    image: pillowcase5,
+    images: [pillowcase3, pillowcase4, pillowcase2],
+    description: "Themed pillow case for different seasons",
+    category: "pillowcases",
+    rating: 4.3,
+    reviews: 18,
+  },
+  {
+    id: 69,
+    name: "Seasonal Pillow Case",
+    price: 1100,
+    image: pillowcase6,
+    images: [pillowcase5, pillowcase4, pillowcase2],
+    description: "Themed pillow case for different seasons",
+    category: "pillowcases",
+    rating: 4.3,
+    reviews: 18,
+  },
+  {
+    id: 70,
+    name: "Seasonal Pillow Case",
+    price: 1100,
+    image: pillowcase7,
+    images: [pillowcase2, pillowcase4, pillowcase2],
+    description: "Themed pillow case for different seasons",
+    category: "pillowcases",
+    rating: 4.3,
+    reviews: 18,
+  },
 ];
+
+
