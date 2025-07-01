@@ -11,6 +11,11 @@ import {
   Save,
   ShoppingCart,
   TextFields,
+  FormatAlignLeft,
+  FormatAlignCenter,
+  FormatAlignRight,
+  FormatAlignJustify,
+  Height,
 } from "@mui/icons-material";
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import RotateRightIcon from "@mui/icons-material/RotateRight";
@@ -31,6 +36,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  Divider,
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
@@ -90,6 +96,8 @@ import planemetalkeychain1 from "../assets/products/planemetalkeychain1.jpg";
 import planewhitecap from "../assets/products/planewhitecap.jpg";
 import planewhitekeychain from "../assets/products/planewhitekeychain.jpg";
 
+// At the top of the file, add:
+import colorPaletteImg from '../assets/effects/sample-effect1.png';
 
 // Assuming this is the correct filename
 
@@ -1122,6 +1130,10 @@ const ProductCustomize: React.FC = () => {
     window.addEventListener('mouseup', onUp);
   }
 
+  // Add state for alignment and line height
+  const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
+  const [lineHeight, setLineHeight] = useState(1.1);
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
@@ -1532,127 +1544,40 @@ const ProductCustomize: React.FC = () => {
                   />
                 )
               )}
-              {el.type === "text" &&
-                (el.textStyle === "arcUp" ? (
-                  <svg
-                    width={el.width}
-                    height={el.height}
-                    viewBox={`0 0 ${el.width} ${el.height}`}
-                    style={{ width: "100%", height: "100%" }}
-                  >
-                    <defs>
-                      <path
-                        id={`arcUp-preview-${el.id}`}
-                        d={`M20,${el.height - 20} Q${el.width / 2},${
-                          -el.height / 2
-                        } ${el.width - 20},${el.height - 20}`}
-                        fill="none"
-                      />
-                    </defs>
-                    <text
-                      fill={el.color || textColor}
-                      fontWeight="700"
-                      fontSize={Math.max(
-                        10,
-                        Math.min(el.height * 0.4, el.width / el.content.length)
-                      )}
-                      textAnchor="middle"
-                    >
-                      <textPath
-                        xlinkHref={`#arcUp-preview-${el.id}`}
-                        startOffset="50%"
-                      >
-                        {el.content}
-                      </textPath>
-                    </text>
-                  </svg>
-                ) : el.textStyle === "arcDown" ? (
-                  <svg
-                    width={el.width}
-                    height={el.height}
-                    viewBox={`0 0 ${el.width} ${el.height}`}
-                    style={{ width: "100%", height: "100%" }}
-                  >
-                    <defs>
-                      <path
-                        id={`arcDown-preview-${el.id}`}
-                        d={`M20,20 Q${el.width / 2},${el.height * 1.2} ${
-                          el.width - 20
-                        },20`}
-                        fill="none"
-                      />
-                    </defs>
-                    <text
-                      fill={el.color || textColor}
-                      fontWeight="700"
-                      fontSize={Math.max(
-                        10,
-                        Math.min(el.height * 0.4, el.width / el.content.length)
-                      )}
-                      textAnchor="middle"
-                    >
-                      <textPath
-                        xlinkHref={`#arcDown-preview-${el.id}`}
-                        startOffset="50%"
-                      >
-                        {el.content}
-                      </textPath>
-                    </text>
-                  </svg>
-                ) : el.textStyle === "wavy" ? (
-                  <svg
-                    width={el.width}
-                    height={el.height}
-                    viewBox={`0 0 ${el.width} ${el.height}`}
-                    style={{ width: "100%", height: "100%" }}
-                  >
-                    <defs>
-                      <path
-                        id={`wavy-preview-${el.id}`}
-                        d={`M20,${el.height / 2} Q${el.width / 4},${
-                          el.height / 2 - 20
-                        } ${el.width / 2},${el.height / 2} T${el.width - 20},${
-                          el.height / 2
-                        }`}
-                        fill="none"
-                      />
-                    </defs>
-                    <text
-                      fill={el.color || textColor}
-                      fontWeight="700"
-                      fontSize={Math.max(
-                        10,
-                        Math.min(el.height * 0.4, el.width / el.content.length)
-                      )}
-                      textAnchor="middle"
-                    >
-                      <textPath
-                        xlinkHref={`#wavy-preview-${el.id}`}
-                        startOffset="50%"
-                      >
-                        {el.content}
-                      </textPath>
-                    </text>
-                  </svg>
-                ) : (
+              {el.type === "text" && (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}
+                >
                   <Typography
                     sx={{
                       color: el.color || textColor,
                       fontWeight: 700,
                       textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      textAlign: "center",
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
                       fontFamily: el.fontFamily || "Arial, sans-serif",
-                      fontSize: `${Math.max(10, el.height * 0.7)}px`,
+                      fontSize: `${Math.max(10, Math.min(el.height * 0.7, el.width / (el.content.length * 0.6)))}px`,
+                      wordBreak: 'break-word',
+                      whiteSpace: 'pre-line',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
                     }}
                   >
                     {el.content}
                   </Typography>
-                ))}
+                </Box>
+              )}
               {el.type === "sticker" && (
                 <Typography
                   sx={{
@@ -2151,10 +2076,21 @@ const ProductCustomize: React.FC = () => {
         <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
           <Button
             variant="contained"
-            color="primary"
             startIcon={<Save />}
             onClick={handleSave}
-            sx={{ borderRadius: 8, fontWeight: 700, px: 4 }}
+            sx={{
+              borderRadius: 8,
+              fontWeight: 700,
+              px: 4,
+              bgcolor: '#e05555',
+              color: 'white',
+              boxShadow: 2,
+              mb: 2,
+              '&:hover': {
+                bgcolor: '#c94444',
+                boxShadow: 3,
+              },
+            }}
           >
             Save
           </Button>
@@ -2224,57 +2160,153 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {tab === 1 && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <TextField
-              label="Text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              size="small"
-              sx={{ minWidth: 180 }}
-            />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <input
-                type="color"
-                value={textColor}
-                onChange={(e) => setTextColor(e.target.value)}
-                style={{
-                  width: 28,
-                  height: 28,
-                  border: "none",
-                  background: "none",
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+            <Paper elevation={6} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 5, minWidth: { xs: '100%', sm: 400 }, maxWidth: 650, width: '100%', minHeight: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.08)', border: '1.5px solid #f3f3f3', gap: 0 }}>
+              {/* Live Preview */}
+              {text && (
+                <Box sx={{ mb: 3, width: '100%', textAlign: 'center', p: 2, borderRadius: 3, background: '#f8fafd', border: '1px solid #f0f0f0', minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(244,106,106,0.04)' }}>
+                  <Typography
+                    sx={{
+                      color: textColor,
+                      fontFamily: selectedFont,
+                      fontWeight: 700,
+                      fontSize: 24,
+                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      ...(textStyle === 'straight' ? {} : { fontStyle: 'italic' }),
+                    }}
+                  >
+                    {text}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Preview
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: 'center',
+                gap: { xs: 2, sm: 2.5 },
+                width: '100%',
+                justifyContent: 'center',
+                mb: 1,
+              }}>
+                <TextField
+                  placeholder="Enter your text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  size="small"
+                  variant="outlined"
+                  sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 2, background: '#fafbfc', borderRadius: 2, input: { textAlign: 'center', fontWeight: 500 } }}
+                  InputProps={{ style: { height: 40 } }}
+                />
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      border: '2px solid #eee',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: '#fafbfc',
+                      boxShadow: '0 2px 6px rgba(244,106,106,0.08)',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      color: '#bdbdbd',
+                      transition: 'box-shadow 0.2s',
+                      '&:hover': { boxShadow: '0 4px 12px rgba(244,106,106,0.15)' },
+                    }}
+                    onClick={() => document.getElementById('text-color-input')?.click()}
+                  >
+                    <Palette sx={{ fontSize: 28 }} />
+                    <input
+                      id="text-color-input"
+                      type="color"
+                      value={textColor}
+                      onChange={(e) => setTextColor(e.target.value)}
+                      style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', padding: 0, position: 'absolute', top: 0, left: 0, opacity: 0 }}
+                    />
+                  </Box>
+                </Box>
+                <Select
+                  size="small"
+                  value={selectedFont}
+                  onChange={(e) => setSelectedFont(e.target.value)}
+                  sx={{ minWidth: 130, background: '#fafbfc', borderRadius: 2, height: 40 }}
+                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
+                  displayEmpty
+                >
+                  <MenuItem value="Arial">Arial</MenuItem>
+                  <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                  <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
+                  <MenuItem value="Monospace">Monospace</MenuItem>
+                  <MenuItem value="Cursive">Cursive</MenuItem>
+                </Select>
+                <Select
+                  size="small"
+                  value={textStyle}
+                  onChange={(e) => setTextStyle(e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy')}
+                  sx={{ minWidth: 120, background: '#fafbfc', borderRadius: 2, height: 40 }}
+                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
+                  displayEmpty
+                >
+                  <MenuItem value="straight">Straight</MenuItem>
+                  <MenuItem value="arcUp">Arc Up</MenuItem>
+                  <MenuItem value="arcDown">Arc Down</MenuItem>
+                  <MenuItem value="wavy">Wavy</MenuItem>
+                </Select>
+              </Box>
+              {/* Alignment and Line Height Controls */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: 'center', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#fafbfc', borderRadius: 2, p: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                  <IconButton size="small" color={textAlign === 'left' ? 'primary' : 'default'} onClick={() => setTextAlign('left')}><FormatAlignLeft /></IconButton>
+                  <IconButton size="small" color={textAlign === 'center' ? 'primary' : 'default'} onClick={() => setTextAlign('center')}><FormatAlignCenter /></IconButton>
+                  <IconButton size="small" color={textAlign === 'right' ? 'primary' : 'default'} onClick={() => setTextAlign('right')}><FormatAlignRight /></IconButton>
+                  <IconButton size="small" color={textAlign === 'justify' ? 'primary' : 'default'} onClick={() => setTextAlign('justify')}><FormatAlignJustify /></IconButton>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Height sx={{ color: '#bdbdbd' }} />
+                  <Select
+                    size="small"
+                    value={lineHeight}
+                    onChange={e => setLineHeight(Number(e.target.value))}
+                    sx={{ minWidth: 60, background: '#fafbfc', borderRadius: 2, height: 36 }}
+                  >
+                    <MenuItem value={1}>1</MenuItem>
+                    <MenuItem value={1.2}>1.2</MenuItem>
+                    <MenuItem value={1.5}>1.5</MenuItem>
+                    <MenuItem value={2}>2</MenuItem>
+                  </Select>
+                </Box>
+              </Box>
+              <Button
+                variant="contained"
+                onClick={handleAddText}
+                startIcon={<TextFields />}
+                fullWidth
+                sx={{
+                  borderRadius: 3,
+                  fontWeight: 700,
+                  bgcolor: '#f46a6a',
+                  color: 'white',
+                  boxShadow: 2,
+                  mt: 2,
+                  height: 36,
+                  fontSize: 15,
+                  maxWidth: { xs: '100%', sm: 160 },
+                  alignSelf: 'center',
+                  '&:hover': {
+                    bgcolor: '#e05555',
+                    boxShadow: 3,
+                  },
                 }}
-              />
-              <Select
-                size="small"
-                value={selectedFont}
-                onChange={(e) => setSelectedFont(e.target.value)}
-                sx={{ minWidth: 140 }}
               >
-                <MenuItem value="Arial">Arial</MenuItem>
-                <MenuItem value="Times New Roman">Times New Roman</MenuItem>
-                <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
-                <MenuItem value="Monospace">Monospace</MenuItem>
-                <MenuItem value="Cursive">Cursive</MenuItem>
-              </Select>
-              <Select
-                size="small"
-                value={textStyle}
-                onChange={(e) =>
-                  setTextStyle(
-                    e.target.value as "straight" | "arcUp" | "arcDown" | "wavy"
-                  )
-                }
-                sx={{ minWidth: 120 }}
-              >
-                <MenuItem value="straight">Straight</MenuItem>
-                <MenuItem value="arcUp">Arc Up</MenuItem>
-                <MenuItem value="arcDown">Arc Down</MenuItem>
-                <MenuItem value="wavy">Wavy</MenuItem>
-              </Select>
-            </Box>
-            <Button variant="contained" onClick={handleAddText} sx={{ ml: 1 }}>
-              Add Text
-            </Button>
+                Add Text
+              </Button>
+            </Paper>
           </Box>
         )}
         {tab === 2 && (
@@ -2821,19 +2853,40 @@ const ProductCustomize: React.FC = () => {
         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
           <Button
             variant="contained"
-            color="primary"
             startIcon={<ShoppingCart />}
             onClick={handleAddToCart}
-            sx={{ borderRadius: 8, fontWeight: 700, px: 4 }}
+            sx={{
+              borderRadius: 8,
+              fontWeight: 700,
+              px: 4,
+              bgcolor: '#f46a6a',
+              color: 'white',
+              boxShadow: 2,
+              '&:hover': {
+                bgcolor: '#e05555',
+                boxShadow: 3,
+              },
+            }}
           >
             Add to Cart
           </Button>
           <Button
-            variant="contained"
-            color="secondary"
+            variant="outlined"
             startIcon={<Payment />}
             onClick={handleBuyNow}
-            sx={{ borderRadius: 8, fontWeight: 700, px: 4 }}
+            sx={{
+              borderRadius: 8,
+              fontWeight: 700,
+              px: 4,
+              color: '#f46a6a',
+              borderColor: '#f46a6a',
+              background: 'white',
+              '&:hover': {
+                color: '#f46a6a',
+                background: 'white',
+                borderColor: '#f46a6a',
+              },
+            }}
           >
             Buy Now
           </Button>

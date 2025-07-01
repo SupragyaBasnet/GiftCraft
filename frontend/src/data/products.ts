@@ -40,7 +40,7 @@ import pillowcase7 from "../assets/pillowcase7.jpg";
 import pillowcase8 from "../assets/pillowcase8.jpg";
 import pillowcase9 from "../assets/pillowcase9.jpg";
 import tshirt1 from "../assets/tshirt1.jpeg";
-import tshirt2 from "../assets/tshirt2.jpeg";
+import tshirt2 from "../assets/tshirt2.jpg";
 import tshirt3 from "../assets/tshirt3.jpg";
 import tshirt4 from "../assets/tshirt4.jpg";
 import tshirt5 from "../assets/tshirt5.webp";
