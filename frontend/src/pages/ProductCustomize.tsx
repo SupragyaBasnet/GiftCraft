@@ -1505,10 +1505,10 @@ const ProductCustomize: React.FC = () => {
                     </defs>
                     <image
                       href={el.content}
-                      x={el.imageOffsetX || 0}
-                      y={el.imageOffsetY || 0}
-                      width={(el.width || 0) * (el.imageScale || 1)}
-                      height={(el.height || 0) * (el.imageScale || 1)}
+                      x={0}
+                      y={0}
+                      width={el.width}
+                      height={el.height}
                       clipPath={`url(#${el.shape}-clip-${el.id})`}
                       preserveAspectRatio="xMidYMid slice"
                     />
@@ -1531,13 +1531,6 @@ const ProductCustomize: React.FC = () => {
                     }}
                   />
                 )
-              )}
-              {/* Drag-to-pan overlay for image */}
-              {el.type === "image" && selectedElementId === el.id && (
-                <div
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'grab', zIndex: 10 }}
-                  onMouseDown={e => startPanImage(e, el.id)}
-                />
               )}
               {el.type === "text" &&
                 (el.textStyle === "arcUp" ? (
@@ -1712,10 +1705,10 @@ const ProductCustomize: React.FC = () => {
                     </defs>
                     <image
                       href={el.content}
-                      x={el.imageOffsetX || 0}
-                      y={el.imageOffsetY || 0}
-                      width={(el.width || 0) * (el.imageScale || 1)}
-                      height={(el.height || 0) * (el.imageScale || 1)}
+                      x={0}
+                      y={0}
+                      width={el.width}
+                      height={el.height}
                       clipPath={`url(#${el.shape}-clip-${el.id})`}
                       preserveAspectRatio="xMidYMid slice"
                     />
@@ -1738,13 +1731,6 @@ const ProductCustomize: React.FC = () => {
                     }}
                   />
                 )
-              )}
-              {/* Drag-to-pan overlay for art */}
-              {el.type === "art" && selectedElementId === el.id && (
-                <div
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'grab', zIndex: 10 }}
-                  onMouseDown={e => startPanImage(e, el.id)}
-                />
               )}
               {el.type === "shape" &&
                 (el.content === "rectangle" ? (
@@ -1900,9 +1886,7 @@ const ProductCustomize: React.FC = () => {
               <Button
                 size="small"
                 color="error"
-                onClick={() =>
-                  setElements(elements.filter((e) => e.id !== el.id))
-                }
+                onClick={() => setElements(elements.filter((e) => e.id !== el.id))}
                 sx={{
                   position: "absolute",
                   top: -8,
@@ -1914,6 +1898,8 @@ const ProductCustomize: React.FC = () => {
                   p: 0,
                   bgcolor: "white",
                   boxShadow: 1,
+                  zIndex: 1000,
+                  cursor: "pointer",
                   "&:hover": { bgcolor: "#ffebee" },
                 }}
               >
