@@ -2182,15 +2182,58 @@ const ProductCustomize: React.FC = () => {
                   </Typography>
                 </Box>
               )}
-              <Box sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: 'center',
-                gap: { xs: 2, sm: 2.5 },
-                width: '100%',
-                justifyContent: 'center',
-                mb: 1,
-              }}>
+              {/* Top row: font, style, alignment, line height */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: 'center', mb: 2, flexWrap: 'wrap' }}>
+                <Select
+                  size="small"
+                  value={selectedFont}
+                  onChange={(e) => setSelectedFont(e.target.value)}
+                  sx={{ minWidth: 130, background: '#fafbfc', borderRadius: 2, height: 40 }}
+                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
+                  displayEmpty
+                >
+                  <MenuItem value="Arial">Arial</MenuItem>
+                  <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                  <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
+                  <MenuItem value="Monospace">Monospace</MenuItem>
+                  <MenuItem value="Cursive">Cursive</MenuItem>
+                </Select>
+                <Select
+                  size="small"
+                  value={textStyle}
+                  onChange={(e) => setTextStyle(e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy')}
+                  sx={{ minWidth: 120, background: '#fafbfc', borderRadius: 2, height: 40 }}
+                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
+                  displayEmpty
+                >
+                  <MenuItem value="straight">Straight</MenuItem>
+                  <MenuItem value="arcUp">Arc Up</MenuItem>
+                  <MenuItem value="arcDown">Arc Down</MenuItem>
+                  <MenuItem value="wavy">Wavy</MenuItem>
+                </Select>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#fafbfc', borderRadius: 2, p: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                  <IconButton size="small" color={textAlign === 'left' ? 'primary' : 'default'} onClick={() => setTextAlign('left')}><FormatAlignLeft /></IconButton>
+                  <IconButton size="small" color={textAlign === 'center' ? 'primary' : 'default'} onClick={() => setTextAlign('center')}><FormatAlignCenter /></IconButton>
+                  <IconButton size="small" color={textAlign === 'right' ? 'primary' : 'default'} onClick={() => setTextAlign('right')}><FormatAlignRight /></IconButton>
+                  <IconButton size="small" color={textAlign === 'justify' ? 'primary' : 'default'} onClick={() => setTextAlign('justify')}><FormatAlignJustify /></IconButton>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Height sx={{ color: '#bdbdbd' }} />
+                  <Select
+                    size="small"
+                    value={lineHeight}
+                    onChange={e => setLineHeight(Number(e.target.value))}
+                    sx={{ minWidth: 60, background: '#fafbfc', borderRadius: 2, height: 36 }}
+                  >
+                    <MenuItem value={1}>1</MenuItem>
+                    <MenuItem value={1.2}>1.2</MenuItem>
+                    <MenuItem value={1.5}>1.5</MenuItem>
+                    <MenuItem value={2}>2</MenuItem>
+                  </Select>
+                </Box>
+              </Box>
+              {/* Middle row: text input and color palette */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%', mb: 2 }}>
                 <TextField
                   placeholder="Enter your text"
                   value={text}
@@ -2231,57 +2274,8 @@ const ProductCustomize: React.FC = () => {
                     />
                   </Box>
                 </Box>
-                <Select
-                  size="small"
-                  value={selectedFont}
-                  onChange={(e) => setSelectedFont(e.target.value)}
-                  sx={{ minWidth: 130, background: '#fafbfc', borderRadius: 2, height: 40 }}
-                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
-                  displayEmpty
-                >
-                  <MenuItem value="Arial">Arial</MenuItem>
-                  <MenuItem value="Times New Roman">Times New Roman</MenuItem>
-                  <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
-                  <MenuItem value="Monospace">Monospace</MenuItem>
-                  <MenuItem value="Cursive">Cursive</MenuItem>
-                </Select>
-                <Select
-                  size="small"
-                  value={textStyle}
-                  onChange={(e) => setTextStyle(e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy')}
-                  sx={{ minWidth: 120, background: '#fafbfc', borderRadius: 2, height: 40 }}
-                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
-                  displayEmpty
-                >
-                  <MenuItem value="straight">Straight</MenuItem>
-                  <MenuItem value="arcUp">Arc Up</MenuItem>
-                  <MenuItem value="arcDown">Arc Down</MenuItem>
-                  <MenuItem value="wavy">Wavy</MenuItem>
-                </Select>
               </Box>
-              {/* Alignment and Line Height Controls */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: 'center', mb: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#fafbfc', borderRadius: 2, p: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                  <IconButton size="small" color={textAlign === 'left' ? 'primary' : 'default'} onClick={() => setTextAlign('left')}><FormatAlignLeft /></IconButton>
-                  <IconButton size="small" color={textAlign === 'center' ? 'primary' : 'default'} onClick={() => setTextAlign('center')}><FormatAlignCenter /></IconButton>
-                  <IconButton size="small" color={textAlign === 'right' ? 'primary' : 'default'} onClick={() => setTextAlign('right')}><FormatAlignRight /></IconButton>
-                  <IconButton size="small" color={textAlign === 'justify' ? 'primary' : 'default'} onClick={() => setTextAlign('justify')}><FormatAlignJustify /></IconButton>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Height sx={{ color: '#bdbdbd' }} />
-                  <Select
-                    size="small"
-                    value={lineHeight}
-                    onChange={e => setLineHeight(Number(e.target.value))}
-                    sx={{ minWidth: 60, background: '#fafbfc', borderRadius: 2, height: 36 }}
-                  >
-                    <MenuItem value={1}>1</MenuItem>
-                    <MenuItem value={1.2}>1.2</MenuItem>
-                    <MenuItem value={1.5}>1.5</MenuItem>
-                    <MenuItem value={2}>2</MenuItem>
-                  </Select>
-                </Box>
-              </Box>
+              {/* Add Text button at the bottom */}
               <Button
                 variant="contained"
                 onClick={handleAddText}
