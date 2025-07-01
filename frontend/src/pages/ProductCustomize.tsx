@@ -127,9 +127,12 @@ interface Element {
   fill?: boolean;
   fontFamily?: string;
   textStyle?: "straight" | "arcUp" | "arcDown" | "wavy";
-  shape?: "rectangle" | "circle" | "oval" | "heart" | "star";
+  shape?: "rectangle" | "circle" | "oval" | "heart" | "star" | "square";
   shapeSize?: number;
   rotation?: number;
+  imageOffsetX?: number;
+  imageOffsetY?: number;
+  imageScale?: number;
 }
 
 // Map product type to images
@@ -632,6 +635,9 @@ const ProductCustomize: React.FC = () => {
           width: 120,
           height: 120,
           shape: "rectangle",
+          imageOffsetX: 0,
+          imageOffsetY: 0,
+          imageScale: 1,
         };
         setElements([...elements, newElement]);
         setSnackbar({
@@ -656,6 +662,9 @@ const ProductCustomize: React.FC = () => {
         height: 50,
         fontFamily: selectedFont,
         textStyle,
+        imageOffsetX: 0,
+        imageOffsetY: 0,
+        imageScale: 1,
       };
       setElements([...elements, newElement]);
       setText("");
@@ -728,6 +737,9 @@ const ProductCustomize: React.FC = () => {
         color: el.type === "text" && el.color ? el.color : undefined, // Include color only for text elements if present
         fontFamily: el.fontFamily,
         textStyle: el.textStyle,
+        imageOffsetX: el.imageOffsetX,
+        imageOffsetY: el.imageOffsetY,
+        imageScale: el.imageScale,
       })),
       image: currentImage, // Capture the image URL that was customized
     };
@@ -799,6 +811,9 @@ const ProductCustomize: React.FC = () => {
           color: el.type === "text" && el.color ? el.color : undefined, // Include color only for text elements if present
           fontFamily: el.fontFamily,
           textStyle: el.textStyle,
+          imageOffsetX: el.imageOffsetX,
+          imageOffsetY: el.imageOffsetY,
+          imageScale: el.imageScale,
         })),
         image: currentImage,
       };
@@ -951,6 +966,9 @@ const ProductCustomize: React.FC = () => {
       width: 60,
       height: 60,
       shape: "rectangle",
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      imageScale: 1,
     };
     setElements([...elements, newElement]);
     setSnackbar({ open: true, message: "Art added!", severity: "success" });
@@ -970,7 +988,8 @@ const ProductCustomize: React.FC = () => {
       | "hexagon"
       | "star"
       | "heart"
-      | "diamond",
+      | "diamond"
+      | "square",
     fill: boolean,
     fillColor: string,
     borderColor: string
@@ -1022,6 +1041,9 @@ const ProductCustomize: React.FC = () => {
       color: fillColor,
       borderColor,
       fill,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      imageScale: 1,
     } as any;
     setElements([...elements, newElement]);
     setSnackbar({
@@ -1040,6 +1062,9 @@ const ProductCustomize: React.FC = () => {
       y: 0,
       width: 350,
       height: canvasHeight,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      imageScale: 1,
     };
     setElements([...elements, newElement]);
     setSnackbar({ open: true, message: "Effect added!", severity: "success" });
@@ -1065,12 +1090,37 @@ const ProductCustomize: React.FC = () => {
     { value: "oval", label: "Oval" },
     { value: "heart", label: "Heart" },
     { value: "star", label: "Star" },
+    { value: "square", label: "Square" },
   ];
 
   const [shapeAnchorEl, setShapeAnchorEl] = useState<null | HTMLElement>(null);
 
   // Add state for selected frame index
   const [selectedFrameIndex, setSelectedFrameIndex] = useState(0);
+
+  // Fix pan handler types
+  function startPanImage(e: React.MouseEvent<HTMLDivElement>, id: string) {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const el = elements.find(el => el.id === id);
+    const origX = el?.imageOffsetX || 0;
+    const origY = el?.imageOffsetY || 0;
+    function onMove(moveEvent: MouseEvent) {
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+      updateElement(id, {
+        imageOffsetX: origX + dx,
+        imageOffsetY: origY + dy,
+      });
+    }
+    function onUp() {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -1419,31 +1469,74 @@ const ProductCustomize: React.FC = () => {
               }}
             >
               {el.type === "image" && (
-                <Box
-                  component="img"
-                  src={el.content}
-                  alt="uploaded"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
-                    borderRadius: el.shape === "circle" ? "50%" : 0,
-                    clipPath:
-                      el.shape === "oval"
-                        ? `ellipse(${(el.shapeSize || 100) / 2}% ${
-                            ((el.shapeSize || 100) * 0.4) / 1
-                          }% at 50% 50%)`
-                        : el.shape === "heart"
-                        ? `path('M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z') scale(${
-                            (el.shapeSize || 100) / 100
-                          })`
-                        : el.shape === "star"
-                        ? `polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%) scale(${
-                            (el.shapeSize || 100) / 100
-                          })`
-                        : undefined,
-                  }}
+                el.shape === "heart" || el.shape === "star" || el.shape === "circle" || el.shape === "oval" || el.shape === "square" ? (
+                  <svg
+                    width={el.width}
+                    height={el.height}
+                    viewBox={`0 0 ${el.width} ${el.height}`}
+                    style={{ width: "100%", height: "100%", display: "block" }}
+                  >
+                    <defs>
+                      {el.shape === "heart" && (
+                        <clipPath id={`heart-clip-${el.id}`}>
+                          <path d={`M ${el.width/2},${el.height*0.3} C ${el.width*0.35},${el.height*0.0} ${el.width*0.0},${el.height*0.25} ${el.width/2},${el.height*0.8} C ${el.width},${el.height*0.25} ${el.width*0.65},${el.height*0.0} ${el.width/2},${el.height*0.3} Z`} />
+                        </clipPath>
+                      )}
+                      {el.shape === "star" && (
+                        <clipPath id={`star-clip-${el.id}`}>
+                          <polygon points={getStarPoints(el.width, el.height, 5, el.width/2, el.height/2, Math.min(el.width,el.height)/2, Math.min(el.width,el.height)/4)} />
+                        </clipPath>
+                      )}
+                      {el.shape === "circle" && (
+                        <clipPath id={`circle-clip-${el.id}`}>
+                          <circle cx={el.width/2} cy={el.height/2} r={Math.min(el.width,el.height)/2} />
+                        </clipPath>
+                      )}
+                      {el.shape === "oval" && (
+                        <clipPath id={`oval-clip-${el.id}`}>
+                          <ellipse cx={el.width/2} cy={el.height/2} rx={el.width/2} ry={el.height/2} />
+                        </clipPath>
+                      )}
+                      {el.shape === "square" && (
+                        <clipPath id={`square-clip-${el.id}`}>
+                          <rect x={0} y={0} width={el.width} height={el.height} />
+                        </clipPath>
+                      )}
+                    </defs>
+                    <image
+                      href={el.content}
+                      x={el.imageOffsetX || 0}
+                      y={el.imageOffsetY || 0}
+                      width={(el.width || 0) * (el.imageScale || 1)}
+                      height={(el.height || 0) * (el.imageScale || 1)}
+                      clipPath={`url(#${el.shape}-clip-${el.id})`}
+                      preserveAspectRatio="xMidYMid slice"
+                    />
+                  </svg>
+                ) : (
+                  <Box
+                    component="img"
+                    src={el.content}
+                    alt="uploaded"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+                      borderRadius: el.shape === "circle" ? "50%" : 0,
+                      clipPath:
+                        el.shape === "oval"
+                          ? `ellipse(${(el.shapeSize || 100) / 2}% ${(el.shapeSize || 100) * 0.4 / 1}% at 50% 50%)`
+                          : undefined,
+                    }}
+                  />
+                )
+              )}
+              {/* Drag-to-pan overlay for image */}
+              {el.type === "image" && selectedElementId === el.id && (
+                <div
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'grab', zIndex: 10 }}
+                  onMouseDown={e => startPanImage(e, el.id)}
                 />
               )}
               {el.type === "text" &&
@@ -1583,31 +1676,74 @@ const ProductCustomize: React.FC = () => {
                 </Typography>
               )}
               {el.type === "art" && (
-                <Box
-                  component="img"
-                  src={el.content}
-                  alt="art"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    filter: "drop-shadow(0 2px 8px #FFD700)",
-                    borderRadius: el.shape === "circle" ? "50%" : 0,
-                    clipPath:
-                      el.shape === "oval"
-                        ? `ellipse(${(el.shapeSize || 100) / 2}% ${
-                            ((el.shapeSize || 100) * 0.4) / 1
-                          }% at 50% 50%)`
-                        : el.shape === "heart"
-                        ? `path('M 50 30 C 50 15, 90 15, 90 37.5 C 90 60, 50 80, 50 95 C 50 80, 10 60, 10 37.5 C 10 15, 50 15, 50 30 Z') scale(${
-                            (el.shapeSize || 100) / 100
-                          })`
-                        : el.shape === "star"
-                        ? `polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%) scale(${
-                            (el.shapeSize || 100) / 100
-                          })`
-                        : undefined,
-                  }}
+                el.shape === "heart" || el.shape === "star" || el.shape === "circle" || el.shape === "oval" || el.shape === "square" ? (
+                  <svg
+                    width={el.width}
+                    height={el.height}
+                    viewBox={`0 0 ${el.width} ${el.height}`}
+                    style={{ width: "100%", height: "100%", display: "block" }}
+                  >
+                    <defs>
+                      {el.shape === "heart" && (
+                        <clipPath id={`heart-clip-${el.id}`}>
+                          <path d={`M ${el.width/2},${el.height*0.3} C ${el.width*0.35},${el.height*0.0} ${el.width*0.0},${el.height*0.25} ${el.width/2},${el.height*0.8} C ${el.width},${el.height*0.25} ${el.width*0.65},${el.height*0.0} ${el.width/2},${el.height*0.3} Z`} />
+                        </clipPath>
+                      )}
+                      {el.shape === "star" && (
+                        <clipPath id={`star-clip-${el.id}`}>
+                          <polygon points={getStarPoints(el.width, el.height, 5, el.width/2, el.height/2, Math.min(el.width,el.height)/2, Math.min(el.width,el.height)/4)} />
+                        </clipPath>
+                      )}
+                      {el.shape === "circle" && (
+                        <clipPath id={`circle-clip-${el.id}`}>
+                          <circle cx={el.width/2} cy={el.height/2} r={Math.min(el.width,el.height)/2} />
+                        </clipPath>
+                      )}
+                      {el.shape === "oval" && (
+                        <clipPath id={`oval-clip-${el.id}`}>
+                          <ellipse cx={el.width/2} cy={el.height/2} rx={el.width/2} ry={el.height/2} />
+                        </clipPath>
+                      )}
+                      {el.shape === "square" && (
+                        <clipPath id={`square-clip-${el.id}`}>
+                          <rect x={0} y={0} width={el.width} height={el.height} />
+                        </clipPath>
+                      )}
+                    </defs>
+                    <image
+                      href={el.content}
+                      x={el.imageOffsetX || 0}
+                      y={el.imageOffsetY || 0}
+                      width={(el.width || 0) * (el.imageScale || 1)}
+                      height={(el.height || 0) * (el.imageScale || 1)}
+                      clipPath={`url(#${el.shape}-clip-${el.id})`}
+                      preserveAspectRatio="xMidYMid slice"
+                    />
+                  </svg>
+                ) : (
+                  <Box
+                    component="img"
+                    src={el.content}
+                    alt="art"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      filter: "drop-shadow(0 2px 8px #FFD700)",
+                      borderRadius: el.shape === "circle" ? "50%" : 0,
+                      clipPath:
+                        el.shape === "oval"
+                          ? `ellipse(${(el.shapeSize || 100) / 2}% ${(el.shapeSize || 100) * 0.4 / 1}% at 50% 50%)`
+                          : undefined,
+                    }}
+                  />
+                )
+              )}
+              {/* Drag-to-pan overlay for art */}
+              {el.type === "art" && selectedElementId === el.id && (
+                <div
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'grab', zIndex: 10 }}
+                  onMouseDown={e => startPanImage(e, el.id)}
                 />
               )}
               {el.type === "shape" &&
@@ -1756,6 +1892,10 @@ const ProductCustomize: React.FC = () => {
                       strokeWidth="4"
                     />
                   </svg>
+                ) : el.content === "square" ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100">
+                    <rect x={0} y={0} width={100} height={100} fill={el.fill ? el.color : "transparent"} />
+                  </svg>
                 ) : null)}
               <Button
                 size="small"
@@ -1853,54 +1993,18 @@ const ProductCustomize: React.FC = () => {
                 </>
               )}
               {selectedElementId === el.id && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    left: "50%",
-                    bottom: -36,
-                    transform: "translateX(-50%)",
-                    zIndex: 20,
-                    cursor: "grab",
-                    bgcolor: "white",
-                    borderRadius: "50%",
-                    boxShadow: 2,
-                    width: 32,
-                    height: 32,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "2px solid #F46A6A",
-                    p: 0,
-                    userSelect: "none",
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'grab',
+                    zIndex: 10,
                   }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    const rect =
-                      e.currentTarget.parentElement?.getBoundingClientRect();
-                    const centerX = rect
-                      ? rect.left + rect.width / 2
-                      : e.clientX;
-                    const centerY = rect
-                      ? rect.top + rect.height / 2
-                      : e.clientY;
-                    function onMouseMove(ev: MouseEvent) {
-                      const dx = ev.clientX - centerX;
-                      const dy = ev.clientY - centerY;
-                      let angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
-                      if (angle < 0) angle += 360;
-                      updateElement(el.id, { rotation: angle });
-                      console.log("Rotating", el.id, angle);
-                    }
-                    function onMouseUp() {
-                      window.removeEventListener("mousemove", onMouseMove);
-                      window.removeEventListener("mouseup", onMouseUp);
-                    }
-                    window.addEventListener("mousemove", onMouseMove);
-                    window.addEventListener("mouseup", onMouseUp);
-                  }}
-                >
-                  <RotateRightIcon fontSize="small" sx={{ color: "#F46A6A" }} />
-                </Box>
+                  onMouseDown={e => startPanImage(e, el.id)}
+                />
               )}
             </Rnd>
           ))}
@@ -2028,7 +2132,8 @@ const ProductCustomize: React.FC = () => {
                           | "circle"
                           | "oval"
                           | "heart"
-                          | "star",
+                          | "star"
+                          | "square",
                       })
                     }
                     sx={{ minWidth: 100 }}
@@ -2038,6 +2143,7 @@ const ProductCustomize: React.FC = () => {
                     <MenuItem value="oval">Oval</MenuItem>
                     <MenuItem value="heart">Heart</MenuItem>
                     <MenuItem value="star">Star</MenuItem>
+                    <MenuItem value="square">Square</MenuItem>
                   </Select>
                   <Button
                     size="small"
@@ -2628,6 +2734,22 @@ const ProductCustomize: React.FC = () => {
                   />
                 </svg>
               </Button>
+              {/* Square */}
+              <Button
+                onClick={() =>
+                  handleAddShape(
+                    "square",
+                    shapeFill,
+                    shapeColor,
+                    shapeBorderColor
+                  )
+                }
+                sx={{ p: 0, minWidth: 0, minHeight: 0, bgcolor: "transparent" }}
+              >
+                <svg width="40" height="40">
+                  <rect x={0} y={0} width={100} height={100} fill={shapeFill ? shapeColor : "transparent"} />
+                </svg>
+              </Button>
             </Box>
           </Box>
         )}
@@ -2745,3 +2867,16 @@ const ProductCustomize: React.FC = () => {
 };
 
 export default ProductCustomize;
+
+// Helper function for star points (add at the top of the file or inside the component)
+function getStarPoints(width: number, height: number, arms: number, cx: number, cy: number, outerRadius: number, innerRadius: number) {
+  let results = "";
+  let angle = Math.PI / arms;
+  for (let i = 0; i < 2 * arms; i++) {
+    const r = i % 2 === 0 ? outerRadius : innerRadius;
+    const currX = cx + Math.cos(i * angle - Math.PI / 2) * r;
+    const currY = cy + Math.sin(i * angle - Math.PI / 2) * r;
+    results += `${currX},${currY} `;
+  }
+  return results.trim();
+}

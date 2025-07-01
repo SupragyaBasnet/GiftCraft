@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import hero1 from '../assets/hero1.jpeg';
+import hero1 from '../assets/hero1.jpg';
 import hero2 from '../assets/hero2.jpg';
 import hero3 from '../assets/hero3.jpg';
 
@@ -54,8 +54,8 @@ const RotatingHeroSection: React.FC = () => {
           textAlign: 'center',
           color: 'white',
           px: 2,
-          py: { xs: 10, md: 14 },
-          maxWidth: '900px',
+          minHeight: '600px',
+          height: { xs: '60vh', md: '70vh' },
           mx: 'auto',
         }}
       >
@@ -79,48 +79,6 @@ const RotatingHeroSection: React.FC = () => {
           Design unique gifts for your loved ones with our easy-to-use customization tools.
           Make every occasion special.
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 4 }}>
-          <Button
-            component={RouterLink}
-            to="/customize"
-            variant="contained"
-            size="large"
-            onClick={(e) => {
-              const isLoggedIn = localStorage.getItem('giftcraftUser');
-              if (!isLoggedIn) {
-                e.preventDefault();
-                navigate('/login');
-              }
-            }}
-            sx={{
-              px: 4,
-              fontWeight: 700,
-              backgroundColor: '#F46A6A',
-              '&:hover': { backgroundColor: '#e05555' },
-            }}
-            startIcon={<DesignServices />}
-          >
-            Start Customizing
-          </Button>
-          <Button
-            component={RouterLink}
-            to="/products"
-            variant="outlined"
-            size="large"
-            sx={{
-              px: 4,
-              fontWeight: 700,
-              color: 'white',
-              borderColor: 'white',
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.1)',
-                borderColor: 'white',
-              },
-            }}
-          >
-            Browse Products
-          </Button>
-        </Box>
       </Box>
     </Box>
   );

@@ -14,6 +14,7 @@ interface Element {
   height: number;
   color?: string; // Add optional color property for text elements
   textStyle?: string; // Add optional textStyle property
+  shape?: string; // Add optional shape property
 }
 
 interface CustomizedProductImageProps {
@@ -178,16 +179,45 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
           }}
         >
           {el.type === 'image' && (
-            <Box
-              component="img"
-              src={el.content}
-              alt="customization element"
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.05))' // Lighter shadow for thumbnail
-              }} />
+            (el.shape === 'heart' || el.shape === 'star') ? (
+              <svg
+                width={el.width}
+                height={el.height}
+                viewBox={`0 0 ${el.width} ${el.height}`}
+                style={{ width: '100%', height: '100%', display: 'block' }}
+              >
+                <defs>
+                  {el.shape === 'heart' ? (
+                    <clipPath id={`heart-clip-${el.id}`}> 
+                      <path d={`M${el.width/2} ${el.height*0.8} L${el.width*0.2} ${el.height*0.5} A${el.width*0.3} ${el.height*0.3} 0 1 1 ${el.width/2} ${el.height*0.3} A${el.width*0.3} ${el.height*0.3} 0 1 1 ${el.width*0.8} ${el.height*0.5} Z`} />
+                    </clipPath>
+                  ) : (
+                    <clipPath id={`star-clip-${el.id}`}> 
+                      <polygon points={getStarPoints(el.width, el.height, 5, el.width/2, el.height/2, el.width/2.2, el.width/5)} />
+                    </clipPath>
+                  )}
+                </defs>
+                <image
+                  href={el.content}
+                  width={el.width}
+                  height={el.height}
+                  clipPath={`url(#${el.shape}-clip-${el.id})`}
+                  style={{ objectFit: 'contain' }}
+                />
+              </svg>
+            ) : (
+              <Box
+                component="img"
+                src={el.content}
+                alt="customization element"
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.05))'
+                }}
+              />
+            )
           )}
           {el.type === 'text' && (
             el.textStyle === 'arcUp' ? (
@@ -256,5 +286,18 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
     </CanvasBox>
   );
 };
+
+// Helper function for star points (add at the bottom of the file)
+function getStarPoints(width: number, height: number, arms: number, cx: number, cy: number, outerRadius: number, innerRadius: number) {
+  let results = "";
+  let angle = Math.PI / arms;
+  for (let i = 0; i < 2 * arms; i++) {
+    const r = i % 2 === 0 ? outerRadius : innerRadius;
+    const currX = cx + Math.cos(i * angle - Math.PI / 2) * r;
+    const currY = cy + Math.sin(i * angle - Math.PI / 2) * r;
+    results += `${currX},${currY} `;
+  }
+  return results.trim();
+}
 
 export default CustomizedProductImage; 

@@ -22,10 +22,10 @@ import notebook5 from "../assets/notebook5.webp";
 import pen1 from "../assets/pen1.webp";
 import pen2 from "../assets/pen2.jpeg";
 import pen3 from "../assets/pen3.png";
-import phonecase1 from "../assets/phonecase1.webp";
-import phonecase2 from "../assets/phonecase2.jpeg";
+import phonecase1 from "../assets/phonecase1.jpg";
+import phonecase2 from "../assets/phonecase2.jpg";
 import phonecase3 from "../assets/phonecase3.jpg";
-import phonecase4 from "../assets/phonecase4.webp";
+import phonecase4 from "../assets/phonecase4.jpg";
 import photoframe1 from "../assets/photoframe1.jpg";
 import photoframe2 from "../assets/photoframe2.jpg";
 import photoframe3 from "../assets/photoframe3.jpg";
@@ -195,28 +195,6 @@ export const products: Product[] = [
     category: "phonecases",
     rating: 4.6,
     reviews: 39,
-  },
-  {
-    id: 44,
-    name: "Phone Case",
-    price: 2000,
-    image: phonecase1,
-    images: [phonecase1, phonecase2, phonecase3, phonecase4],
-    description: "Minimalist signature case",
-    category: "phonecases",
-    rating: 4.7,
-    reviews: 33,
-  },
-  {
-    id: 45,
-    name: "Phone Case",
-    price: 2100,
-    image: phonecase2,
-    images: [phonecase1, phonecase2, phonecase3, phonecase4],
-    description: "Minimalist signature case",
-    category: "phonecases",
-    rating: 4.8,
-    reviews: 28,
   },
   {
     id: 46,
