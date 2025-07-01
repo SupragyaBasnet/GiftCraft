@@ -201,12 +201,13 @@ const Products: React.FC = () => {
                     <Grid item key={product.id} xs={12} sm={6} md={4} lg={4}>
                       <Card
                         sx={{
-                          height: '100%',
+                          width: 260,
+                          height: 420,
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'grey.50',
+                          bgcolor: 'white',
                           borderRadius: 4,
                           boxShadow: '0 2px 12px 0 rgba(0,0,0,0.04)',
                           p: { xs: 1, sm: 2 },
@@ -215,6 +216,8 @@ const Products: React.FC = () => {
                             transform: 'translateY(-5px)',
                             boxShadow: '0 6px 24px 0 rgba(244,106,106,0.10)',
                           },
+                          mx: 'auto',
+                          overflow: 'hidden',
                         }}
                       >
                         <CardMedia
@@ -223,20 +226,20 @@ const Products: React.FC = () => {
                           alt={product.name}
                           sx={{ width: 180, height: 180, objectFit: 'contain', mx: 'auto', bgcolor: 'white', borderRadius: 2, mt: 2, mb: 1 }}
                         />
-                        <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 0 }}>
-                          <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#111', fontSize: '1.2rem' }}>
+                        <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 0, width: '100%', minHeight: 140, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                          <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#111', fontSize: '1.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {product.name}
                           </Typography>
-                          <Typography variant="body2" paragraph sx={{ mb: 1, color: '#111' }}>
+                          <Typography variant="body2" paragraph sx={{ mb: 0.5, color: '#111', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', minHeight: 36 }}>
                             {product.description}
                           </Typography>
-                          <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
+                          <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mb: 0.5 }}>
                             <Rating value={product.rating} precision={0.5} readOnly size="small" />
                             <Typography variant="body2" color="text.secondary">
                               ({product.reviews})
                             </Typography>
                           </Stack>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#111', mb: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#111', mb: 0.5 }}>
                             Rs. {typeof product.price === 'number' ? product.price.toLocaleString('en-IN') : 'N/A'}
                           </Typography>
                         </CardContent>
@@ -297,15 +300,16 @@ const Products: React.FC = () => {
                               borderRadius: 8,
                               fontWeight: 700,
                               borderColor: '#F46A6A',
-                              color: '#F46A6A',
                               flex: 1,
                               minWidth: 0,
+                              minHeight: 44,
                               px: 0,
-                              fontSize: { xs: '0.95rem', sm: '0.8rem' },
+                              fontSize: { xs: '0.95rem', sm: '0.7rem' },
                               justifyContent: 'center',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
+                              color: '#F46A6A',
                               '& .MuiButton-startIcon': {
                                 marginRight: 1,
                                 '& svg': { fontSize: 22 },

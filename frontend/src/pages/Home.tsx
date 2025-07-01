@@ -5,7 +5,7 @@ import {
 } from '@mui/icons-material';
 import {
   Box, Button, Card, CardActions, CardContent,
-  CardMedia, Container, Grid, Paper, Typography
+  CardMedia, Container, Grid, Paper, Typography, Rating
 } from '@mui/material';
 import React from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -283,9 +283,12 @@ const Home: React.FC = () => {
             <Grid item key={product.id} xs={12} sm={6} md={3}>
               <Card
                 sx={{
-                  height: '100%',
+                  width: 260,
+                  height: 370,
                   display: 'flex',
                   flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
                   borderRadius: 4,
                   boxShadow: '0 2px 16px 0 rgba(244,106,106,0.09)',
                   transition: 'transform 0.2s, box-shadow 0.2s',
@@ -293,71 +296,44 @@ const Home: React.FC = () => {
                     transform: 'translateY(-6px) scale(1.03)',
                     boxShadow: '0 6px 24px 0 rgba(244,106,106,0.18)',
                   },
+                  mx: 'auto',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
                 }}
+                onClick={() => navigate(`/products/${product.id}`)}
               >
                 <CardMedia
                   component="img"
-                  height="220"
                   image={product.image}
                   alt={product.name}
-                  sx={{ objectFit: 'cover', borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
+                  sx={{
+                    width: 180,
+                    height: 180,
+                    objectFit: 'contain',
+                    mx: 'auto',
+                    mt: 1,
+                    mb: 0.5,
+                    bgcolor: 'white',
+                    borderRadius: 2,
+                  }}
                 />
-                <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                  <Typography gutterBottom variant="h6" component="h3" sx={{ fontWeight: 700 }}>
+                <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 2, width: '100%', minHeight: 0 }}>
+                  <Typography gutterBottom variant="h6" component="h3" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {product.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
+                    <Rating value={product.rating} precision={0.5} readOnly size="small" />
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                      ({product.reviews})
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" paragraph sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', minHeight: 40 }}>
                     {product.description}
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                     Rs. {product.price.toLocaleString('en-IN')}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ px: 2, pb: 2 }}>
-                  <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
-                    <Button
-                      component={RouterLink}
-                      to={`/customize/${product.category}`}
-                      variant="contained"
-                      size="medium"
-                      onClick={(e) => {
-                        const isLoggedIn = localStorage.getItem('giftcraftUser');
-                        if (!isLoggedIn) {
-                          e.preventDefault();
-                          localStorage.setItem('giftcraftPendingProduct', product.category);
-                          navigate('/login');
-                        }
-                      }}
-                      sx={{
-                        flex: 1,
-                        borderRadius: 8,
-                        fontWeight: 700,
-                        backgroundColor: '#F46A6A',
-                        color: 'white',
-                        '&:hover': { backgroundColor: '#e05555' },
-                      }}
-                      startIcon={<DesignServices />}
-                    >
-                      Customize
-                    </Button>
-                    <Button
-                      component={RouterLink}
-                      to={`/products/${product.id.toString()}`}
-                      variant="outlined"
-                      size="medium"
-                      sx={{
-                        flex: 1,
-                        borderRadius: 8,
-                        fontWeight: 600,
-                        color: '#F46A6A',
-                        borderColor: '#F46A6A',
-                        '&:hover': { bgcolor: 'rgba(244,106,106,0.08)', borderColor: '#e05555' },
-                      }}
-                    >
-                      View
-                    </Button>
-                  </Box>
-                </CardActions>
               </Card>
             </Grid>
           ))}
