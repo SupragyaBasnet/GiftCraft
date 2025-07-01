@@ -6,7 +6,7 @@ const Contact: React.FC = () => {
   return (
     <Box sx={{minHeight: '100vh', py: 8 }}>
       <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: { xs: 3, md: 6 }, borderRadius: 4, boxShadow: '0 4px 24px rgba(224,85,85,0.07)', mt: 6, mb: 2, textAlign: 'center', width: '100%', maxWidth: 1000, mx: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Paper elevation={3} sx={{ p: { xs: 3, md: 6 }, borderRadius: 4, boxShadow: '0 4px 24px rgba(224,85,85,0.18)', mt: 6, mb: 2, textAlign: 'center', width: '100%', maxWidth: 1000, mx: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, color: '#111', mb: 0 }}>
             Contact Us
           </Typography> 

@@ -492,7 +492,7 @@ const Home: React.FC = () => {
           color="primary"
           component={RouterLink}
           to="/products"
-          sx={{ mt: 3, fontWeight: 700, borderRadius: 8, px: 4, py: 1.5, fontSize: '1.1rem', backgroundColor: '#F46A6A', '&:hover': { backgroundColor: '#e05555' } }}
+          sx={{ mt: 3, fontWeight: 700, borderRadius: 7, px: 3, py: 1.35, fontSize: '1rem', backgroundColor: '#F46A6A', '&:hover': { backgroundColor: '#e05555' } }}
         >
           Browse Products
         </Button>
