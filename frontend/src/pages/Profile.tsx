@@ -88,7 +88,7 @@ const Profile: React.FC = () => {
           .filter((order: any) => order.address) // Filter orders that have an address
           .map((order: any) => order.address as string) // Extract addresses and explicitly cast to string
         ));
-        setAddresses(uniqueAddresses); // Set the unique addresses in state
+        setAddresses(uniqueAddresses as string[]); // Set the unique addresses in state
 
       } catch (e) {
         console.error('Failed to load order history or extract addresses from localStorage', e);
@@ -114,6 +114,10 @@ const Profile: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [openReviewModal, setOpenReviewModal] = useState(false);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewRating, setReviewRating] = useState<number | null>(null);
+  const [reviewOrderId, setReviewOrderId] = useState<string | null>(null);
 
   // Tab change handler
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setTab(newValue);
@@ -200,6 +204,31 @@ const Profile: React.FC = () => {
   // Toggle expanded order details
   const handleToggleExpand = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  };
+
+  // Review modal handlers
+  const handleOpenReviewModal = (orderId: string) => {
+    setReviewOrderId(orderId);
+    setOpenReviewModal(true);
+  };
+  const handleCloseReviewModal = () => {
+    setOpenReviewModal(false);
+    setReviewText('');
+    setReviewRating(null);
+    setReviewOrderId(null);
+  };
+  const handleSubmitReview = () => {
+    // Update the review and rating for the order in localStorage
+    const existingOrderHistory = localStorage.getItem('giftcraftOrderHistory');
+    let orderHistory = existingOrderHistory ? JSON.parse(existingOrderHistory) : [];
+    const orderIdx = orderHistory.findIndex((o: any) => o.id === reviewOrderId);
+    if (orderIdx !== -1) {
+      orderHistory[orderIdx].review = reviewText;
+      orderHistory[orderIdx].rating = reviewRating;
+      localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
+      setOrderHistory(orderHistory);
+    }
+    handleCloseReviewModal();
   };
 
   // --- Tab Panels ---
@@ -319,10 +348,9 @@ const Profile: React.FC = () => {
                         <Box sx={{ pl: 4, pr: 2, pb: 2, borderBottom: '1px solid #eee' }}>
                           <Typography variant="subtitle1" fontWeight={700} gutterBottom>Items:</Typography>
                           {/* Display order items - Assuming 'item' in order object has name, qty, price */} {/* Use CustomizedProductImage here */}
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                              {/* Use the CustomizedProductImage component to display the item */}
-                              <Box sx={{ width: 60, height: 60, mr: 2 }}> {/* Adjust size as needed */}
-                                {/* Pass item details to CustomizedProductImage */}
+                          {order.item ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                              <Box sx={{ width: 60, height: 60, mr: 2 }}>
                                 <CustomizedProductImage 
                                   baseImage={order.item.image} 
                                   elements={order.item.elements || []} 
@@ -341,7 +369,12 @@ const Profile: React.FC = () => {
                                    )}
                                  <Typography variant="body2">Price: Rs. {productPrices[order.item.productType] || 0}</Typography>
                               </Box>
-                          </Box>
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+                              Order item details missing.
+                            </Typography>
+                          )}
 
                           {/* Display Address */}
                           {order.address && (
@@ -352,12 +385,20 @@ const Profile: React.FC = () => {
                           )}
 
                           {/* Display Review and Rating if available */}
-                          {order.review && (
+                          {order.review ? (
                             <Box sx={{ mt: 2 }}>
                               <Typography variant="subtitle1" fontWeight={700}>Your Review:</Typography>
                               <Rating name="read-only-rating" value={order.rating} readOnly />
                               <Typography variant="body2">{order.review}</Typography>
                             </Box>
+                          ) : (
+                            <Button
+                              variant="outlined"
+                              sx={{ mt: 2, borderRadius: 2 }}
+                              onClick={() => handleOpenReviewModal(order.id)}
+                            >
+                              Leave a Review
+                            </Button>
                           )}
 
                           <Typography variant="subtitle1" fontWeight={700} gutterBottom sx={{ mt: 2 }}>Tracking:</Typography>
@@ -518,6 +559,36 @@ const Profile: React.FC = () => {
             startIcon={<PhotoCamera />}
           >
             Capture
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Review Modal */}
+      <Dialog open={openReviewModal} onClose={handleCloseReviewModal} maxWidth="sm" fullWidth>
+        <DialogTitle>Leave a Review</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <Typography variant="subtitle1">Your Rating:</Typography>
+            <Rating
+              name="review-rating"
+              value={reviewRating}
+              onChange={(_, newValue) => setReviewRating(newValue)}
+              size="large"
+            />
+            <TextField
+              label="Your Review"
+              multiline
+              minRows={3}
+              value={reviewText}
+              onChange={e => setReviewText(e.target.value)}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseReviewModal}>Cancel</Button>
+          <Button onClick={handleSubmitReview} variant="contained" disabled={!reviewRating || !reviewText.trim()}>
+            Submit Review
           </Button>
         </DialogActions>
       </Dialog>

@@ -249,16 +249,6 @@ const CheckoutPage: React.FC = () => {
             ))}
             {/* You can add more details like order number here in a real app */}
 
-            {/* Add a button to leave a review */}
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 4, borderRadius: 8, fontWeight: 700, px: 4 }}
-              onClick={handleOpenReviewModal}
-            >
-              Leave a Review
-            </Button>
-
           </Box>
         ) : (
           /* Content to show BEFORE order is confirmed */
