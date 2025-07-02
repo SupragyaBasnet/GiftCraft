@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
               <Link href="/products" color="inherit" underline="hover" sx={{ color: '#111' }}>
                 Products
               </Link>
-              <Link href="/about-us" color="inherit" underline="hover" sx={{ color: '#111' }}>
+              <Link href="/about" color="inherit" underline="hover" sx={{ color: '#111' }}>
                 About Us
               </Link>
               <Link href="/cart" color="inherit" underline="hover" sx={{ color: '#111' }}>
@@ -73,7 +73,6 @@ const Footer: React.FC = () => {
               <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>• Quality & Trust</Typography>
               <Typography variant="body2" sx={{ color: '#111', mb: 1 }}>• Fast & Friendly Service</Typography>
             </Box>
-          
           </Grid>
         </Grid>
         <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>

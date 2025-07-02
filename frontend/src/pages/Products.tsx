@@ -62,7 +62,7 @@ const Products: React.FC = () => {
 
   // Sidebar content
   const sidebar = (
-    <Box sx={{ width: 260, p: 2 }}>
+    <Box sx={{ width: 260, p: 2, position: { md: 'sticky' }, top: { md: 32 }, alignSelf: { md: 'flex-start' }, zIndex: 2 }}>
       <Typography variant="h6" fontWeight={700} mb={2}>Filters</Typography>
       {/* Category Filter */}
       <Typography variant="subtitle2" fontWeight={600} mb={1}>Category</Typography>

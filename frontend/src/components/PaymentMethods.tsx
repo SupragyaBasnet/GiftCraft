@@ -12,26 +12,84 @@ import {
   PhoneAndroid,
   DeliveryDining,
 } from '@mui/icons-material';
+import esewaLogo from '../assets/esewa_logo.jpg';
+import khaltiLogo from '../assets/khalti_logo.png';
+import imepayLogo from '../assets/imepay_logo.jpg';
 
 const PaymentMethods: React.FC = () => {
   const methods = [
     {
-      icon: <Payment sx={{ fontSize: 40 }} />,
+      icon: (
+        <Box sx={{
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          bgcolor: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 1,
+          mb: 0.5,
+        }}>
+          <Box component="img" src={esewaLogo} alt="eSewa" sx={{ height: 28, width: 28, objectFit: 'contain' }} />
+        </Box>
+      ),
       title: 'eSewa',
       description: 'Pay securely through eSewa',
     },
     {
-      icon: <AccountBalanceWallet sx={{ fontSize: 40 }} />,
+      icon: (
+        <Box sx={{
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          bgcolor: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 1,
+          mb: 0.5,
+        }}>
+          <Box component="img" src={khaltiLogo} alt="Khalti" sx={{ height: 28, width: 28, objectFit: 'contain' }} />
+        </Box>
+      ),
       title: 'Khalti',
       description: 'Quick payment through Khalti',
     },
     {
-      icon: <PhoneAndroid sx={{ fontSize: 40 }} />,
+      icon: (
+        <Box sx={{
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          bgcolor: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 1,
+          mb: 0.5,
+        }}>
+          <Box component="img" src={imepayLogo} alt="IME Pay" sx={{ height: 28, width: 28, objectFit: 'contain' }} />
+        </Box>
+      ),
       title: 'IME Pay',
       description: 'Pay securely through IME Pay',
     },
     {
-      icon: <DeliveryDining sx={{ fontSize: 40 }} />,
+      icon: (
+        <Box sx={{
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          bgcolor: '#238A3B',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 0.5,
+        }}>
+          <Payment sx={{ fontSize: 32, color: 'white' }} />
+        </Box>
+      ),
       title: 'Cash on Delivery',
       description: 'Pay with cash upon delivery',
     },

@@ -160,32 +160,36 @@ const ProductDetails: React.FC = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Box
               component="img"
-              src={images[mainIdx]}
+              src={product.image}
               alt={product.name || ''}
               sx={{ width: 350, height: 350, borderRadius: 4, boxShadow: 3, mb: 2, objectFit: 'contain', bgcolor: 'white', p: 0, m: 0, display: 'block' }}
             />
-            {images.length > 1 && (
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 1 }}>
-                {images.map((img, idx) => (
-                  <Box
-                    key={idx}
-                    component="img"
-                    src={img || ''}
-                    alt={product.name + '-thumb-' + idx || ''}
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      objectFit: 'cover',
-                      borderRadius: 2,
-                      border: mainIdx === idx ? '2px solid #F46A6A' : '1px solid #eee',
-                      cursor: 'pointer',
-                      transition: 'border 0.2s',
-                    }}
-                    onClick={() => setMainIdx(idx)}
-                  />
-                ))}
-              </Box>
-            )}
+            {/* Show all products in the same category as thumbnails */}
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 1 }}>
+              {products.filter(p => p.category === product.category).map((catProd) => (
+                <Box
+                  key={catProd.id}
+                  component="img"
+                  src={catProd.image}
+                  alt={catProd.name}
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    objectFit: 'cover',
+                    borderRadius: 2,
+                    border: catProd.id === product.id ? '2px solid #F46A6A' : '1px solid #eee',
+                    cursor: catProd.id === product.id ? 'default' : 'pointer',
+                    opacity: catProd.id === product.id ? 1 : 0.7,
+                    transition: 'border 0.2s',
+                  }}
+                  onClick={() => {
+                    if (catProd.id !== product.id) {
+                      navigate(`/products/${catProd.id}`);
+                    }
+                  }}
+                />
+              ))}
+            </Box>
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>

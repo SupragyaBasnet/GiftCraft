@@ -10,7 +10,7 @@ import CustomizedProductImage from '../components/CustomizedProductImage';
 // Import payment logos
 import esewaLogo from '../assets/esewa_logo.jpg'; // Assuming path and filename
 import khaltiLogo from '../assets/khalti_logo.png'; // Assuming path and filename
-import imepayLogo from '../assets/imepay_logo.png'; // Assuming path and filename
+import imepayLogo from '../assets/imepay_logo.jpg'; // Assuming path and filename
 
 // Simple client-side price map (placeholder) - Needed for calculating subtotal and delivery charge
 const productPrices: Record<string, number> = {

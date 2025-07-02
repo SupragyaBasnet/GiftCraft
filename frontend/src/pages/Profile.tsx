@@ -154,6 +154,7 @@ const Profile: React.FC = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result as string);
+        localStorage.setItem('profileImage', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -191,6 +192,7 @@ const Profile: React.FC = () => {
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0);
         setProfileImage(canvas.toDataURL('image/jpeg'));
+        localStorage.setItem('profileImage', canvas.toDataURL('image/jpeg'));
         handleCameraClose();
       }
     }
@@ -235,6 +237,12 @@ const Profile: React.FC = () => {
   function TabPanel({ children, value, index }: { children: React.ReactNode, value: number, index: number }) {
     return value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null;
   }
+
+  // On component mount, load profile image from localStorage if available
+  useEffect(() => {
+    const savedImage = localStorage.getItem('profileImage');
+    if (savedImage) setProfileImage(savedImage);
+  }, []);
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -282,6 +290,16 @@ const Profile: React.FC = () => {
                 minWidth: 180,
                 mt: 2,
                 mb: { xs: 2, sm: 0 },
+                '& .MuiTab-root': {
+                  color: '#888', // grey for all tab text
+                  fontWeight: 600,
+                },
+                '& .Mui-selected': {
+                  color: '#111 !important', // black for selected tab text
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#111', // black indicator
+                },
               }}
             >
               <Tab icon={<Home />} iconPosition="start" label="Profile" />
@@ -331,7 +349,21 @@ const Profile: React.FC = () => {
                     ),
                   }}
                 />
-                <Button type="submit" variant="contained" sx={{ mt: 3, borderRadius: 2 }}>
+                <Button 
+                  type="submit" 
+                  variant="outlined"
+                  sx={{ 
+                    mt: 3, 
+                    borderRadius: 2, 
+                    color: 'rgb(255,106,106)',
+                    borderColor: 'rgb(255,106,106)',
+                    fontWeight: 700,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,106,106,0.08)',
+                      borderColor: 'rgb(255,106,106)',
+                      color: 'rgb(255,106,106)',
+                    }
+                  }}>
                   Save Changes
                 </Button>
               </Box>
@@ -416,8 +448,19 @@ const Profile: React.FC = () => {
                               </Box>
                             ) : (
                               <Button
-                                variant="outlined"
-                                sx={{ mt: 2, borderRadius: 2 }}
+                                variant="contained"
+                                sx={{
+                                  mt: 2,
+                                  borderRadius: 2,
+                                  backgroundColor: 'rgb(255,106,106)',
+                                  color: '#fff',
+                                  fontWeight: 700,
+                                  boxShadow: 'none',
+                                  '&:hover': {
+                                    backgroundColor: 'rgb(230,86,86)',
+                                    boxShadow: 'none',
+                                  }
+                                }}
                                 onClick={() => handleOpenReviewModal(order.id)}
                               >
                                 Leave a Review
@@ -502,8 +545,19 @@ const Profile: React.FC = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <Button
-                  variant="contained"
-                  sx={{ mt: 2, borderRadius: 2, fontWeight: 600 }}
+                  variant="outlined"
+                  sx={{
+                    mt: 2,
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    color: 'rgb(255,106,106)',
+                    borderColor: 'rgb(255,106,106)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,106,106,0.08)',
+                      borderColor: 'rgb(255,106,106)',
+                      color: 'rgb(255,106,106)',
+                    }
+                  }}
                   onClick={() => setSnackbar({open: true, message: 'Password changed!', severity: 'success'})}
                 >
                   Change Password
