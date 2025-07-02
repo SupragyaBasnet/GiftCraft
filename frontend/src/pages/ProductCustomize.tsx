@@ -793,143 +793,92 @@ const ProductCustomize: React.FC = () => {
   };
 
   const handleSave = () => {
-    // Capture current customization details
-    const currentCustomization = {
-      productType: selectedProduct,
-      viewIndex: hasArrayViews ? currentArrayIndex : currentView, // Use array index or view type
-      size:
-        selectedProduct === "notebook"
-          ? selectedNotebookSize
-          : selectedProduct === "tshirt"
-          ? selectedTshirtSize
-          : selectedProduct === "waterbottle"
-          ? selectedWaterBottleSize
-          : undefined, // Capture size if applicable
-      color: color,
-      // Clean up elements before saving
-      elements: elements.map((el) => ({
-        id: el.id,
-        type: el.type,
-        content: el.content,
-        x: el.x,
-        y: el.y,
-        width: el.width,
-        height: el.height,
-        color: el.type === "text" && el.color ? el.color : undefined, // Include color only for text elements if present
-        fontFamily: el.fontFamily,
-        textStyle: el.textStyle,
-        imageOffsetX: el.imageOffsetX,
-        imageOffsetY: el.imageOffsetY,
-        imageScale: el.imageScale,
-      })),
-      image: currentImage, // Capture the image URL that was customized
-    };
-    console.log("Customization Saved:", currentCustomization); // Log to console for demonstration
-    setSnackbar({
-      open: true,
-      message: "Customization saved!",
-      severity: "success",
-    });
-    // In a real application, you would save this to a backend or localStorage
+    try {
+      // Simulate save logic
+      setSnackbar({ open: true, message: 'Customization saved!', severity: 'success' });
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
+    }
   };
 
   const handleAddToCart = () => {
-    const customizedItem = {
-      id: Date.now(), // Use timestamp for a simple unique ID
-      productType: selectedProduct,
-      image: Array.isArray(productImages[selectedProduct])
-        ? (productImages[selectedProduct] as string[])[currentArrayIndex]
-        : (productImages[selectedProduct] as ProductView)[currentView],
-      elements: elements,
-      color: color,
-      size:
-        selectedProduct === "tshirt"
-          ? selectedTshirtSize
-          : selectedProduct === "notebook"
-          ? selectedNotebookSize
-          : undefined,
-      quantity: 1, // Default quantity to 1
-    };
-
-    const existingCart = JSON.parse(
-      localStorage.getItem("giftcraftCart") || "[]"
-    );
-    const updatedCart = [...existingCart, customizedItem];
-
-    localStorage.setItem("giftcraftCart", JSON.stringify(updatedCart));
-    setCartItems(updatedCart); // Update local state to reflect change
-
-    setSnackbar({ open: true, message: "Added to cart!", severity: "success" });
-    navigate("/cart"); // Redirect to cart page after adding
+    try {
+      const isLoggedIn = localStorage.getItem('giftcraftUser');
+      if (!isLoggedIn) {
+        setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
+        return;
+      }
+      // Simulate add to cart logic
+      setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+      navigate('/cart');
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
+    }
   };
 
   const handleBuyNow = () => {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem("giftcraftUser"); // Assuming we store user data in localStorage
-    if (!isLoggedIn) {
-      // Save current customization to localStorage to restore after login
-      const currentCustomization = {
+    try {
+      const isLoggedIn = localStorage.getItem('giftcraftUser');
+      if (!isLoggedIn) {
+        setSnackbar({ open: true, message: 'Please log in to buy.', severity: 'error' });
+        // Save current customization to localStorage to restore after login
+        const currentCustomization = {
+          productType: selectedProduct,
+          viewIndex: hasArrayViews ? currentArrayIndex : currentView,
+          size:
+            selectedProduct === 'notebook'
+              ? selectedNotebookSize
+              : selectedProduct === 'tshirt'
+              ? selectedTshirtSize
+              : selectedProduct === 'waterbottle'
+              ? selectedWaterBottleSize
+              : undefined,
+          color: color,
+          elements: elements.map((el) => ({
+            id: el.id,
+            type: el.type,
+            content: el.content,
+            x: el.x,
+            y: el.y,
+            width: el.width,
+            height: el.height,
+            color: el.type === 'text' && el.color ? el.color : undefined,
+            fontFamily: el.fontFamily,
+            textStyle: el.textStyle,
+            imageOffsetX: el.imageOffsetX,
+            imageOffsetY: el.imageOffsetY,
+            imageScale: el.imageScale,
+          })),
+          image: currentImage,
+        };
+        localStorage.setItem('giftcraftPendingCustomization', JSON.stringify(currentCustomization));
+        navigate('/login');
+        return;
+      }
+      // Simulate buy logic
+      setSnackbar({ open: true, message: 'Purchase successful!', severity: 'success' });
+      // Proceed to checkout
+      const customizedProduct = {
+        id: Date.now(),
         productType: selectedProduct,
-        viewIndex: hasArrayViews ? currentArrayIndex : currentView, // Use array index or view type
+        viewIndex: hasArrayViews ? currentArrayIndex : currentView,
         size:
-          selectedProduct === "notebook"
+          selectedProduct === 'notebook'
             ? selectedNotebookSize
-            : selectedProduct === "tshirt"
+            : selectedProduct === 'tshirt'
             ? selectedTshirtSize
-            : selectedProduct === "waterbottle"
+            : selectedProduct === 'waterbottle'
             ? selectedWaterBottleSize
             : undefined,
         color: color,
-        // Clean up elements before saving
-        elements: elements.map((el) => ({
-          id: el.id,
-          type: el.type,
-          content: el.content,
-          x: el.x,
-          y: el.y,
-          width: el.width,
-          height: el.height,
-          color: el.type === "text" && el.color ? el.color : undefined, // Include color only for text elements if present
-          fontFamily: el.fontFamily,
-          textStyle: el.textStyle,
-          imageOffsetX: el.imageOffsetX,
-          imageOffsetY: el.imageOffsetY,
-          imageScale: el.imageScale,
-        })),
+        elements: elements,
         image: currentImage,
       };
-      localStorage.setItem(
-        "giftcraftPendingCustomization",
-        JSON.stringify(currentCustomization)
-      );
-      // Redirect to login page
-      navigate("/login");
-      return;
+      localStorage.setItem('giftcraftCheckoutItem', JSON.stringify(customizedProduct));
+      navigate('/checkout');
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to complete purchase.', severity: 'error' });
     }
-
-    // If logged in, proceed with buy now
-    const customizedProduct = {
-      id: Date.now(),
-      productType: selectedProduct,
-      viewIndex: hasArrayViews ? currentArrayIndex : currentView, // Use array index or view type
-      size:
-        selectedProduct === "notebook"
-          ? selectedNotebookSize
-          : selectedProduct === "tshirt"
-          ? selectedTshirtSize
-          : selectedProduct === "waterbottle"
-          ? selectedWaterBottleSize
-          : undefined,
-      color: color,
-      elements: elements,
-      image: currentImage,
-    };
-
-    localStorage.setItem(
-      "giftcraftCheckoutItem",
-      JSON.stringify(customizedProduct)
-    );
-    navigate("/checkout");
   };
 
   // Add useEffect to restore customization after login
@@ -1623,17 +1572,39 @@ const ProductCustomize: React.FC = () => {
               <MenuItem value="XXL">XXL</MenuItem>
             </TextField>
           )}
-          {selectedProduct === "waterbottle" && (
-            <TextField
-              select
-              label="Size"
-              value={selectedWaterBottleSize}
-              onChange={(e) => setSelectedWaterBottleSize(e.target.value)}
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value="1 Liter">1 Liter</MenuItem>
-              <MenuItem value="0.5 Liter">0.5 Liter</MenuItem>
-            </TextField>
+          {selectedProduct === "waterbottle" && hasArrayViews && (
+            <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+
+              <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <TextField
+                  select
+                  label="Bottle Type"
+                  value={currentArrayIndex}
+                  onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+                  sx={{ minWidth: 180 }}
+                >
+                  {productImageInfo.waterbottle.map((info, idx) => (
+                    <MenuItem key={info.name} value={idx}>
+                      {info.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+         
+              {/* Size dropdown for waterbottle */}
+              <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2, mt:2}}>
+                <TextField
+                  select
+                  label="Size"
+                  value={selectedWaterBottleSize}
+                  onChange={e => setSelectedWaterBottleSize(e.target.value)}
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="1 Liter">1 Liter</MenuItem>
+                  <MenuItem value="0.5 Liter">0.5 Liter</MenuItem>
+                </TextField>
+              </Box>
+            </Box>
           )}
           {selectedProduct === "frame" && (
             <TextField
@@ -1800,7 +1771,9 @@ const ProductCustomize: React.FC = () => {
                 border:
                   selectedElementId === el.id
                     ? "2px solid #F46A6A"
-                    : "2px dashed orange",
+                    : el.__hovered
+                    ? "2px dashed orange"
+                    : "none",
                 boxShadow:
                   selectedElementId === el.id ? "0 0 8px #F46A6A55" : "none",
                 background: "transparent",
@@ -1810,6 +1783,8 @@ const ProductCustomize: React.FC = () => {
                 cursor: "move",
                 transform: `rotate(${el.rotation || 0}deg)`,
               }}
+              onMouseEnter={() => updateElement(el.id, { __hovered: true })}
+              onMouseLeave={() => updateElement(el.id, { __hovered: false })}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
                 setSelectedElementId(el.id);

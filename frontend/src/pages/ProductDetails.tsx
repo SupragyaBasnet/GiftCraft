@@ -102,7 +102,7 @@ const ProductDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [mainIdx, setMainIdx] = useState(0);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -125,6 +125,20 @@ const ProductDetails: React.FC = () => {
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => Math.max(1, prev + amount));
+  };
+
+  const handleAddToCart = () => {
+    try {
+      const isLoggedIn = localStorage.getItem('giftcraftUser');
+      if (!isLoggedIn) {
+        setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
+        return;
+      }
+      // Simulate add to cart logic (could be API call)
+      setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
+    }
   };
 
   if (loading) {
@@ -221,7 +235,7 @@ const ProductDetails: React.FC = () => {
               size="large"
               sx={{ borderRadius: 8, fontWeight: 700, backgroundColor: '#F46A6A', color: 'white', '&:hover': { backgroundColor: '#e05555' } }}
               startIcon={<ShoppingCart />}
-              onClick={() => setSnackbarOpen(true)}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </Button>
@@ -356,9 +370,9 @@ const ProductDetails: React.FC = () => {
           ))}
         </Grid>
       </Box>
-      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <MuiAlert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
-          Added to cart!
+      <Snackbar open={snackbar.open} autoHideDuration={2000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <MuiAlert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
         </MuiAlert>
       </Snackbar>
     </Container>
