@@ -8,8 +8,59 @@ import { products, Product } from '../data/products';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { keyframes } from '@mui/system';
 
-function getProductStory(category: string) {
-  switch (category) {
+function getProductStory(product: Product) {
+  const uniqueDescriptions: Record<number, string> = {
+    1: "This classic custom t-shirt is a wearable memory—perfect for birthdays, reunions, or just because. Every design tells a story only you can create.",
+    13: "Premium cotton, premium memories. This t-shirt is for those who want comfort and style, wrapped in a personal touch.",
+    14: "Vintage style meets modern sentiment. Gift a t-shirt that brings nostalgia and new memories together in one unique piece.",
+    37: "Oversized for comfort, customized for personality. This t-shirt is a cozy canvas for your creativity.",
+    38: "Athletic and personal—this t-shirt is for the go-getter who loves a custom touch on their activewear.",
+    2: "Every sip from this classic mug is a reminder of your thoughtfulness. Perfect for coffee lovers and tea enthusiasts alike.",
+    15: "A premium ceramic mug for premium moments. Make every coffee break special with a design that's uniquely theirs.",
+    16: "Travel in style and sentiment. This mug keeps drinks warm and memories close, wherever they go.",
+    3: "A phone case that's as unique as they are. Protect their phone and showcase your creativity every day.",
+    17: "Premium protection, premium personalization. This phone case is a daily reminder of your special bond.",
+    18: "Minimalist design, maximum meaning. Gift a phone case that's both stylish and sentimental.",
+    43: "Signature style, signature memories. This case is for those who want their phone to stand out and feel personal.",
+    4: "A water bottle that keeps them hydrated and connected to you. Perfect for busy days and thoughtful moments.",
+    19: "Double-walled and double the love. This bottle is a practical gift with a personal twist.",
+    20: "Sports-style and full of spirit. This bottle is for the active soul who loves a custom touch.",
+    46: "Space-saving, heart-filling. This bottle is a unique way to show you care, every single day.",
+    47: "A gift set mug for those who love a coordinated touch. Every piece is a reminder of your thoughtful gesture.",
+    48: "Hand-painted and heartfelt. This artistic mug is a one-of-a-kind gift for a one-of-a-kind person.",
+    5: "A classic cap for classic memories. Personalize it for a gift they'll wear with pride.",
+    21: "Premium embroidery, premium memories. This cap is a stylish way to show you care.",
+    22: "Sports cap for sporty spirits. Add a custom design for a gift that's both fun and functional.",
+    49: "Snapback style, snapback memories. This cap is a trendy way to keep your bond close.",
+    6: "A premium notebook for premium thoughts. Personalize it for a gift that inspires creativity.",
+    23: "High-quality paper, high-quality memories. This notebook is perfect for dreamers and planners alike.",
+    24: "A couple's notebook for shared dreams and stories. Personalize it for a truly unique gift.",
+    52: "Leather cover, lasting memories. This notebook is a luxurious way to keep your thoughts safe.",
+    53: "Compact and custom. This notebook is perfect for notes on the go, with a personal touch.",
+    7: "A basic pen with a not-so-basic meaning. Personalize it for a daily reminder of your support.",
+    25: "Premium pen for premium words. Engrave it with a name or message for a truly special gift.",
+    26: "A gift pen set for those who love to write. Every word becomes more meaningful with a personal touch.",
+    27: "A premium keychain for premium memories. Personalize it for a gift they'll carry everywhere.",
+    28: "A photo keychain to keep your favorite moments close. Every glance is a reminder of your bond.",
+    58: "A company logo keychain for professional pride. Personalize it for a thoughtful business gift.",
+    59: "A star metal keychain for the star in your life. Custom artwork makes it truly unique.",
+    60: "A rectangle metal keychain for classic style and custom engraving. A small gift with big meaning.",
+    9: "A classic photo frame for classic memories. Personalize it to showcase your favorite moments.",
+    29: "Premium wood, premium memories. This frame is a beautiful way to display your love.",
+    30: "A digital photo frame for ever-changing memories. Load it with photos for a gift that keeps on giving.",
+    61: "A collage frame for a collage of memories. Personalize it for a truly unique display.",
+    64: "A silk pillowcase for sweet dreams and custom comfort. Personalize it for a gift that's both practical and heartfelt.",
+    65: "A pink silk pillowcase for a touch of luxury and love. Perfect for special occasions.",
+    66: "A couple pictured pillowcase for shared dreams. Personalize it for a gift that celebrates togetherness.",
+    67: "A heart-shaped pillowcase for heartfelt comfort. Every night is a reminder of your care.",
+    68: "An emoji pillowcase for fun and comfort. Personalize it for a gift that brings smiles.",
+    69: "A star-shaped emoji pillowcase for playful dreams. Custom design makes it extra special.",
+    70: "A silk pillowcase for luxurious comfort and sweet memories. Personalize it for a truly thoughtful gift.",
+  };
+  if (uniqueDescriptions[product.id]) {
+    return uniqueDescriptions[product.id];
+  }
+  switch (product.category) {
     case 'tshirts':
       return "A custom t-shirt is more than just clothing—it's a canvas for memories, inside jokes, and love. Every time they wear it, they'll feel your thoughtfulness close to their heart.";
     case 'mugs':
@@ -259,7 +310,7 @@ const ProductDetails: React.FC = () => {
           Why This Gift is Special
         </Typography>
         <Typography variant="h5" sx={{ color: '#B22234', fontWeight: 500, fontSize: { xs: '1.15rem', md: '1.35rem' }, lineHeight: 1.7, maxWidth: 700, mx: 'auto' }}>
-          {getProductStory(product.category)}
+          {getProductStory(product)}
         </Typography>
       </Box>
       {/* Related Products */}
