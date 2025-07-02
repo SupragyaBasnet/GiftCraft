@@ -231,7 +231,7 @@ export const products: Product[] = [
   },
   {
     id: 4,
-    name: "Standard Water Bottle",
+    name: "Baby and Mother Picture Water Bottle",
     price: 900,
     image: waterbottle1,
     images: [
@@ -265,7 +265,7 @@ export const products: Product[] = [
   },
   {
     id: 20,
-    name: "Sports Water Bottle",
+    name: "Name Signature Water Bottle",
     price: 1100,
     image: waterbottle3,
     images: [
@@ -282,7 +282,7 @@ export const products: Product[] = [
   },
   {
     id: 46,
-    name: "Collapsible Water Bottle",
+    name: "Avenger Water Bottle",
     price: 1300,
     image: waterbottle4,
     images: [
@@ -299,7 +299,7 @@ export const products: Product[] = [
   },
   {
     id: 47,
-    name: "Glass Water Bottle",
+    name: "We bear bears Water Bottle",
     price: 1500,
     image: waterbottle5,
     images: [
@@ -360,7 +360,7 @@ export const products: Product[] = [
   },
   {
     id: 6,
-    name: "Basic Notebook",
+    name: "Premium Named Notebook",
     price: 500,
     image: notebook1,
     images: [notebook1, notebook2, notebook3, notebook4webp, notebook5],
@@ -371,7 +371,7 @@ export const products: Product[] = [
   },
   {
     id: 23,
-    name: "Premium Notebook",
+    name: "Premium Named Notebook",
     price: 700,
     image: notebook2,
     images: [notebook2, notebook1, notebook3, notebook4webp, notebook5],
@@ -382,7 +382,7 @@ export const products: Product[] = [
   },
   {
     id: 24,
-    name: "Sketchbook",
+    name: "Couple Notebook",
     price: 600,
     image: notebook3,
     images: [notebook3, notebook1, notebook2, notebook4webp, notebook5],
@@ -393,7 +393,7 @@ export const products: Product[] = [
   },
   {
     id: 52,
-    name: "Leather Notebook",
+    name: "Basis Name Notebook",
     price: 900,
     image: notebook4webp,
     images: [notebook4webp, notebook1, notebook2, notebook3, notebook5],
@@ -404,7 +404,7 @@ export const products: Product[] = [
   },
   {
     id: 53,
-    name: "Pocket Notebook",
+    name: "Picture Notebook",
     price: 400,
     image: notebook5,
     images: [notebook5, notebook1, notebook2, notebook3, notebook4webp],
@@ -470,33 +470,33 @@ export const products: Product[] = [
   },
   {
     id: 58,
-    name: "Leather Keychain",
+    name: "Company Logo Keychain",
     price: 300,
     image: keychain4,
     images: [keychain4, keychain1, keychain2, keychain3, keychain],
-    description: "Genuine leather keychain with custom design",
+    description: "Genuine keychain with custom design",
     category: "keychains",
     rating: 4.3,
     reviews: 14,
   },
   {
     id: 59,
-    name: "Acrylic Keychain",
+    name: "Star Metal Keychain",
     price: 180,
     image: keychain,
     images: [keychain, keychain1, keychain2, keychain3, keychain4],
-    description: "Colorful acrylic keychain with custom artwork",
+    description: "Star Metal acrylic keychain with custom artwork",
     category: "keychains",
     rating: 4.2,
     reviews: 16,
   },
   {
     id: 60,
-    name: "Wooden Keychain",
+    name: "Rectangle Metal Keychain",
     price: 220,
     image: keychain1,
     images: [keychain1, keychain2, keychain3, keychain4, keychain],
-    description: "Natural wood keychain with custom engraving",
+    description: "Rectangle Metal keychain with custom engraving",
     category: "keychains",
     rating: 4.1,
     reviews: 12,
@@ -558,7 +558,7 @@ export const products: Product[] = [
   },
   {
     id: 65,
-    name: "Memory Foam Pillow Case",
+    name: "Pink Color Silk Pillow Case",
     price: 1300,
     image: pillowcase2,
     images: [pillowcase2, pillowcase1, pillowcase3],
@@ -569,7 +569,7 @@ export const products: Product[] = [
   },
   {
     id: 66,
-    name: "Seasonal Pillow Case",
+    name: "Couple Pictured Pillow Case",
     price: 1100,
     image: pillowcase3,
     images: [pillowcase3, pillowcase1, pillowcase2],
@@ -580,7 +580,7 @@ export const products: Product[] = [
   },
   {
     id: 67,
-    name: "Seasonal Pillow Case",
+    name: "Heart Shaped Pillow Case",
     price: 1100,
     image: pillowcase4,
     images: [pillowcase3, pillowcase1, pillowcase2],
@@ -591,7 +591,7 @@ export const products: Product[] = [
   },
   {
     id: 68,
-    name: "Seasonal Pillow Case",
+    name: "Emoji Pillow Case",
     price: 1100,
     image: pillowcase5,
     images: [pillowcase3, pillowcase4, pillowcase2],
@@ -602,7 +602,7 @@ export const products: Product[] = [
   },
   {
     id: 69,
-    name: "Seasonal Pillow Case",
+    name: "Star Shaped Emoji Pillow Case",
     price: 1100,
     image: pillowcase6,
     images: [pillowcase5, pillowcase4, pillowcase2],
@@ -613,7 +613,7 @@ export const products: Product[] = [
   },
   {
     id: 70,
-    name: "Seasonal Pillow Case",
+    name: "Silk Pillow Case",
     price: 1100,
     image: pillowcase7,
     images: [pillowcase2, pillowcase4, pillowcase2],
