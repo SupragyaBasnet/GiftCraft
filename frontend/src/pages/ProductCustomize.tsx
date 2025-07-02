@@ -45,6 +45,8 @@ import CanvasDraw from "react-canvas-draw";
 import { ChromePicker, ColorResult } from "react-color";
 import { Rnd } from "react-rnd";
 import { useNavigate, useParams } from "react-router-dom";
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
 
 // Import product images from products directory
 import frame1 from "../assets/products/frame1.jpg";
@@ -141,6 +143,12 @@ interface Element {
   imageOffsetX?: number;
   imageOffsetY?: number;
   imageScale?: number;
+  fontSize?: number;
+  fontWeight?: number;
+  isBold?: boolean;
+  isItalic?: boolean;
+  lineHeight?: number;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
 }
 
 // Map product type to images
@@ -454,6 +462,62 @@ const phonecaseLabels = [
   "Samsung S23 Ultra",
 ];
 
+// Move this to the top level, before the ProductCustomize component:
+export function getAutoFitFontSize({
+  text,
+  fontFamily = 'Arial',
+  boxWidth,
+  boxHeight,
+  textStyle = 'straight',
+  lineHeight = 1.2,
+  minFontSize = 10,
+  maxFontSize = 200,
+}) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return minFontSize;
+  function measureStraight(fontSize) {
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    const lines = text.split('\n');
+    const widths = lines.map(line => ctx.measureText(line).width);
+    const maxWidth = Math.max(...widths, 1);
+    const totalHeight = lines.length * fontSize * lineHeight;
+    return { width: maxWidth, height: totalHeight };
+  }
+  function measureArc(fontSize) {
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    return ctx.measureText(text).width;
+  }
+  function getPathLength() {
+    const a = boxWidth / 2;
+    const b = boxHeight / 2;
+    return Math.PI * (3*(a+b) - Math.sqrt((3*a+b)*(a+3*b))) / 2;
+  }
+  let low = minFontSize, high = maxFontSize, best = minFontSize;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (textStyle === 'straight') {
+      const { width, height } = measureStraight(mid);
+      if (width <= boxWidth && height <= boxHeight) {
+        best = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    } else {
+      const textLen = measureArc(mid);
+      const pathLen = getPathLength();
+      if (textLen <= pathLen) {
+        best = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+  }
+  return best;
+}
+
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
   const navigate = useNavigate();
@@ -662,7 +726,7 @@ const ProductCustomize: React.FC = () => {
     if (text) {
       const newElement: Element = {
         id: Date.now().toString(),
-        type: "text",
+        type: 'text',
         content: text,
         x: 50,
         y: 50,
@@ -670,6 +734,12 @@ const ProductCustomize: React.FC = () => {
         height: 50,
         fontFamily: selectedFont,
         textStyle,
+        fontSize: fontSize !== 'auto' ? fontSize : undefined,
+        fontWeight,
+        isBold,
+        isItalic,
+        lineHeight,
+        textAlign,
         imageOffsetX: 0,
         imageOffsetY: 0,
         imageScale: 1,
@@ -1134,6 +1204,82 @@ const ProductCustomize: React.FC = () => {
   const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
   const [lineHeight, setLineHeight] = useState(1.1);
 
+  // Add these inside the ProductCustomize component, near the other useState hooks:
+  const [fontSize, setFontSize] = useState<'auto' | number>('auto');
+  const [fontWeight, setFontWeight] = useState<400 | 600 | 700>(400);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+
+  // 1. When a text element is selected, load its content into the input box
+  useEffect(() => {
+    if (selectedElementId) {
+      const el = elements.find(e => e.id === selectedElementId && e.type === 'text');
+      if (el) {
+        setText(el.content);
+      }
+    } else {
+      setText('');
+    }
+  }, [selectedElementId, elements]);
+
+  // 2. When the input changes and a text element is selected, update the element's content
+  const handleTextInputChange = (e) => {
+    setText(e.target.value);
+    if (selectedElementId) updateElement(selectedElementId, { content: e.target.value });
+  };
+
+  // 1. When a text element is selected, update controls to match its style
+  useEffect(() => {
+    if (selectedElementId) {
+      const el = elements.find(e => e.id === selectedElementId && e.type === 'text');
+      if (el) {
+        setFontSize(el.fontSize ?? 'auto');
+        setFontWeight(el.fontWeight ?? 400);
+        setIsBold(!!el.isBold);
+        setIsItalic(!!el.isItalic);
+        setSelectedFont(el.fontFamily ?? 'Arial');
+        setTextStyle(el.textStyle ?? 'straight');
+        setLineHeight(el.lineHeight ?? 1.1);
+        setTextAlign(el.textAlign ?? 'center');
+      }
+    }
+  }, [selectedElementId, elements]);
+
+  // 2. When a control is changed and a text element is selected, update the element's style
+  const handleFontSizeChange = (value) => {
+    setFontSize(value);
+    if (selectedElementId) updateElement(selectedElementId, { fontSize: value });
+  };
+  const handleFontWeightChange = (value) => {
+    setFontWeight(value);
+    if (selectedElementId) updateElement(selectedElementId, { fontWeight: value });
+  };
+  const handleBoldChange = (value) => {
+    setIsBold(value);
+    if (selectedElementId) updateElement(selectedElementId, { isBold: value });
+  };
+  const handleItalicChange = (value) => {
+    setIsItalic(value);
+    if (selectedElementId) updateElement(selectedElementId, { isItalic: value });
+  };
+  const handleFontChange = (value) => {
+    setSelectedFont(value);
+    if (selectedElementId) updateElement(selectedElementId, { fontFamily: value });
+  };
+  const handleTextStyleChange = (value) => {
+    setTextStyle(value);
+    if (selectedElementId) updateElement(selectedElementId, { textStyle: value });
+  };
+  const handleLineHeightChange = (value) => {
+    setLineHeight(value);
+    if (selectedElementId) updateElement(selectedElementId, { lineHeight: value });
+  };
+  const handleTextAlignChange = (value) => {
+    setTextAlign(value);
+    if (selectedElementId) updateElement(selectedElementId, { textAlign: value });
+  };
+  // Use these handlers in your controls instead of setState directly.
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
@@ -1555,27 +1701,72 @@ const ProductCustomize: React.FC = () => {
                     overflow: 'hidden',
                   }}
                 >
-                  <Typography
-                    sx={{
-                      color: el.color || textColor,
-                      fontWeight: 700,
-                      textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      fontFamily: el.fontFamily || "Arial, sans-serif",
-                      fontSize: `${Math.max(10, Math.min(el.height * 0.7, el.width / (el.content.length * 0.6)))}px`,
-                      wordBreak: 'break-word',
-                      whiteSpace: 'pre-line',
-                      lineHeight: 1.1,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {el.content}
-                  </Typography>
+                  {el.textStyle === 'arcUp' ? (
+                    <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                      <defs>
+                        <path id={`arcUp-preview-${el.id}`} d={`M20,${el.height - 20} Q${el.width / 2},${-el.height / 2} ${el.width - 20},${el.height - 20}`} fill="none" />
+                      </defs>
+                      <text
+                        fill={el.color || textColor}
+                        fontWeight="700"
+                        fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: 'straight', lineHeight })}
+                        textAnchor="middle"
+                      >
+                        <textPath xlinkHref={`#arcUp-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
+                      </text>
+                    </svg>
+                  ) : el.textStyle === 'arcDown' ? (
+                    <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                      <defs>
+                        <path id={`arcDown-preview-${el.id}`} d={`M20,20 Q${el.width / 2},${el.height * 1.2} ${el.width - 20},20`} fill="none" />
+                      </defs>
+                      <text
+                        fill={el.color || textColor}
+                        fontWeight="700"
+                        fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle, lineHeight })}
+                        textAnchor="middle"
+                      >
+                        <textPath xlinkHref={`#arcDown-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
+                      </text>
+                    </svg>
+                  ) : el.textStyle === 'wavy' ? (
+                    <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                      <defs>
+                        <path id={`wavy-preview-${el.id}`} d={`M20,${el.height / 2} Q${el.width / 4},${el.height / 2 - 20} ${el.width / 2},${el.height / 2} T${el.width - 20},${el.height / 2}`} fill="none" />
+                      </defs>
+                      <text
+                        fill={el.color || textColor}
+                        fontWeight="700"
+                        fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle, lineHeight })}
+                        textAnchor="middle"
+                      >
+                        <textPath xlinkHref={`#wavy-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
+                      </text>
+                    </svg>
+                  ) : (
+                    <Typography
+                      sx={{
+                        color: el.color || textColor,
+                        fontWeight: 700,
+                        textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: textAlign,
+                        fontFamily: el.fontFamily || "Arial, sans-serif",
+                        fontSize: getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle, lineHeight }),
+                        wordBreak: 'break-word',
+                        whiteSpace: 'pre-line',
+                        lineHeight: lineHeight,
+                        overflow: 'hidden',
+                        fontStyle: isItalic ? 'italic' : 'normal',
+                      }}
+                    >
+                      {el.content}
+                    </Typography>
+                  )}
                 </Box>
               )}
               {el.type === "sticker" && (
@@ -2161,7 +2352,7 @@ const ProductCustomize: React.FC = () => {
         )}
         {tab === 1 && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Paper elevation={6} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 5, minWidth: { xs: '100%', sm: 400 }, maxWidth: 650, width: '100%', minHeight: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.08)', border: '1.5px solid #f3f3f3', gap: 0 }}>
+            <Paper elevation={6} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 5, minWidth: { xs: '100%', sm: 400 }, maxWidth: 650, width: '100%', minHeight: 800, pb: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.08)', border: '1.5px solid #f3f3f3', gap: 0 }}>
               {/* Live Preview */}
               {text && (
                 <Box sx={{ mb: 3, width: '100%', textAlign: 'center', p: 2, borderRadius: 3, background: '#f8fafd', border: '1px solid #f0f0f0', minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(244,106,106,0.04)' }}>
@@ -2169,10 +2360,10 @@ const ProductCustomize: React.FC = () => {
                     sx={{
                       color: textColor,
                       fontFamily: selectedFont,
-                      fontWeight: 700,
-                      fontSize: 24,
+                      fontWeight: isBold ? 700 : fontWeight,
+                      fontStyle: isItalic ? 'italic' : 'normal',
+                      fontSize: fontSize !== 'auto' ? fontSize : getAutoFitFontSize({ text, fontFamily: selectedFont, boxWidth: 500, boxHeight: 60, textStyle, lineHeight }),
                       textShadow: '0 1px 2px rgba(0,0,0,0.08)',
-                      ...(textStyle === 'straight' ? {} : { fontStyle: 'italic' }),
                     }}
                   >
                     {text}
@@ -2182,53 +2373,59 @@ const ProductCustomize: React.FC = () => {
                   </Typography>
                 </Box>
               )}
-              {/* Top row: font, style, alignment, line height */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: 'center', mb: 2, flexWrap: 'wrap' }}>
-                <Select
-                  size="small"
-                  value={selectedFont}
-                  onChange={(e) => setSelectedFont(e.target.value)}
-                  sx={{ minWidth: 130, background: '#fafbfc', borderRadius: 2, height: 40 }}
-                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
-                  displayEmpty
-                >
-                  <MenuItem value="Arial">Arial</MenuItem>
-                  <MenuItem value="Times New Roman">Times New Roman</MenuItem>
-                  <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
-                  <MenuItem value="Monospace">Monospace</MenuItem>
-                  <MenuItem value="Cursive">Cursive</MenuItem>
-                </Select>
-                <Select
-                  size="small"
-                  value={textStyle}
-                  onChange={(e) => setTextStyle(e.target.value as 'straight' | 'arcUp' | 'arcDown' | 'wavy')}
-                  sx={{ minWidth: 120, background: '#fafbfc', borderRadius: 2, height: 40 }}
-                  inputProps={{ style: { height: 40, textAlign: 'center', fontWeight: 500 }, MenuProps: { PaperProps: { style: { maxHeight: 300, width: 200 } } } }}
-                  displayEmpty
-                >
-                  <MenuItem value="straight">Straight</MenuItem>
-                  <MenuItem value="arcUp">Arc Up</MenuItem>
-                  <MenuItem value="arcDown">Arc Down</MenuItem>
-                  <MenuItem value="wavy">Wavy</MenuItem>
-                </Select>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#fafbfc', borderRadius: 2, p: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                  <IconButton size="small" color={textAlign === 'left' ? 'primary' : 'default'} onClick={() => setTextAlign('left')}><FormatAlignLeft /></IconButton>
-                  <IconButton size="small" color={textAlign === 'center' ? 'primary' : 'default'} onClick={() => setTextAlign('center')}><FormatAlignCenter /></IconButton>
-                  <IconButton size="small" color={textAlign === 'right' ? 'primary' : 'default'} onClick={() => setTextAlign('right')}><FormatAlignRight /></IconButton>
-                  <IconButton size="small" color={textAlign === 'justify' ? 'primary' : 'default'} onClick={() => setTextAlign('justify')}><FormatAlignJustify /></IconButton>
+              {/* Top row: font, style, alignment, line height (all in one line) */}
+              <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%', mb: 1 }}>
+                  {/* Font Family */}
+                  <Select size="small" value={selectedFont} onChange={e => setSelectedFont(e.target.value)} sx={{ minWidth: 140, height: 44 }}>
+                    <MenuItem value="Arial">Arial</MenuItem>
+                    <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                    <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
+                    <MenuItem value="Monospace">Monospace</MenuItem>
+                    <MenuItem value="Cursive">Cursive</MenuItem>
+                  </Select>
+                  {/* Style */}
+                  <Select size="small" value={textStyle} onChange={e => setTextStyle(e.target.value as any)} sx={{ minWidth: 120, height: 44 }}>
+                    <MenuItem value="straight">Straight</MenuItem>
+                    <MenuItem value="arcUp">Arc Up</MenuItem>
+                    <MenuItem value="arcDown">Arc Down</MenuItem>
+                    <MenuItem value="wavy">Wavy</MenuItem>
+                  </Select>
+                  {/* Alignment */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fafbfc', borderRadius: 2, p: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <IconButton size="small" color={textAlign === 'left' ? 'primary' : 'default'} onClick={() => setTextAlign('left')}><FormatAlignLeft /></IconButton>
+                    <IconButton size="small" color={textAlign === 'center' ? 'primary' : 'default'} onClick={() => setTextAlign('center')}><FormatAlignCenter /></IconButton>
+                    <IconButton size="small" color={textAlign === 'right' ? 'primary' : 'default'} onClick={() => setTextAlign('right')}><FormatAlignRight /></IconButton>
+                    <IconButton size="small" color={textAlign === 'justify' ? 'primary' : 'default'} onClick={() => setTextAlign('justify')}><FormatAlignJustify /></IconButton>
+                  </Box>
+                  {/* Bold */}
+                  <Button variant={isBold ? 'contained' : 'outlined'} onClick={() => setIsBold(b => !b)} sx={{ minWidth: 36, height: 44, fontWeight: 700 }}>B</Button>
+                  {/* Italic */}
+                  <Button variant={isItalic ? 'contained' : 'outlined'} onClick={() => setIsItalic(i => !i)} sx={{ minWidth: 36, height: 44, fontStyle: 'italic', fontWeight: 500 }}>/</Button>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Height sx={{ color: '#bdbdbd' }} />
-                  <Select
-                    size="small"
-                    value={lineHeight}
-                    onChange={e => setLineHeight(Number(e.target.value))}
-                    sx={{ minWidth: 60, background: '#fafbfc', borderRadius: 2, height: 36 }}
-                  >
-                    <MenuItem value={1}>1</MenuItem>
-                    <MenuItem value={1.2}>1.2</MenuItem>
-                    <MenuItem value={1.5}>1.5</MenuItem>
-                    <MenuItem value={2}>2</MenuItem>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%' }}>
+                  {/* Line Height */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Height sx={{ color: '#bdbdbd' }} />
+                    <Select size="small" value={lineHeight} onChange={e => setLineHeight(Number(e.target.value))} sx={{ minWidth: 70, height: 44 }}>
+                      <MenuItem value={1}>1</MenuItem>
+                      <MenuItem value={1.2}>1.2</MenuItem>
+                      <MenuItem value={1.5}>1.5</MenuItem>
+                      <MenuItem value={2}>2</MenuItem>
+                    </Select>
+                  </Box>
+                  {/* Font Size */}
+                  <Select size="small" value={fontSize} onChange={e => setFontSize(e.target.value === 'auto' ? 'auto' : Number(e.target.value))} sx={{ minWidth: 70, height: 44 }}>
+                    <MenuItem value="auto">Auto</MenuItem>
+                    {[8, 10, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72].map(size => (
+                      <MenuItem key={size} value={size}>{size}</MenuItem>
+                    ))}
+                  </Select>
+                  {/* Font Weight */}
+                  <Select size="small" value={fontWeight} onChange={e => setFontWeight(Number(e.target.value) as 400 | 600 | 700)} sx={{ minWidth: 90, height: 44 }}>
+                    <MenuItem value={400}>Regular</MenuItem>
+                    <MenuItem value={600}>Semi-Bold</MenuItem>
+                    <MenuItem value={700}>Bold</MenuItem>
                   </Select>
                 </Box>
               </Box>
@@ -2237,7 +2434,7 @@ const ProductCustomize: React.FC = () => {
                 <TextField
                   placeholder="Enter your text"
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={handleTextInputChange}
                   size="small"
                   variant="outlined"
                   sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 2, background: '#fafbfc', borderRadius: 2, input: { textAlign: 'center', fontWeight: 500 } }}
@@ -2304,24 +2501,10 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {tab === 2 && (
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1,
-              flexWrap: "wrap",
-              justifyContent: "center",
-              mb: 2,
-            }}
-          >
-            {stickers.map((s, i) => (
-              <Button
-                key={i}
-                onClick={() => handleAddSticker(s)}
-                sx={{ fontSize: 28 }}
-              >
-                {s}
-              </Button>
-            ))}
+          <Box sx={{ minHeight: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+            <Box sx={{ maxWidth: 700, minWidth: 400, height: 250 }}>
+              <Picker data={data} onEmojiSelect={emoji => handleAddSticker(emoji.native)} style={{ width: '100%', height: 250 }} />
+            </Box>
           </Box>
         )}
         {tab === 3 && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Rnd } from 'react-rnd';
+import { getAutoFitFontSize } from '../pages/ProductCustomize';
 
 // Define types for elements (should match the type in ProductCustomize.tsx)
 interface Element {
@@ -225,7 +226,7 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
                 <defs>
                   <path id={`arcUp-${el.id}`} d={`M10,${el.height-10} Q${el.width/2},${-el.height/1.5} ${el.width-10},${el.height-10}`} fill="none" />
                 </defs>
-                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle })} textAnchor="start">
                   <textPath xlinkHref={`#arcUp-${el.id}`} startOffset="0%">{el.content}</textPath>
                 </text>
               </svg>
@@ -234,7 +235,7 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
                 <defs>
                   <path id={`arcDown-${el.id}`} d={`M10,10 Q${el.width/2},${el.height*1.5} ${el.width-10},10`} fill="none" />
                 </defs>
-                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle })} textAnchor="start">
                   <textPath xlinkHref={`#arcDown-${el.id}`} startOffset="0%">{el.content}</textPath>
                 </text>
               </svg>
@@ -243,7 +244,7 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
                 <defs>
                   <path id={`wavy-${el.id}`} d={`M10,${el.height/2} Q${el.width/6},${el.height/2-30} ${el.width/3},${el.height/2} T${el.width-10},${el.height/2}`} fill="none" />
                 </defs>
-                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={Math.max(10, el.height * 0.5)} textAnchor="start">
+                <text fill={el.color || '#F46A6A'} fontWeight="700" fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle })} textAnchor="start">
                   <textPath xlinkHref={`#wavy-${el.id}`} startOffset="0%">{el.content}</textPath>
                 </text>
               </svg>
@@ -259,7 +260,7 @@ const CustomizedProductImage: React.FC<CustomizedProductImageProps> = ({ baseIma
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
-                  fontSize: Math.min(el.width / el.content.length * 1.2, el.height * 0.8)
+                  fontSize: getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle })
                 }}
               >
                 {el.content}
