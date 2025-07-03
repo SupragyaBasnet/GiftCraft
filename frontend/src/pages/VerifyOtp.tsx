@@ -7,38 +7,42 @@ import {
   Button,
   Paper,
   Alert,
-  InputAdornment,
-  IconButton,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-const ForgotPassword: React.FC = () => {
-  const [email, setEmail] = useState('');
+const VerifyOtp: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get('email') || '';
+  const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    if (!otp) {
+      setError('OTP is required.');
+      return;
+    }
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, otp }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
-      setSuccess('If this email exists, an OTP has been sent.');
+      if (!res.ok) throw new Error(data.message || 'Failed to verify OTP');
+      setSuccess('OTP verified! Redirecting...');
+      localStorage.setItem('giftcraftVerifiedOtp', otp);
       setTimeout(() => {
-        navigate(`/verify-otp?email=${encodeURIComponent(email)}`);
+        navigate(`/set-new-password?email=${encodeURIComponent(email)}`);
       }, 1000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send OTP');
+      setError(err instanceof Error ? err.message : 'Failed to verify OTP');
     } finally {
       setLoading(false);
     }
@@ -56,7 +60,10 @@ const ForgotPassword: React.FC = () => {
       >
         <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 400 }}>
           <Typography variant="h4" component="h1" gutterBottom align="center">
-            Forgot Password
+            Verify OTP
+          </Typography>
+          <Typography variant="body2" align="center" sx={{ mb: 2 }}>
+            Enter the OTP sent to <b>{email}</b>
           </Typography>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -68,28 +75,26 @@ const ForgotPassword: React.FC = () => {
               {success}
             </Alert>
           )}
-          <Box component="form" onSubmit={handleSendOtp}>
+          <Box component="form" onSubmit={handleVerifyOtp}>
             <TextField
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="otp"
+              label="OTP Code"
+              name="otp"
               autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading || !email}
+              disabled={loading || !otp}
             >
-              Send OTP
+              Verify OTP
             </Button>
           </Box>
         </Paper>
@@ -98,4 +103,4 @@ const ForgotPassword: React.FC = () => {
   );
 };
 
-export default ForgotPassword; 
+export default VerifyOtp; 

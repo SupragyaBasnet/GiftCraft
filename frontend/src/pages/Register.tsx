@@ -102,7 +102,7 @@ const Register: React.FC = () => {
 
       // Delay navigation to show snackbar
       setTimeout(() => {
-        navigate("/");
+        navigate("/login");
       }, 500);
     } catch (err) {
       const errorMessage =

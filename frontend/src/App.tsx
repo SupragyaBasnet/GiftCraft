@@ -21,6 +21,9 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import Help from './pages/Help';
 import Contact from './pages/Contact';
+import ResetPassword from './pages/ResetPassword';
+import VerifyOtp from './pages/VerifyOtp';
+import SetNewPassword from './pages/SetNewPassword';
 
 const theme = createTheme({
   palette: {
@@ -89,6 +92,9 @@ const App: React.FC = () => {
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/verify-otp" element={<VerifyOtp />} />
+                  <Route path="/set-new-password" element={<SetNewPassword />} />
                 </Routes>
               </Box>
               <Footer />
