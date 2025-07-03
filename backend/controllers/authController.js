@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
   // Optional: for auto-login after register
 
   exports.register = async (req, res) => {
@@ -78,4 +79,71 @@ exports.profile = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+// Helper: send OTP email
+const sendOtpEmail = async (to, otp) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
+    },
+  });
+  await transporter.sendMail({
+    from: process.env.GMAIL_USER,
+    to,
+    subject: 'Your GiftCraft Password Reset OTP',
+    text: `Your OTP for password reset is: ${otp}. It is valid for 5 minutes.`,
+  });
+};
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      // For security, always respond with success
+      return res.json({ message: 'If this email exists, an OTP has been sent.' });
+    }
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+    await sendOtpEmail(email, otp);
+    res.json({ message: 'If this email exists, an OTP has been sent.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+exports.verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !user.otp || !user.otpExpiry) {
+    return res.status(400).json({ message: 'Invalid or expired OTP.' });
+  }
+  if (user.otp !== otp || user.otpExpiry < new Date()) {
+    return res.status(400).json({ message: 'Invalid or expired OTP.' });
+  }
+  res.json({ message: 'OTP verified.' });
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !user.otp || !user.otpExpiry) {
+    return res.status(400).json({ message: 'Invalid or expired OTP.' });
+  }
+  if (user.otp !== otp || user.otpExpiry < new Date()) {
+    return res.status(400).json({ message: 'Invalid or expired OTP.' });
+  }
+  user.password = newPassword;
+  user.otp = undefined;
+  user.otpExpiry = undefined;
+  await user.save();
+  res.json({ message: 'Password reset successful.' });
 }; 

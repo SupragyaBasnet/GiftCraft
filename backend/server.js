@@ -1,20 +1,31 @@
-const app = require('./app');
-const mongoose = require('mongoose');
-require('dotenv').config();
+const app = require("./app");
+const mongoose = require("mongoose");
+require("dotenv").config();
+const nodemailer = require("nodemailer");
 
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com", // or your SMTP host
+  port: 587,
+  secure: false, // true for port 465, false for 587
+  auth: {
+    user: process.env.GMAIL_USER, // use GMAIL_USER for consistency
+    pass: process.env.GMAIL_PASS, // use GMAIL_PASS for consistency
+  },
+});
 const PORT = process.env.PORT || 5000;
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
-    console.log('MongoDB connected');
+    console.log("MongoDB connected");
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('MongoDB connection error:', err);
+    console.error("MongoDB connection error:", err);
   });
