@@ -1,22 +1,28 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const app = express();
 require('dotenv').config();
 
-const app = express();
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Health check route
+app.get('/', (req, res) => {
+  res.send('GiftCraft backend is running!');
+});
 
+// Routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
 const productRoutes = require('./routes/product');
 app.use('/api/products', productRoutes);
 
-module.exports = app; 
+
+
+
+module.exports = app;
