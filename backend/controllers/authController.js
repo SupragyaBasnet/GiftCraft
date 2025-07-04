@@ -47,6 +47,7 @@ const nodemailer = require('nodemailer');
           name: user.name,
           email: user.email,
           phone: user.phone,
+          profileImage: user.profileImage,
         },
       });
     } catch (err) {
@@ -66,7 +67,7 @@ exports.login = async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: user.isAdmin } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profileImage: user.profileImage } });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -75,7 +76,14 @@ exports.login = async (req, res) => {
 exports.profile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      profileImage: user.profileImage || null,
+    });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -146,4 +154,65 @@ exports.resetPassword = async (req, res) => {
   user.otpExpiry = undefined;
   await user.save();
   res.json({ message: 'Password reset successful.' });
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, phone } = req.body;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    await user.save();
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      profileImage: user.profileImage,
+    });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
+    user.password = newPassword;
+    await user.save();
+    res.json({ message: 'Password changed successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateProfileImage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { profileImage } = req.body;
+    const user = await User.findByIdAndUpdate(userId, { profileImage }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ profileImage: user.profileImage });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.removeProfileImage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findByIdAndUpdate(userId, { profileImage: '' }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'Profile image removed' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 }; 

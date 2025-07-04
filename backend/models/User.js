@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   otpExpiry: {
     type: Date,
   },
+  profileImage: { type: String },
 });
 
 // Hash password before saving
