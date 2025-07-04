@@ -7,6 +7,7 @@ import MuiAlert from '@mui/material/Alert';
 import { products, Product } from '../data/products';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { keyframes } from '@mui/system';
+import { useCart } from '../context/CartContext';
 
 function getProductStory(product: Product) {
   const uniqueDescriptions: Record<number, string> = {
@@ -103,6 +104,7 @@ const ProductDetails: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [mainIdx, setMainIdx] = useState(0);
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -127,15 +129,23 @@ const ProductDetails: React.FC = () => {
     setQuantity((prev) => Math.max(1, prev + amount));
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     try {
       const isLoggedIn = localStorage.getItem('giftcraftUser');
       if (!isLoggedIn) {
         setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
         return;
       }
-      // Simulate add to cart logic (could be API call)
+      await addToCart({
+        id: String(product.id),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        description: product.description,
+      }, quantity);
       setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+      navigate('/cart');
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
     }

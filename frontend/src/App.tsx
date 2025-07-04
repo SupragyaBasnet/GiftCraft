@@ -24,6 +24,9 @@ import Contact from './pages/Contact';
 import ResetPassword from './pages/ResetPassword';
 import VerifyOtp from './pages/VerifyOtp';
 import SetNewPassword from './pages/SetNewPassword';
+import PaymentSuccess from './pages/payment-success';
+import PaymentFailure from './pages/payment-failure';
+import OrderConfirmed from './pages/orderconfirmed';
 
 const theme = createTheme({
   palette: {
@@ -74,7 +77,7 @@ const App: React.FC = () => {
                     path="/cart"
                     element={
                       <PrivateRoute>
-                        <CartPage />
+                        <Cart />
                       </PrivateRoute>
                     }
                   />
@@ -95,6 +98,9 @@ const App: React.FC = () => {
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/verify-otp" element={<VerifyOtp />} />
                   <Route path="/set-new-password" element={<SetNewPassword />} />
+                  <Route path="/payment-success" element={<PaymentSuccess />} />
+                  <Route path="/payment-failure" element={<PaymentFailure />} />
+                  <Route path="/orderconfirmed" element={<OrderConfirmed />} />
                 </Routes>
               </Box>
               <Footer />

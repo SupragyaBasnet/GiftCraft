@@ -13,12 +13,14 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import { useCart } from '../context/CartContext';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 const Cart: React.FC = () => {
-  const { items, removeItem, updateQuantity, totalPrice } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, getTotalPrice } = useCart();
+  const navigate = useNavigate();
+  console.log('Cart items from context:', cartItems);
 
-  if (items.length === 0) {
+  if (cartItems.length === 0) {
     return (
       <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
@@ -33,6 +35,10 @@ const Cart: React.FC = () => {
           size="large"
           component={RouterLink}
           to="/products"
+          sx={{
+            backgroundColor: 'rgb(206,106,106)',
+            '&:hover': { backgroundColor: 'rgb(176,86,86)' }
+          }}
         >
           Browse Products
         </Button>
@@ -48,8 +54,8 @@ const Cart: React.FC = () => {
       <div className="heading-dash" />
       <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
-          {items.map((item) => (
-            <Card key={item.id} sx={{ mb: 2 }}>
+          {cartItems.map((item) => (
+            <Card key={item.cartItemId} sx={{ mb: 2 }}>
               <CardContent>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={3}>
@@ -63,33 +69,44 @@ const Cart: React.FC = () => {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="h6">{item.name}</Typography>
-                    {item.customization?.text && (
-                      <Typography variant="body2" color="text.secondary">
-                        Text: {item.customization.text}
-                      </Typography>
-                    )}
-                    {item.customization?.color && (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          mt: 1,
-                        }}
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        disabled={item.quantity <= 1}
+                        sx={{ minWidth: 32, px: 0 }}
                       >
-                        <Typography variant="body2" sx={{ mr: 1 }}>
-                          Color:
-                        </Typography>
-                        <Box
-                          sx={{
-                            width: 20,
-                            height: 20,
-                            bgcolor: item.customization.color,
-                            border: '1px solid #ccc',
-                            borderRadius: '50%',
-                          }}
-                        />
-                      </Box>
-                    )}
+                        -
+                      </Button>
+                      <Typography variant="body2" color="text.secondary" sx={{ mx: 2 }}>
+                        Quantity: {item.quantity}
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        sx={{ minWidth: 32, px: 0 }}
+                      >
+                        +
+                      </Button>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      Item Total: Rs. {item.price * item.quantity}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        mt: 1,
+                        backgroundColor: 'rgb(255,106,106)',
+                        '&:hover': { backgroundColor: 'rgb(220,80,80)' }
+                      }}
+                      size="small"
+                      onClick={() => navigate('/checkout?singleItemId=' + item.cartItemId, { state: { items: [{ ...item, total: item.price * item.quantity }] } })}
+                    >
+                      Proceed to Checkout
+                    </Button>
                   </Grid>
                   <Grid item xs={12} sm={3}>
                     <Box
@@ -99,12 +116,12 @@ const Cart: React.FC = () => {
                         justifyContent: 'space-between',
                       }}
                     >
-                      <Typography variant="h6" color="primary">
-                        ${item.price}
+                      <Typography variant="h6" sx={{ color: '#000', fontWeight: 700 }}>
+                        Rs. {item.price * item.quantity}
                       </Typography>
                       <IconButton
                         color="error"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeFromCart(item.id)}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -127,7 +144,7 @@ const Cart: React.FC = () => {
                     <Typography>Subtotal</Typography>
                   </Grid>
                   <Grid item>
-                    <Typography>${totalPrice.toFixed(2)}</Typography>
+                    <Typography>Rs. {getTotalPrice().toLocaleString('en-IN')}</Typography>
                   </Grid>
                 </Grid>
               </Box>
@@ -139,7 +156,7 @@ const Cart: React.FC = () => {
                   </Grid>
                   <Grid item>
                     <Typography variant="h6">
-                      ${totalPrice.toFixed(2)}
+                      Rs. {getTotalPrice().toLocaleString('en-IN')}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -151,6 +168,10 @@ const Cart: React.FC = () => {
                 fullWidth
                 component={RouterLink}
                 to="/checkout"
+                sx={{
+                  backgroundColor: 'rgb(255,106,106)',
+                  '&:hover': { backgroundColor: 'rgb(220,80,80)' }
+                }}
               >
                 Proceed to Checkout
               </Button>

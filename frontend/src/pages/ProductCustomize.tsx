@@ -49,6 +49,7 @@ import { Rnd } from "react-rnd";
 import { useNavigate, useParams } from "react-router-dom";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
+import { useCart } from '../context/CartContext';
 
 // Import product images from products directory
 import frame1 from "../assets/products/frame1.jpg";
@@ -528,6 +529,7 @@ export function getAutoFitFontSize({
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   // Validate product type from URL and provide default
   const selectedProduct: ProductType =
@@ -801,14 +803,21 @@ const ProductCustomize: React.FC = () => {
     }
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     try {
       const isLoggedIn = localStorage.getItem('giftcraftUser');
       if (!isLoggedIn) {
         setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
         return;
       }
-      // Simulate add to cart logic
+      await addToCart({
+        id: Date.now().toString(),
+        name: selectedProduct.charAt(0).toUpperCase() + selectedProduct.slice(1),
+        price: 0, // Set price as needed
+        image: currentImage,
+        category: selectedProduct,
+        description: 'Customized product',
+      });
       setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
       navigate('/cart');
     } catch (err) {

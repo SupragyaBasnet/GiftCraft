@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Typography, Box, Paper, Button, TextField, Alert, Card, CardContent, CardActionArea, Dialog, DialogTitle, DialogContent, DialogActions, Rating } from '@mui/material';
 import { Payment as PaymentIcon, Save, Add, Remove } from '@mui/icons-material';
 import Confetti from 'react-confetti';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 // Import the new CustomizedProductImage component
 import CustomizedProductImage from '../components/CustomizedProductImage';
@@ -26,14 +27,72 @@ const productPrices: Record<string, number> = {
   pillowcase: 900,
 };
 
-// Placeholder delivery charge
-const DELIVERY_CHARGE = 100; // Example fixed delivery charge
+// Delivery charge by city (Nepal major cities)
+const CITY_DELIVERY_CHARGES: { [city: string]: number } = {
+  'Kathmandu': 100,
+  'Lalitpur': 120,
+  'Bhaktapur': 150,
+  'Pokhara': 200,
+  'Biratnagar': 250,
+  'Birgunj': 250,
+  'Butwal': 220,
+  'Dharan': 230,
+  'Bharatpur': 180,
+  'Janakpur': 260,
+  'Hetauda': 200,
+  'Nepalgunj': 300,
+  'Dhangadhi': 350,
+  'Itahari': 240,
+  'Ghorahi': 320,
+  'Tulsipur': 320,
+  'Bhimdatta': 350,
+  'Damak': 250,
+  'Gorkha': 280,
+  'Siddharthanagar': 220,
+  'Tikapur': 340,
+  'Rajbiraj': 270,
+  'Lahan': 270,
+  'Panauti': 160,
+  'Kirtipur': 130,
+  'Banepa': 170,
+  'Dhulikhel': 180,
+  'Bhadrapur': 300,
+  'Ilam': 320,
+  'Baglung': 300,
+  'Beni': 320,
+  'Damauli': 250,
+  'Tansen': 280,
+  'Palpa': 280,
+  'Jaleshwar': 270,
+  'Kalaiya': 260,
+  'Parasi': 250,
+  'Siraha': 270,
+  'Gaighat': 270,
+  'Inaruwa': 260,
+  'Khandbari': 350,
+  'Phidim': 350,
+  'Dipayal': 400,
+  'Amargadhi': 400,
+  'Sandhikharka': 350,
+  'Chainpur': 400,
+  'Darchula': 450,
+  'Jumla': 500,
+  'Simikot': 600,
+  'Other': 400
+};
+
+function getDeliveryCharge(address: string): number {
+  for (const city in CITY_DELIVERY_CHARGES) {
+    if (address.toLowerCase().includes(city.toLowerCase())) {
+      return CITY_DELIVERY_CHARGES[city];
+    }
+  }
+  return CITY_DELIVERY_CHARGES['Other'];
+}
 
 const CheckoutPage: React.FC = () => {
-  const [checkoutItem, setCheckoutItem] = useState<any>(null); // Single item
-  const [checkoutCart, setCheckoutCart] = useState<any[] | null>(null); // Multiple items
-  const [quantities, setQuantities] = useState<{ [id: string]: number }>({}); // For cart items
-  const [quantity, setQuantity] = useState(1); // For single item
+  const location = useLocation();
+  const { cartItems, getTotalPrice, removeFromCart, clearCart } = useCart();
   const [address, setAddress] = useState('');
   const [addressError, setAddressError] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
@@ -41,66 +100,19 @@ const CheckoutPage: React.FC = () => {
   const [openReviewModal, setOpenReviewModal] = useState(false);
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState<number | null>(null);
+  const [deliveryCharge, setDeliveryCharge] = useState(100);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check for cart checkout first
-    const savedCart = localStorage.getItem('giftcraftCheckoutCart');
-    if (savedCart) {
-      try {
-        const cart = JSON.parse(savedCart);
-        setCheckoutCart(cart);
-        // Set default quantities for each item
-        const qtys: { [id: string]: number } = {};
-        cart.forEach((item: any) => {
-          qtys[item.id] = item.quantity || 1;
-        });
-        setQuantities(qtys);
-        return;
-      } catch (e) {
-        console.error('Failed to load checkout cart from localStorage', e);
-        localStorage.removeItem('giftcraftCheckoutCart');
-        navigate('/');
-      }
-    }
-    // Fallback to single item checkout
-    const savedItem = localStorage.getItem('giftcraftCheckoutItem');
-    if (savedItem) {
-      try {
-        const item = JSON.parse(savedItem);
-        setCheckoutItem(item);
-        setQuantity(item.quantity || 1);
-      } catch (e) {
-        console.error('Failed to load checkout item from localStorage', e);
-        localStorage.removeItem('giftcraftCheckoutItem');
-        navigate('/');
-      }
-    } else {
-      navigate('/');
-    }
-  }, [navigate]);
+  // Determine items to checkout
+  const itemsToCheckout = location.state?.items || cartItems;
 
-  // --- Price calculations ---
-  let itemSubtotal = 0;
-  let itemTotal = 0;
-  if (checkoutCart) {
-    itemSubtotal = checkoutCart.reduce((sum, item) => sum + (productPrices[item.productType] || 0) * (quantities[item.id] || 1), 0);
-    itemTotal = itemSubtotal + (itemSubtotal > 0 ? DELIVERY_CHARGE : 0);
-  } else if (checkoutItem) {
-    itemSubtotal = (productPrices[checkoutItem.productType] || 0) * quantity;
-    itemTotal = itemSubtotal + DELIVERY_CHARGE;
-  }
+  // Calculate subtotal and total
+  const subtotal = itemsToCheckout.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+  const total = subtotal + deliveryCharge;
 
-  // --- Quantity handlers ---
-  const handleQuantityChange = (amount: number) => {
-    setQuantity((prev) => Math.max(1, prev + amount));
-  };
-  const handleCartQuantityChange = (id: string, amount: number) => {
-    setQuantities((prev) => ({ ...prev, [id]: Math.max(1, (prev[id] || 1) + amount) }));
-  };
-
-  // --- Address and payment logic ---
+  // Address and payment logic
   const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(event.target.value);
     setAddressError('');
@@ -117,24 +129,37 @@ const CheckoutPage: React.FC = () => {
   };
   const isConfirmButtonEnabled = address.trim() !== '' && selectedPaymentMethod !== null;
 
-  // --- Order confirmation logic ---
+  // Order confirmation logic
   const handleConfirmOrder = async () => {
     if (!validateAddress()) return;
-    let items: any[] = [];
-    if (checkoutCart) {
-      items = checkoutCart.map(item => ({
-        product: item._id || item.id,
-        quantity: quantities[item.id] || 1,
-        price: productPrices[item.productType] || 0,
-      }));
-    } else if (checkoutItem) {
-      items = [{
-        product: checkoutItem._id || checkoutItem.id,
-        quantity,
-        price: productPrices[checkoutItem.productType] || 0,
-      }];
+    const items = itemsToCheckout.map((item: any) => ({
+      product: item.id || item._id,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+    if (selectedPaymentMethod === 'eSewa') {
+      setIsRedirecting(true);
+      try {
+        const singleItemId = itemsToCheckout.length === 1 ? itemsToCheckout[0].cartItemId : undefined;
+        const res = await fetch('/api/auth/payment/esewa/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ total, orderId: items[0]?.product, singleItemId }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        } else {
+          setOrderConfirmedMessage('Failed to initiate eSewa payment.');
+          setIsRedirecting(false);
+        }
+      } catch (err) {
+        setOrderConfirmedMessage('Failed to initiate eSewa payment.');
+        setIsRedirecting(false);
+      }
+      return;
     }
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0) + DELIVERY_CHARGE;
     try {
       const res = await fetch('/api/products/order', {
         method: 'POST',
@@ -142,13 +167,25 @@ const CheckoutPage: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
         },
-        body: JSON.stringify({ items, total }),
+        body: JSON.stringify({ items, total, address, paymentMethod: 'Cash on Delivery' }),
       });
       if (!res.ok) throw new Error('Failed to place order');
-      setOrderConfirmedMessage('Your order has been placed! Thank you for trusting and choosing us!');
-      localStorage.removeItem('giftcraftCheckoutCart');
-      localStorage.removeItem('giftcraftCart');
-      localStorage.removeItem('giftcraftCheckoutItem');
+      // Update cart context for COD before redirect
+      const singleItemId = itemsToCheckout.length === 1 ? itemsToCheckout[0].cartItemId : undefined;
+      if (singleItemId) {
+        // Find the cart item and remove by product id
+        const cartItem = cartItems.find((item) => item.cartItemId === singleItemId || item.id === singleItemId);
+        if (cartItem) {
+          await removeFromCart(cartItem.id);
+        } else {
+          await removeFromCart(singleItemId);
+        }
+        navigate(`/orderconfirmed?singleItemId=${singleItemId}`);
+      } else {
+        await clearCart();
+        navigate('/orderconfirmed');
+      }
+      return;
     } catch (err) {
       setOrderConfirmedMessage('Failed to place order. Please try again.');
     }
@@ -195,11 +232,15 @@ const CheckoutPage: React.FC = () => {
     // localStorage.removeItem('giftcraftCheckoutItem'); // This is now handled in handleConfirmOrder
   };
 
-  if (!checkoutCart && !checkoutItem) {
+  useEffect(() => {
+    setDeliveryCharge(getDeliveryCharge(address));
+  }, [address]);
+
+  if (!itemsToCheckout || itemsToCheckout.length === 0) {
     return (
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h5">Redirecting...</Typography>
+          <Typography variant="h5">No items to checkout.</Typography>
         </Paper>
       </Container>
     );
@@ -208,117 +249,63 @@ const CheckoutPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
-        {/* Conditionally render Checkout title */}
         {!orderConfirmedMessage && (
           <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, color: '#111', mb: 0 }}>
             Proceed to Checkout
           </Typography>
         )}
         <div className="heading-dash" />
-
-        {/* Order Confirmed Section - Shown when order is confirmed */}
         {orderConfirmedMessage ? (
-          <Box 
-            sx={{
-              textAlign: 'center', 
-              mt: 3, 
-              opacity: 0, // Start invisible for animation
-              animation: 'fadeIn 0.5s ease-in-out forwards', // Apply fade-in animation
-              '@keyframes fadeIn': {
-                '0%': { opacity: 0 },
-                '100%': { opacity: 1 },
-              },
-            }}
-          >
-            {/* Place your party burst animation component here */}
-            <Confetti width={window.innerWidth} height={window.innerHeight} />
-
-            <Typography variant="h5" color="success.main" fontWeight={700} gutterBottom>
-              Order Confirmed!
-            </Typography>
-            {/* Split message by newline for multiple paragraphs */}
-            {orderConfirmedMessage.split('\n\n').map((paragraph, index) => (
-              <Typography key={index} variant="body1" gutterBottom={index < orderConfirmedMessage.split('\n\n').length - 1}>
-                {paragraph}
-              </Typography>
-            ))}
-            {/* You can add more details like order number here in a real app */}
-
+          <Box sx={{ textAlign: 'center', mt: 3, opacity: 0, animation: 'fadeIn 0.5s ease-in-out forwards', '@keyframes fadeIn': { '0%': { opacity: 0 }, '100%': { opacity: 1 } } }}>
+            {orderConfirmedMessage.toLowerCase().includes('failed') ? (
+              <Alert severity="error" sx={{ mb: 2 }}>{orderConfirmedMessage}</Alert>
+            ) : (
+              <>
+                <Confetti width={window.innerWidth} height={window.innerHeight} />
+                <Typography variant="h5" color="success.main" fontWeight={700} gutterBottom>
+                  Order Confirmed!
+                </Typography>
+                {orderConfirmedMessage.split('\n\n').map((paragraph, index) => (
+                  <Typography key={index} variant="body1" gutterBottom={index < orderConfirmedMessage.split('\n\n').length - 1}>
+                    {paragraph}
+                  </Typography>
+                ))}
+              </>
+            )}
           </Box>
         ) : (
-          /* Content to show BEFORE order is confirmed */
           <>
             {/* Item Details Summary */}
             <Box sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>
               <Typography variant="h6" fontWeight={700}>Item Summary:</Typography>
-              {checkoutCart ? (
-                <Box>
-                  {checkoutCart.map((item) => (
-                    <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                      <Box sx={{ width: 80, height: 80, mr: 2 }}>
-                        <CustomizedProductImage 
-                          baseImage={item.image} 
-                          elements={item.elements || []}
-                          color={item.color || '#ffffff'}
-                          productType={item.productType}
-                        />
-                      </Box>
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight={700}>
-                          {item.productType.charAt(0).toUpperCase() + item.productType.slice(1)}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                          <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
-                          <Button size="small" onClick={() => handleCartQuantityChange(item.id, -1)}><Remove /></Button>
-                          <Typography sx={{ mx: 1 }}>{quantities[item.id] || 1}</Typography>
-                          <Button size="small" onClick={() => handleCartQuantityChange(item.id, 1)}><Add /></Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              ) : checkoutItem && (
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              {itemsToCheckout.map((item: any) => (
+                <Box key={item.id || item._id} sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                   <Box sx={{ width: 80, height: 80, mr: 2 }}>
-                  <CustomizedProductImage 
-                    baseImage={checkoutItem.image} 
-                      elements={checkoutItem.elements || []}
-                      color={checkoutItem.color || '#ffffff'}
-                      productType={checkoutItem.productType}
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="subtitle1" fontWeight={700}>
-                      {checkoutItem.productType.charAt(0).toUpperCase() + checkoutItem.productType.slice(1)}
-                  </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                      <Typography variant="subtitle2" sx={{ mr: 1 }}>Quantity:</Typography>
-                      <Button size="small" onClick={() => handleQuantityChange(-1)}><Remove /></Button>
-                      <Typography sx={{ mx: 1 }}>{quantity}</Typography>
-                      <Button size="small" onClick={() => handleQuantityChange(1)}><Add /></Button>
-                    </Box>
+                    <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={700}>{item.name}</Typography>
+                    <Typography variant="body2">Quantity: {item.quantity}</Typography>
                   </Box>
                 </Box>
-              )}
+              ))}
             </Box>
-
             {/* Price Breakdown */}
             <Box sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>
               <Typography variant="h6" fontWeight={700}>Order Summary:</Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                 <Typography variant="body1">Subtotal:</Typography>
-                <Typography variant="body1">Rs. {itemSubtotal}</Typography>
+                <Typography variant="body1">Rs. {subtotal}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
                 <Typography variant="body1">Delivery Charge:</Typography>
-                <Typography variant="body1">Rs. {DELIVERY_CHARGE}</Typography>
+                <Typography variant="body1">Rs. {deliveryCharge}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                 <Typography variant="h6" fontWeight={700}>Total:</Typography>
-                <Typography variant="h6" fontWeight={700}>Rs. {itemTotal}</Typography>
+                <Typography variant="h6" fontWeight={700}>Rs. {total}</Typography>
               </Box>
             </Box>
-
             {/* Address Section */}
             <Box sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>
               <Typography variant="h6" fontWeight={700}>Delivery Address:</Typography>
@@ -342,7 +329,6 @@ const CheckoutPage: React.FC = () => {
                 />
               </Box>
             </Box>
-
             {/* Payment Methods Section */}
             <Box sx={{ mt: 3 }}>
               <Typography variant="h6" fontWeight={700} gutterBottom>Choose Payment Method:</Typography>
@@ -377,78 +363,6 @@ const CheckoutPage: React.FC = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" fontWeight={600}>eSewa</Typography>
-                        <Typography variant="body2" color="text.secondary">Digital Wallet</Typography>
-                      </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-
-                {/* Khalti */}
-                <Card 
-                  elevation={2} 
-                  sx={{
-                    border: selectedPaymentMethod === 'Khalti' ? '2px solid #F46A6A' : '1px solid #eee', // Highlight selected
-                    '&:hover': {
-                      borderColor: '#F46A6A',
-                      boxShadow: 3
-                    }
-                  }}
-                >
-                  <CardActionArea onClick={() => handlePaymentMethodSelect('Khalti')}>
-                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-                       {/* Use actual logo */}
-                      <Box sx={{ 
-                        width: 40, 
-                        height: 40,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        <Box 
-                          component="img" 
-                          src={khaltiLogo} 
-                          alt="Khalti Logo" 
-                          sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                        />
-                      </Box>
-                      <Box>
-                        <Typography variant="h6" fontWeight={600}>Khalti</Typography>
-                        <Typography variant="body2" color="text.secondary">Digital Wallet</Typography>
-                      </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-
-                {/* IME Pay */}
-                <Card 
-                  elevation={2} 
-                  sx={{
-                    border: selectedPaymentMethod === 'IME Pay' ? '2px solid #F46A6A' : '1px solid #eee', // Highlight selected
-                    '&:hover': {
-                      borderColor: '#F46A6A',
-                      boxShadow: 3
-                    }
-                  }}
-                >
-                  <CardActionArea onClick={() => handlePaymentMethodSelect('IME Pay')}>
-                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-                       {/* Use actual logo */}
-                      <Box sx={{ 
-                        width: 40, 
-                        height: 40,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        <Box 
-                          component="img" 
-                          src={imepayLogo} 
-                          alt="IME Pay Logo" 
-                          sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                        />
-                      </Box>
-                      <Box>
-                        <Typography variant="h6" fontWeight={600}>IME Pay</Typography>
                         <Typography variant="body2" color="text.secondary">Digital Wallet</Typography>
                       </Box>
                     </CardContent>
@@ -490,23 +404,32 @@ const CheckoutPage: React.FC = () => {
                 </Card>
               </Box>
             </Box>
-
             {/* Actions */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 3 }}>
-              {/* Confirm Order Button - Enabled when address and payment are selected */}
-              <Button 
-                variant="contained" 
-                color="secondary" 
-                size="large" 
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                sx={{
+                  mt: 3,
+                  backgroundColor: 'rgb(255,106,106)',
+                  '&:hover': { backgroundColor: 'rgb(220,80,80)' },
+                  maxWidth: 320,
+                  width: '100%',
+                  alignSelf: 'center'
+                }}
+                disabled={!isConfirmButtonEnabled || isRedirecting}
                 onClick={handleConfirmOrder}
-                disabled={!isConfirmButtonEnabled}
               >
-                Confirm Order
+                {isRedirecting
+                  ? selectedPaymentMethod === 'eSewa'
+                    ? 'Redirecting to eSewa...'
+                    : 'Processing...'
+                  : 'Confirm Order'}
               </Button>
             </Box>
           </>
         )}
-
       </Paper>
 
       {/* Review Modal */}
@@ -541,7 +464,6 @@ const CheckoutPage: React.FC = () => {
           <Button onClick={handleSubmitReview} color="primary" disabled={!reviewText.trim() || reviewRating === null}>Submit Review</Button> {/* Disable submit if no rating or review text */}
         </DialogActions>
       </Dialog>
-
     </Container>
   );
 };
