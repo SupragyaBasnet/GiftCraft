@@ -11,6 +11,7 @@ interface User {
   name: string;
   email: string;
   phone?: string;
+  profileImage?: string;
 }
 
 interface AuthContextType {
@@ -65,6 +66,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [user]);
 
+  // Fetch user profile from backend on app load if token exists
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('giftcraftToken');
+      if (token) {
+        try {
+          const res = await fetch('/api/auth/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setUser({
+              id: data._id,
+              name: data.name,
+              email: data.email,
+              phone: data.phone,
+              profileImage: data.profileImage,
+            });
+          }
+        } catch (err) {
+          // Optionally handle error
+        }
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const login = async (email: string, password: string) => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -73,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || data.error || "Login failed");
-    setUser({ id: data.user.id, name: data.user.name, email: data.user.email, phone: data.user.phone });
+    setUser({ id: data.user.id, name: data.user.name, email: data.user.email, phone: data.user.phone, profileImage: data.user.profileImage });
     localStorage.setItem("giftcraftToken", data.token);
     localStorage.removeItem("profileImage");
   };

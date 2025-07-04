@@ -118,45 +118,39 @@ const CheckoutPage: React.FC = () => {
   const isConfirmButtonEnabled = address.trim() !== '' && selectedPaymentMethod !== null;
 
   // --- Order confirmation logic ---
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
     if (!validateAddress()) return;
-    const existingOrderHistory = localStorage.getItem('giftcraftOrderHistory');
-    let orderHistory = existingOrderHistory ? JSON.parse(existingOrderHistory) : [];
+    let items: any[] = [];
     if (checkoutCart) {
-      // Multi-item order
-      const newOrder = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        items: checkoutCart.map(item => ({ ...item, quantity: quantities[item.id] || 1 })),
-        address,
-        paymentMethod: selectedPaymentMethod,
-        total: itemTotal,
-        status: 'Processing',
-        review: null,
-        rating: null,
-      };
-      orderHistory.push(newOrder);
-      localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
-      setOrderConfirmedMessage(`Your order for ${checkoutCart.length} items has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
-      localStorage.removeItem('giftcraftCheckoutCart');
-      localStorage.removeItem('giftcraftCart'); // Clear cart after order
+      items = checkoutCart.map(item => ({
+        product: item._id || item.id,
+        quantity: quantities[item.id] || 1,
+        price: productPrices[item.productType] || 0,
+      }));
     } else if (checkoutItem) {
-      // Single item order (existing logic)
-    const newOrder = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        item: { ...checkoutItem, quantity },
-        address,
-        paymentMethod: selectedPaymentMethod,
-        total: itemTotal,
-        status: 'Processing',
-        review: null,
-        rating: null,
-    };
-    orderHistory.push(newOrder);
-    localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
-    setOrderConfirmedMessage(`Your order has been placed using ${selectedPaymentMethod}.\n\nThank you for trusting and choosing us!`);
-    localStorage.removeItem('giftcraftCheckoutItem');
+      items = [{
+        product: checkoutItem._id || checkoutItem.id,
+        quantity,
+        price: productPrices[checkoutItem.productType] || 0,
+      }];
+    }
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0) + DELIVERY_CHARGE;
+    try {
+      const res = await fetch('/api/products/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+        },
+        body: JSON.stringify({ items, total }),
+      });
+      if (!res.ok) throw new Error('Failed to place order');
+      setOrderConfirmedMessage('Your order has been placed! Thank you for trusting and choosing us!');
+      localStorage.removeItem('giftcraftCheckoutCart');
+      localStorage.removeItem('giftcraftCart');
+      localStorage.removeItem('giftcraftCheckoutItem');
+    } catch (err) {
+      setOrderConfirmedMessage('Failed to place order. Please try again.');
     }
   };
 

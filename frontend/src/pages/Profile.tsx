@@ -41,9 +41,12 @@ import {
   ExpandLess,
   Edit,
   Star,
+  Visibility,
+  VisibilityOff,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import CustomizedProductImage from '../components/CustomizedProductImage';
+import { useNavigate } from 'react-router-dom';
 
 // Mock data for addresses
 const mockAddresses = [
@@ -66,7 +69,7 @@ const productPrices: Record<string, number> = {
 };
 
 const Profile: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth() as any;
   const [tab, setTab] = useState(0);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<string[]>([]); // Initialize as an empty array of strings
@@ -75,40 +78,13 @@ const Profile: React.FC = () => {
   // Add state for order history
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
 
-  // Fetch order history from localStorage on component mount and extract unique addresses
-  useEffect(() => {
-    const savedOrderHistory = localStorage.getItem('giftcraftOrderHistory');
-    if (savedOrderHistory) {
-      try {
-        const parsedOrderHistory = JSON.parse(savedOrderHistory);
-        setOrderHistory(parsedOrderHistory);
-
-        // Extract unique addresses from order history and ensure they are strings
-        const uniqueAddresses = Array.from(new Set(parsedOrderHistory
-          .filter((order: any) => order.address) // Filter orders that have an address
-          .map((order: any) => order.address as string) // Extract addresses and explicitly cast to string
-        ));
-        setAddresses(uniqueAddresses as string[]); // Set the unique addresses in state
-
-      } catch (e) {
-        console.error('Failed to load order history or extract addresses from localStorage', e);
-        // Optionally clear invalid data
-        localStorage.removeItem('giftcraftOrderHistory');
-        setAddresses([]); // Set addresses to empty array on error
-      }
-    } else {
-      setAddresses([]); // Set addresses to empty array if no order history found
-    }
-  }, []); // Empty dependency array means this effect runs only once on mount
-
-  // Profile state (reuse your existing logic)
+  // Local state for form fields
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone ? user.phone.replace(/^\+977/, '') : '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showCameraDialog, setShowCameraDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,6 +94,26 @@ const Profile: React.FC = () => {
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState<number | null>(null);
   const [reviewOrderId, setReviewOrderId] = useState<string | null>(null);
+
+  // State for password
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Password strength validation
+  const isStrongPassword = (password: string) => {
+    // At least 8 characters, one uppercase, one lowercase, one number, one special character
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(password);
+  };
+  const newPasswordError = newPassword && !isStrongPassword(newPassword);
+
+  // Sync local state with user when user changes
+  useEffect(() => {
+    setName(user?.name || '');
+    setEmail(user?.email || '');
+    setPhone(user?.phone ? user.phone.replace(/^\+977/, '') : '');
+  }, [user]);
+  
 
   // Tab change handler
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setTab(newValue);
@@ -130,9 +126,26 @@ const Profile: React.FC = () => {
   };
 
   // Profile update handler (mock)
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSnackbar({open: true, message: 'Profile updated!', severity: 'success'});
+    setSnackbar({ open: false, message: '', severity: 'success' });
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+        },
+        body: JSON.stringify({ name, phone: '+977' + phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update profile');
+      setSnackbar({ open: true, message: 'Profile updated!', severity: 'success' });
+      // Update global user state only after successful save
+      setUser && setUser((prev: any) => ({ ...prev, name: data.name, phone: data.phone }));
+    } catch (err) {
+      setSnackbar({ open: true, message: err instanceof Error ? err.message : 'Failed to update profile', severity: 'error' });
+    }
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -152,9 +165,27 @@ const Profile: React.FC = () => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
-        localStorage.setItem('profileImage', reader.result as string);
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
+        try {
+          const res = await fetch('/api/auth/profile-image', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+            },
+            body: JSON.stringify({ profileImage: base64Image }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setUser && setUser((prev: any) => ({ ...prev, profileImage: data.profileImage }));
+            setSnackbar({ open: true, message: 'Profile image updated!', severity: 'success' });
+          } else {
+            setSnackbar({ open: true, message: data.message || 'Failed to update profile image', severity: 'error' });
+          }
+        } catch (err) {
+          setSnackbar({ open: true, message: 'Failed to update profile image', severity: 'error' });
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -191,15 +222,51 @@ const Profile: React.FC = () => {
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0);
-        setProfileImage(canvas.toDataURL('image/jpeg'));
-        localStorage.setItem('profileImage', canvas.toDataURL('image/jpeg'));
+        const base64Image = canvas.toDataURL('image/jpeg');
+        // Upload to backend just like gallery upload
+        (async () => {
+          try {
+            const res = await fetch('/api/auth/profile-image', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+              },
+              body: JSON.stringify({ profileImage: base64Image }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              setUser && setUser((prev: any) => ({ ...prev, profileImage: data.profileImage }));
+              setSnackbar({ open: true, message: 'Profile image updated!', severity: 'success' });
+            } else {
+              setSnackbar({ open: true, message: data.message || 'Failed to update profile image', severity: 'error' });
+            }
+          } catch (err) {
+            setSnackbar({ open: true, message: 'Failed to update profile image', severity: 'error' });
+          }
+        })();
         handleCameraClose();
       }
     }
   };
 
-  const handleRemovePhoto = () => {
-    setProfileImage(null);
+  const handleRemovePhoto = async () => {
+    try {
+      const res = await fetch('/api/auth/profile-image', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+        },
+      });
+      if (res.ok) {
+        setUser && setUser((prev: any) => ({ ...prev, profileImage: null }));
+        setSnackbar({ open: true, message: 'Profile image removed!', severity: 'success' });
+      } else {
+        setSnackbar({ open: true, message: 'Failed to remove profile image', severity: 'error' });
+      }
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to remove profile image', severity: 'error' });
+    }
     handleMenuClose();
   };
 
@@ -219,30 +286,105 @@ const Profile: React.FC = () => {
     setReviewRating(null);
     setReviewOrderId(null);
   };
-  const handleSubmitReview = () => {
-    // Update the review and rating for the order in localStorage
-    const existingOrderHistory = localStorage.getItem('giftcraftOrderHistory');
-    let orderHistory = existingOrderHistory ? JSON.parse(existingOrderHistory) : [];
-    const orderIdx = orderHistory.findIndex((o: any) => o.id === reviewOrderId);
-    if (orderIdx !== -1) {
-      orderHistory[orderIdx].review = reviewText;
-      orderHistory[orderIdx].rating = reviewRating;
-      localStorage.setItem('giftcraftOrderHistory', JSON.stringify(orderHistory));
-      setOrderHistory(orderHistory);
-    }
-    handleCloseReviewModal();
-  };
 
   // --- Tab Panels ---
   function TabPanel({ children, value, index }: { children: React.ReactNode, value: number, index: number }) {
-    return value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null;
+    return (
+      <div hidden={value !== index} style={{ width: '100%' }}>
+        {value === index && children}
+      </div>
+    );
   }
 
-  // On component mount, load profile image from localStorage if available
+  // Fetch order history from backend when Orders tab is selected
   useEffect(() => {
-    const savedImage = localStorage.getItem('profileImage');
-    if (savedImage) setProfileImage(savedImage);
-  }, []);
+    if (tab === 1) {
+      const fetchOrders = async () => {
+        try {
+          const res = await fetch('/api/products/orders', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+            },
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setOrderHistory(data);
+            // Extract unique addresses from backend order history
+            const uniqueAddresses = Array.from(new Set(data
+              .filter((order: any) => order.address)
+              .map((order: any) => order.address as string)
+            ));
+            setAddresses(uniqueAddresses as string[]);
+          }
+        } catch (err) {
+          // Optionally handle error
+        }
+      };
+      fetchOrders();
+    }
+  }, [tab]);
+
+  // Remove handleSubmitReview's localStorage logic
+  const handleSubmitReview = () => {
+    // In a real app, you would send this review and rating to your backend
+    handleCloseReviewModal();
+  };
+
+  // Change password handler
+  const navigate = useNavigate();
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setSnackbar({ open: true, message: 'Please fill all fields.', severity: 'error' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setSnackbar({ open: true, message: 'New passwords do not match.', severity: 'error' });
+      return;
+    }
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to change password');
+      setSnackbar({ open: true, message: 'Password changed successfully! Please log in again.', severity: 'success' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Failed to change password', severity: 'error' });
+    }
+  };
+
+  // Fetch profile image from backend on mount
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const res = await fetch('/api/auth/profile', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok && data.profileImage) {
+          setUser && setUser((prev: any) => ({ ...prev, profileImage: data.profileImage }));
+        } else {
+          setUser && setUser((prev: any) => ({ ...prev, profileImage: null }));
+        }
+      } catch (err) {
+        setUser && setUser((prev: any) => ({ ...prev, profileImage: null }));
+      }
+    };
+    fetchProfileImage();
+  }, [setUser]);
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -253,9 +395,9 @@ const Profile: React.FC = () => {
             <Box sx={{ position: 'relative', display: 'inline-block' }}>
               <Avatar
                 sx={{ width: 100, height: 100, fontSize: '2.5rem', mx: 'auto', mb: 2 }}
-                src={profileImage || undefined}
+                src={user?.profileImage || undefined}
               >
-                {!profileImage && user?.name.charAt(0)}
+                {!user?.profileImage && user?.name.charAt(0)}
               </Avatar>
               <IconButton
                 aria-label="upload profile photo"
@@ -313,7 +455,7 @@ const Profile: React.FC = () => {
             {/* Profile Tab */}
             <TabPanel value={tab} index={0}>
               <Typography variant="h5" fontWeight={700} gutterBottom>Profile Overview</Typography>
-              <Box component="form" onSubmit={handleProfileSubmit} sx={{ mt: 2 }}>
+              <Box component="form" onSubmit={handleProfileSubmit}>
                 <TextField
                   margin="normal"
                   required
@@ -321,8 +463,10 @@ const Profile: React.FC = () => {
                   id="name"
                   label="Full Name"
                   name="name"
+                  type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
+                  autoComplete="off"
                 />
                 <TextField
                   margin="normal"
@@ -331,8 +475,10 @@ const Profile: React.FC = () => {
                   id="email"
                   label="Email Address"
                   name="email"
+                  type="text"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  InputProps={{ readOnly: true }}
+                  autoComplete="off"
                 />
                 <TextField
                   margin="normal"
@@ -341,29 +487,34 @@ const Profile: React.FC = () => {
                   id="phone"
                   label="Phone Number"
                   name="phone"
+                  type="text"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   InputProps={{
                     startAdornment: (
                       <Box sx={{ mr: 1, color: 'text.secondary' }}>+977</Box>
                     ),
                   }}
+                  autoComplete="off"
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
+                  size="small"
                   variant="outlined"
-                  sx={{ 
-                    mt: 3, 
-                    borderRadius: 2, 
+                  sx={{
+                    mt: 3,
+                    mb: 2,
                     color: 'rgb(255,106,106)',
                     borderColor: 'rgb(255,106,106)',
-                    fontWeight: 700,
+                    width: 'auto',
+                    alignSelf: 'flex-start',
                     '&:hover': {
-                      backgroundColor: 'rgba(255,106,106,0.08)',
-                      borderColor: 'rgb(255,106,106)',
                       color: 'rgb(255,106,106)',
-                    }
-                  }}>
+                      borderColor: 'rgb(255,106,106)',
+                      backgroundColor: 'rgba(255,106,106,0.08)',
+                    },
+                  }}
+                >
                   Save Changes
                 </Button>
               </Box>
@@ -522,27 +673,65 @@ const Profile: React.FC = () => {
                   fullWidth
                   name="currentPassword"
                   label="Current Password"
-                  type="password"
+                  type={showCurrentPassword ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowCurrentPassword((show) => !show)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showCurrentPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    ),
+                  }}
                 />
                 <TextField
                   margin="normal"
                   fullWidth
                   name="newPassword"
                   label="New Password"
-                  type="password"
+                  type={showNewPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowNewPassword((show) => !show)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    ),
+                  }}
+                  error={!!newPasswordError}
+                  helperText={newPasswordError ? 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character.' : ''}
                 />
                 <TextField
                   margin="normal"
                   fullWidth
                   name="confirmPassword"
                   label="Confirm New Password"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowConfirmPassword((show) => !show)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    ),
+                  }}
                 />
                 <Button
                   variant="outlined"
@@ -558,7 +747,8 @@ const Profile: React.FC = () => {
                       color: 'rgb(255,106,106)',
                     }
                   }}
-                  onClick={() => setSnackbar({open: true, message: 'Password changed!', severity: 'success'})}
+                  onClick={handleChangePassword}
+                  disabled={!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword || !!newPasswordError}
                 >
                   Change Password
                 </Button>
@@ -583,7 +773,7 @@ const Profile: React.FC = () => {
         <MenuItem onClick={handleCameraOpen}>
           <PhotoCamera sx={{ mr: 1 }} /> Take Photo
         </MenuItem>
-        {profileImage && (
+        {user?.profileImage && (
           <MenuItem onClick={handleRemovePhoto} sx={{ color: 'error.main' }}>
             <Delete sx={{ mr: 1 }} /> Remove Photo
           </MenuItem>

@@ -50,12 +50,6 @@ const Navbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Get profile image from localStorage if available
-  let profileImage = null;
-  try {
-    profileImage = localStorage.getItem('profileImage');
-  } catch {}
-
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -206,11 +200,8 @@ const Navbar: React.FC = () => {
         {user ? (
           <MuiListItem button component={RouterLink} to="/profile">
             <ListItemIcon>
-              <Avatar
-                sx={{ width: 32, height: 32, bgcolor: "secondary.main" }}
-                src={profileImage || undefined}
-              >
-                {!profileImage && user.name.charAt(0)}
+              <Avatar src={user?.profileImage || undefined}>
+                {!user?.profileImage && user?.name?.charAt(0)}
               </Avatar>
             </ListItemIcon>
             <ListItemText primary="Profile" />
@@ -580,11 +571,8 @@ const Navbar: React.FC = () => {
                       },
                     }}
                   >
-                    <Avatar
-                      sx={{ width: 32, height: 32, bgcolor: "secondary.main" }}
-                      src={profileImage || undefined}
-                    >
-                      {!profileImage && user.name.charAt(0)}
+                    <Avatar src={user?.profileImage || undefined}>
+                      {!user?.profileImage && user?.name?.charAt(0)}
                     </Avatar>
                   </IconButton>
                   <Menu
