@@ -12,6 +12,8 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   status: { type: String, default: 'Processing' },
   createdAt: { type: Date, default: Date.now },
+  address: { type: String, required: true },
+  paymentMethod: { type: String, required: true },
 });
 
 module.exports = mongoose.model('Order', orderSchema); 

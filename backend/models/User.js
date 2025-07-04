@@ -14,6 +14,13 @@ const userSchema = new mongoose.Schema({
     type: Date,
   },
   profileImage: { type: String },
+  cart: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+      quantity: { type: Number, default: 1 },
+      // Optionally add customization fields here
+    }
+  ],
 });
 
 // Hash password before saving

@@ -55,9 +55,9 @@ exports.deleteProduct = async (req, res) => {
 
 exports.placeOrder = async (req, res) => {
   try {
-    const { items, total } = req.body;
+    const { items, total, address, paymentMethod } = req.body;
     const userId = req.user.id;
-    const order = new Order({ user: userId, items, total });
+    const order = new Order({ user: userId, items, total, address, paymentMethod });
     await order.save();
     res.status(201).json(order);
   } catch (err) {
@@ -84,6 +84,21 @@ exports.deleteAllUserOrders = async (req, res) => {
     res.json({ message: 'All your orders have been deleted.' });
   } catch (err) {
     console.error('Delete orders error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Add or get product by name, category, and price
+exports.addOrGetProduct = async (req, res) => {
+  try {
+    const { name, category, price, image, description } = req.body;
+    let product = await Product.findOne({ name, category, price });
+    if (!product) {
+      product = new Product({ name, category, price, image, description });
+      await product.save();
+    }
+    res.json(product);
+  } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 }; 

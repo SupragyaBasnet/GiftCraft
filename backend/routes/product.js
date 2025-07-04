@@ -11,5 +11,6 @@ router.delete('/:id', auth, productController.deleteProduct);
 router.post('/order', auth, productController.placeOrder);
 router.get('/orders', auth, productController.getUserOrders);
 router.delete('/orders', auth, productController.deleteAllUserOrders);
+router.post('/add-or-get', productController.addOrGetProduct);
 
 module.exports = router; 

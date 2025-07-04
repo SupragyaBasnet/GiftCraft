@@ -215,4 +215,80 @@ exports.removeProfileImage = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+// Get user's cart
+exports.getCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('cart.product');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    console.log('[getCart] User:', req.user.id, 'Cart:', user.cart);
+    res.json(user.cart);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Add item to cart
+exports.addToCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { product, quantity } = req.body;
+    console.log('[addToCart] User:', req.user.id, 'Product:', product, 'Quantity:', quantity);
+    const existingItem = user.cart.find(item => item.product.toString() === product);
+    if (existingItem) {
+      existingItem.quantity += quantity || 1;
+    } else {
+      user.cart.push({ product, quantity: quantity || 1 });
+    }
+    await user.save();
+    console.log('[addToCart] Updated Cart:', user.cart);
+    res.json(user.cart);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update cart item quantity
+exports.updateCartItem = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { product, quantity } = req.body;
+    const item = user.cart.find(item => item.product.toString() === product);
+    if (!item) return res.status(404).json({ message: 'Cart item not found' });
+    item.quantity = quantity;
+    await user.save();
+    res.json(user.cart);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Remove item from cart
+exports.removeFromCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { product } = req.body;
+    user.cart = user.cart.filter(item => item.product.toString() !== product);
+    await user.save();
+    res.json(user.cart);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Clear cart
+exports.clearCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    user.cart = [];
+    await user.save();
+    res.json(user.cart);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 }; 
