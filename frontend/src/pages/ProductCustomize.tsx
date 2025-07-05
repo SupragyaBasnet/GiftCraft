@@ -437,6 +437,7 @@ export function getAutoFitFontSize({
   const ctx = canvas.getContext('2d');
   if (!ctx) return minFontSize ?? 10;
   function measureStraight(fontSize: number) {
+    if (!ctx) return { width: 0, height: 0 };
     ctx.font = `${fontSize}px ${fontFamily}`;
     const lines = text.split('\n');
     const widths = lines.map((line: string) => ctx.measureText(line).width);
@@ -445,6 +446,7 @@ export function getAutoFitFontSize({
     return { width: maxWidth, height: totalHeight };
   }
   function measureArc(fontSize: number) {
+    if (!ctx) return 0;
     ctx.font = `${fontSize}px ${fontFamily}`;
     return ctx.measureText(text).width;
   }
@@ -618,31 +620,42 @@ function getStarPoints(width: number, height: number, spikes: number, cx: number
   return points.trim();
 }
 
-const ProductCustomize: React.FC = () => {
-  // Use both category and id from the URL
-  const { category, id } = useParams<{ category: string; id: string }>();
+interface ProductCustomizeProps {
+  categoryOverride?: string;
+  typeOverride?: string | null;
+}
+
+const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, typeOverride }) => {
+  // Use categoryOverride if provided, else useParams
+  const { category: urlCategory, type: urlType } = useParams<{ category: string, type?: string }>();
+  const category = categoryOverride || urlCategory;
+  const selectedType = typeOverride || urlType || null;
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Find the product by id (not by category/name)
-  const productData = products.find((p) => p.id == id);
-  // Derive selectedProduct from the found product's category
-  const selectedProduct = productData ? productData.category.replace(/s$/, '') : '';
+  // Generate a unique customizationId for this session
+  const [customizationId] = useState(() => `${category}-${Date.now()}-${Math.floor(Math.random() * 100000)}`);
 
-  // If product not found, show a friendly error
-  if (!productData) {
-    return (
-      <Container maxWidth="sm" sx={{ py: 8 }}>
-        <Alert severity="error" sx={{ mt: 4 }}>
-          Product not found. Please return to the <Button component={RouterLink} to="/customize" color="primary">Customize page</Button> and select a product.
-        </Alert>
-      </Container>
-    );
+  // Determine product type and base price from category
+  const productType = category.replace(/s$/, '');
+  // For products with variants, use selectedType to pick the correct image/label/price
+  let baseProduct = products.find((p) => p.category === category);
+  let basePrice = baseProduct ? baseProduct.price : 1000;
+  let baseImage = baseProduct ? baseProduct.image : '';
+
+  // For keychains, phonecases, etc., override image/label/price by type
+  if (selectedType && productType === 'keychain') {
+    // Map type to image and label
+    
+    
+    const typeInfo = keychainTypeMap[selectedType];
+    if (typeInfo) {
+      baseImage = typeInfo.image;
+      basePrice = typeInfo.price || basePrice;
+      baseProduct = { ...baseProduct, name: typeInfo.name, price: typeInfo.price || basePrice, image: typeInfo.image };
+    }
   }
-
-  // Use the product's MongoDB _id for backend requests
-  const basePrice = productData.price;
-  const productId = productData._id; // Use this for backend
+  // Add similar logic for phonecases, etc. as needed
 
   // --- Add state to track if customization is saved ---
   const [isSaved, setIsSaved] = useState(false);
@@ -652,10 +665,10 @@ const ProductCustomize: React.FC = () => {
     const isLoggedIn = localStorage.getItem("giftcraftUser");
     if (!isLoggedIn) {
       // Save the current product type to restore after login
-      localStorage.setItem("giftcraftPendingProduct", selectedProduct);
+      localStorage.setItem("giftcraftPendingProduct", productType);
       navigate("/login");
     }
-  }, [navigate, selectedProduct]);
+  }, [navigate, productType]);
 
   const [currentView, setCurrentView] = useState<ViewType>("front");
   const [currentArrayIndex, setCurrentArrayIndex] = useState(0);
@@ -702,7 +715,7 @@ const ProductCustomize: React.FC = () => {
     setElements([]);
     setCurrentView("front");
     setCurrentArrayIndex(0); // Reset array index when product changes
-  }, [selectedProduct]);
+  }, [productType]);
 
   // Removed useEffect for updating selectedProduct from URL as it's handled on initial render
   // Removed handleGalleryProductClick function based on simplification request
@@ -755,16 +768,16 @@ const ProductCustomize: React.FC = () => {
   };
 
   // Check if the current product has back or side views defined (for object type)
-  const isProductViewObject = typeof productImages[selectedProduct] === "object" && !Array.isArray(productImages[selectedProduct]);
+  const isProductViewObject = typeof productImages[productType as keyof typeof productImages] === "object" && !Array.isArray(productImages[productType as keyof typeof productImages]);
 
   const hasBackView =
     isProductViewObject &&
-    (productImages[selectedProduct] as ProductView)?.back !== undefined;
+    (productImages[productType as keyof typeof productImages] as ProductView)?.back !== undefined;
   const hasSideView =
     isProductViewObject &&
-    (productImages[selectedProduct] as ProductView)?.side !== undefined;
+    (productImages[productType as keyof typeof productImages] as ProductView)?.side !== undefined;
   const hasMultipleViews = hasBackView || hasSideView;
-  const hasArrayViews = Array.isArray(productImages[selectedProduct]);
+  const hasArrayViews = Array.isArray(productImages[productType as keyof typeof productImages]);
 
   const handleColorClick = (event: React.MouseEvent<HTMLElement>) => {
     setColorAnchorEl(event.currentTarget);
@@ -890,11 +903,11 @@ const ProductCustomize: React.FC = () => {
   // --- Get the correct product name for the selected variant (for backend lookup) ---
   function getSelectedProductName() {
     // For products with multiple variants (array views), use the productImageInfo name
-    if (hasArrayViews && productImageInfo[selectedProduct] && productImageInfo[selectedProduct][currentArrayIndex]) {
-      return productImageInfo[selectedProduct][currentArrayIndex].name;
+    if (hasArrayViews && productImageInfo[productType] && productImageInfo[productType][currentArrayIndex]) {
+      return productImageInfo[productType][currentArrayIndex].name;
     }
     // For single-variant products, fallback to productData?.name
-    return productData?.name || '';
+    return baseProduct?.name || '';
   }
 
   // Dedicated add-to-cart for custom products
@@ -903,23 +916,19 @@ const ProductCustomize: React.FC = () => {
       setSnackbar({ open: true, message: 'Please save your customization before adding to cart.', severity: 'error' });
       return;
     }
-    // Fetch the real MongoDB _id for the product variant
-    const productName = getSelectedProductName();
-    const productId = await fetchProductId(productCategoryMap[selectedProduct], productName);
-    if (!productId) {
-      setSnackbar({ open: true, message: 'Product not found in database.', severity: 'error' });
-      return;
-    }
     // Build the customization object from current state
     const customization = {
-      productType: selectedProduct,
+      customizationId,
+      category,
+      productType,
+      type: selectedType,
       viewIndex: hasArrayViews ? currentArrayIndex : currentView,
       size:
-        selectedProduct === 'notebook'
+        productType === 'notebook'
           ? selectedNotebookSize
-          : selectedProduct === 'tshirt'
+          : productType === 'tshirt'
           ? selectedTshirtSize
-          : selectedProduct === 'waterbottle'
+          : productType === 'waterbottle'
           ? selectedWaterBottleSize
           : undefined,
       color: color,
@@ -927,13 +936,15 @@ const ProductCustomize: React.FC = () => {
       image: currentImage,
     };
     const token = localStorage.getItem('giftcraftToken');
-    const customPrice = calculateCustomizationPrice(basePrice, selectedProduct, customization);
+    const customPrice = calculateCustomizationPrice(basePrice, productType, customization);
     const payload = {
-      product: productId,
-      quantity: 1,
+      customizationId,
+      category,
+      type: selectedType,
       customization,
       price: customPrice,
-      image: productData.image, // Add the correct product image for cart display
+      image: currentImage,
+      quantity: 1,
     };
     try {
       const res = await fetch('/api/auth/customization/cart', {
@@ -962,23 +973,19 @@ const ProductCustomize: React.FC = () => {
       setSnackbar({ open: true, message: 'Please save your customization before buying.', severity: 'error' });
       return;
     }
-    // Fetch the real MongoDB _id for the product variant
-    const productName = getSelectedProductName();
-    const productId = await fetchProductId(productCategoryMap[selectedProduct], productName);
-    if (!productId) {
-      setSnackbar({ open: true, message: 'Product not found in database.', severity: 'error' });
-      return;
-    }
     // Build the customization object from current state
     const customization = {
-      productType: selectedProduct,
+      customizationId,
+      category,
+      productType,
+      type: selectedType,
       viewIndex: hasArrayViews ? currentArrayIndex : currentView,
       size:
-        selectedProduct === 'notebook'
+        productType === 'notebook'
           ? selectedNotebookSize
-          : selectedProduct === 'tshirt'
+          : productType === 'tshirt'
           ? selectedTshirtSize
-          : selectedProduct === 'waterbottle'
+          : productType === 'waterbottle'
           ? selectedWaterBottleSize
           : undefined,
       color: color,
@@ -986,13 +993,15 @@ const ProductCustomize: React.FC = () => {
       image: currentImage,
     };
     const token = localStorage.getItem('giftcraftToken');
-    const customPrice = calculateCustomizationPrice(basePrice, selectedProduct, customization);
+    const customPrice = calculateCustomizationPrice(basePrice, productType, customization);
     const payload = {
-      product: productId,
-      quantity: 1,
+      customizationId,
+      category,
+      type: selectedType,
       customization,
       price: customPrice,
-      image: productData.image, // Add the correct product image for cart display
+      image: currentImage,
+      quantity: 1,
     };
     try {
       const res = await fetch('/api/auth/customization/cart', {
@@ -1036,11 +1045,11 @@ const ProductCustomize: React.FC = () => {
         setColor(customization.color);
         setElements(customization.elements);
         if (customization.size) {
-          if (selectedProduct === "notebook") {
+          if (productType === "notebook") {
             setSelectedNotebookSize(customization.size);
-          } else if (selectedProduct === "tshirt") {
+          } else if (productType === "tshirt") {
             setSelectedTshirtSize(customization.size);
-          } else if (selectedProduct === "waterbottle") {
+          } else if (productType === "waterbottle") {
             setSelectedWaterBottleSize(customization.size);
           }
         }
@@ -1062,22 +1071,21 @@ const ProductCustomize: React.FC = () => {
       setCurrentView("front");
       setCurrentArrayIndex(0);
     }
-  }, [selectedProduct, navigate, hasArrayViews]); // Added hasArrayViews to dependencies
+  }, [productType, navigate, hasArrayViews]); // Added hasArrayViews to dependencies
 
   // Determine the current image based on selected product and view
-  const currentImage = hasArrayViews
-    ? (productImages[selectedProduct] as string[])[currentArrayIndex]
-    : currentView === "back" &&
-      isProductViewObject &&
-      (productImages[selectedProduct] as ProductView)?.back
-    ? (productImages[selectedProduct] as ProductView)?.back
-    : currentView === "side" &&
-      isProductViewObject &&
-      (productImages[selectedProduct] as ProductView)?.side
-    ? (productImages[selectedProduct] as ProductView)?.side
-    : isProductViewObject
-    ? (productImages[selectedProduct] as ProductView)?.front
-    : ""; // Fallback for non-array, non-object (shouldn't happen)
+  let currentImage = baseImage;
+  if (hasArrayViews) {
+    currentImage = Array.isArray(productImages[productType as keyof typeof productImages]) && productImages[productType as keyof typeof productImages][currentArrayIndex]
+      ? productImages[productType as keyof typeof productImages][currentArrayIndex]
+      : productImages[productType as keyof typeof productImages][0];
+  } else if (currentView === "back" && isProductViewObject && (productImages[productType as keyof typeof productImages] as ProductView)?.back) {
+    currentImage = (productImages[productType as keyof typeof productImages] as ProductView)?.back;
+  } else if (currentView === "side" && isProductViewObject && (productImages[productType as keyof typeof productImages] as ProductView)?.side) {
+    currentImage = (productImages[productType as keyof typeof productImages] as ProductView)?.side;
+  } else if (isProductViewObject) {
+    currentImage = (productImages[productType as keyof typeof productImages] as ProductView)?.front;
+  }
 
   const [color, setColor] = useState("#ffffff");
   const [text, setText] = useState("");
@@ -1536,18 +1544,60 @@ const ProductCustomize: React.FC = () => {
     ],
   };
 
+  // Defensive: If productType or baseProduct is missing, show a friendly error
+  if (!productType || !baseProduct || !productImages[productType as keyof typeof productImages]) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 8 }}>
+        <Alert severity="error" sx={{ mt: 4 }}>
+          Sorry, this product category is not available for customization. Please go back and choose another category.
+        </Alert>
+      </Container>
+    );
+  }
+
+  const keychainTypeInfo: Record<string, { image: string; name: string; description: string }> = {
+    CircleKeychain: {
+      image: circleKeychain,
+      name: 'Circle Keychain',
+      description: 'Classic round keychain for your custom design.'
+    },
+    RectangleKeychain: {
+      image: squareFront,
+      name: 'Rectangle Keychain',
+      description: 'Sleek rectangle keychain for photos or text.'
+    },
+    StarKeychain: {
+      image: starshapedBack,
+      name: 'Star Keychain',
+      description: 'Fun star-shaped keychain for a unique look.'
+    },
+    RectangleMetalKeychain: {
+      image: planemetalkeychain,
+      name: 'Rectangle Metal Keychain',
+      description: 'Premium metal keychain for durability.'
+    },
+    OvalKeychain: {
+      image: planewhitekeychain,
+      name: 'Oval Keychain',
+      description: 'Elegant oval keychain for your design.'
+    },
+    LeatherKeychain: {
+      image: keychainLeather,
+      name: 'Leather Keychain',
+      description: 'Luxurious leather keychain for a classic touch.'
+    },
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
         <Typography variant="h4" fontWeight={900} gutterBottom align="center" sx={{ fontSize: { xs: '1.7rem', md: '2.1rem' }, fontWeight: 800, letterSpacing: 0.5 }}>
-          Customize Your{" "}
-          {selectedProduct.charAt(0).toUpperCase() +
-            selectedProduct.slice(1).replace("-", " ")}
+          Customize Your {selectedType ? selectedType.replace(/([A-Z])/g, ' $1').trim() : (productType ? productType.charAt(0).toUpperCase() + productType.slice(1).replace("-", " ") : "Product")}
         </Typography>
         <Box sx={{ width: 60, height: 3, bgcolor: '#F46A6A', borderRadius: 2, mx: 'auto', mb: 3 }} />
 
         {/* View Options */}
-        {hasArrayViews && selectedProduct !== "pen" ? (
+        {hasArrayViews && productType !== "pen" ? (
           <Box
             sx={{
               display: "flex",
@@ -1557,7 +1607,7 @@ const ProductCustomize: React.FC = () => {
               mb: 3,
             }}
           />
-        ) : hasArrayViews && selectedProduct === "pen" ? null : hasMultipleViews ? (
+        ) : hasArrayViews && productType === "pen" ? null : hasMultipleViews ? (
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <ToggleButtonGroup
               value={currentView}
@@ -1581,10 +1631,10 @@ const ProductCustomize: React.FC = () => {
               }}
             >
               <ToggleButton value="front">Front</ToggleButton>
-              {(productImages[selectedProduct] as ProductView)?.back && (
+              {(productImages[productType as keyof typeof productImages] as ProductView)?.back && (
                 <ToggleButton value="back">Back</ToggleButton>
               )}
-              {(productImages[selectedProduct] as ProductView)?.side && (
+              {(productImages[productType as keyof typeof productImages] as ProductView)?.side && (
                 <ToggleButton value="side">Side</ToggleButton>
               )}
             </ToggleButtonGroup>
@@ -1592,7 +1642,7 @@ const ProductCustomize: React.FC = () => {
         ) : null}
 
         {/* View Options for phonecase: dropdown below current view, right-aligned, no thumbnails */}
-        {selectedProduct === 'phonecase' && hasArrayViews ? (
+        {productType === 'phonecase' && hasArrayViews ? (
           <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
             <Typography variant="subtitle1" fontWeight={700} mb={1}>
               Current View:
@@ -1630,7 +1680,7 @@ const ProductCustomize: React.FC = () => {
                 ))}
               </TextField>
             </Box>
-            {selectedProduct === 'phonecase' && hasArrayViews && (
+            {productType === 'phonecase' && hasArrayViews && (
               <Box sx={{ textAlign: 'center', mb: 2 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
                   {productImageInfo.phonecase[currentArrayIndex]?.name}
@@ -1657,7 +1707,7 @@ const ProductCustomize: React.FC = () => {
             <Box
               component="img"
               src={currentImage}
-              alt={`${selectedProduct}-
+              alt={`${productType}-
                 hasArrayViews
                   ? currentArrayIndex + 1
                   : hasMultipleViews
@@ -1679,7 +1729,7 @@ const ProductCustomize: React.FC = () => {
 
         {/* Size, Frame Type, and Keychain Type Selection - Now inline */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
-          {selectedProduct === "notebook" && (
+          {productType === "notebook" && (
             <TextField
               select
               label="Size"
@@ -1693,7 +1743,7 @@ const ProductCustomize: React.FC = () => {
               <MenuItem value="B5">B5</MenuItem>
             </TextField>
           )}
-          {selectedProduct === "tshirt" && (
+          {productType === "tshirt" && (
             <TextField
               select
               label="Size"
@@ -1708,7 +1758,7 @@ const ProductCustomize: React.FC = () => {
               <MenuItem value="XXL">XXL</MenuItem>
             </TextField>
           )}
-          {selectedProduct === "pen" && (
+          {productType === "pen" && (
             <TextField
               select
               label="Pen Type"
@@ -1723,7 +1773,7 @@ const ProductCustomize: React.FC = () => {
               ))}
             </TextField>
           )}
-          {selectedProduct === "waterbottle" && hasArrayViews && (
+          {productType === "waterbottle" && hasArrayViews && (
             <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
 
               <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
@@ -1757,7 +1807,7 @@ const ProductCustomize: React.FC = () => {
               </Box>
             </Box>
           )}
-          {selectedProduct === "frame" && (
+          {productType === "frame" && (
             <TextField
               select
               label="Frame Type"
@@ -1774,7 +1824,7 @@ const ProductCustomize: React.FC = () => {
               <MenuItem value={3}>Classic Frame</MenuItem>
             </TextField>
           )}
-          {selectedProduct === "keychain" && (
+          {productType === "keychain" && (
             <TextField
               select
               label="Keychain Type"
@@ -1793,7 +1843,7 @@ const ProductCustomize: React.FC = () => {
         </Box>
 
         {/* Pillowcase shape dropdown (right-aligned below current view) */}
-        {selectedProduct === 'pillowcase' && hasArrayViews && (
+        {productType === 'pillowcase' && hasArrayViews && (
           <>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
               <TextField
@@ -1844,12 +1894,12 @@ const ProductCustomize: React.FC = () => {
               zIndex: 1,
               pointerEvents: "none",
               p: 2,
-              ...getProductStyle(selectedProduct),
+              ...getProductStyle(productType),
             }}
           />
           {/* Color overlay as tint for all products, but mask for phonecase */}
           {color !== "#ffffff" && (
-            selectedProduct === "phonecase" ? (
+            productType === "phonecase" ? (
               <Box
                 sx={{
                   position: "absolute",
@@ -3118,7 +3168,8 @@ const ProductCustomize: React.FC = () => {
             }}
             title={!isSaved ? 'Please save your customization first' : ''}
           >
-            Buy Now
+            PROCEED TO CHECKOUT
+            
           </Button>
         </Box>
       </Paper>

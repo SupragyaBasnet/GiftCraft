@@ -115,14 +115,13 @@ const ProductDetails: React.FC = () => {
           setProduct(product);
         } else {
           setError("Product not found");
-        }
-      } catch (e) {
-        setError("An error occurred");
+        }}
+ catch (e) {
+  setError("An error occurred");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 

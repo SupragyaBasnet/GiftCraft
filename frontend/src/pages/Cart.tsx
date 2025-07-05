@@ -85,7 +85,8 @@ const Cart: React.FC = () => {
                       <Button
                         size="small"
                         variant="outlined"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, Math.min(10, item.quantity + 1))}
+                        disabled={item.quantity >= 10}
                         sx={{ minWidth: 32, px: 0 }}
                       >
                         +

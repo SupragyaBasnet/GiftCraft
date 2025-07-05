@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { products, Product } from '../data/products';
 
 interface CartItem {
   id: string; // product id
@@ -40,14 +41,39 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const data = await res.json();
       console.log('Raw cart data from backend:', data);
       setCartItems(
-        data.map((item: any) => ({
-          id: item.product._id,
-          cartItemId: item._id,
-          name: item.product.name,
-          price: item.product.price,
-          image: item.product.image,
-          quantity: item.quantity,
-        }))
+        data.map((item: any) => {
+          // If item.product exists, it's a normal product; else, it's a custom item
+          if (item.product) {
+            // Try to get image from backend, else from products array, else fallback
+            let image = item.product.image;
+            if (!image) {
+              const localProduct = products.find((p: Product) => String(p.id) === String(item.product._id));
+              image = localProduct?.image || '/placeholder.png';
+            }
+            return {
+              id: item.product._id,
+              cartItemId: item._id || item.customizationId,
+              name: item.product.name,
+              price: item.product.price,
+              image,
+              quantity: item.product.quantity,
+              category: item.product.category,
+              description: item.product.description,
+            };
+          } else {
+            // Customization item
+            return {
+              id: item.customizationId,
+              cartItemId: item.customizationId,
+              name: item.category ? `Custom ${item.category.charAt(0).toUpperCase() + item.category.slice(1)}` : 'Custom Product',
+              price: item.price,
+              image: item.image || '/placeholder.png',
+              quantity: item.quantity,
+              category: item.category,
+              description: 'Customized product',
+            };
+          }
+        })
       );
     } else {
       setCartItems([]);
