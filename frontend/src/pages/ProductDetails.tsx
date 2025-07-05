@@ -130,6 +130,7 @@ const ProductDetails: React.FC = () => {
   };
 
   const handleAddToCart = async () => {
+    if (!product) return;
     try {
       const isLoggedIn = localStorage.getItem('giftcraftUser');
       if (!isLoggedIn) {
@@ -138,11 +139,12 @@ const ProductDetails: React.FC = () => {
       }
       await addToCart({
         id: String(product.id),
+        cartItemId: Date.now().toString(),
         name: product.name,
         price: product.price,
         image: product.image,
-        category: product.category,
-        description: product.description,
+        category: product.category,      // <-- add this
+        description: product.description // <-- add this
       }, quantity);
       setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
       navigate('/cart');
@@ -230,14 +232,26 @@ const ProductDetails: React.FC = () => {
             In Stock
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
-            <Typography variant="h6" sx={{ mr: 2 }}>Quantity:</Typography>
-            <IconButton onClick={() => handleQuantityChange(-1)} size="small">
-              <Remove />
-            </IconButton>
-            <Typography variant="h6" sx={{ mx: 2 }}>{quantity}</Typography>
-            <IconButton onClick={() => handleQuantityChange(1)} size="small">
-              <Add />
-            </IconButton>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => handleQuantityChange(-1)}
+              disabled={quantity <= 1}
+              sx={{ minWidth: 32, px: 0 }}
+            >
+              -
+            </Button>
+            <Typography variant="body2" color="text.secondary" sx={{ mx: 2 }}>
+              Quantity: {quantity}
+            </Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => handleQuantityChange(1)}
+              sx={{ minWidth: 32, px: 0 }}
+            >
+              +
+            </Button>
           </Box>
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
             <Button
@@ -364,6 +378,12 @@ const ProductDetails: React.FC = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   cursor: 'pointer',
+                  minWidth: 220,
+                  maxWidth: 240,
+                  minHeight: 260,
+                  maxHeight: 280,
+                  mx: 'auto',
+                  justifyContent: 'center',
                 }}
               >
                 <Box
@@ -372,9 +392,9 @@ const ProductDetails: React.FC = () => {
                   alt={rel.name}
                   sx={{ width: 100, height: 100, objectFit: 'contain', mb: 1, borderRadius: 2, bgcolor: 'white' }}
                 />
-                <Typography variant="subtitle1" fontWeight={700}>{rel.name}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{rel.description}</Typography>
-                <Typography variant="body2" fontWeight={700} color="primary">Rs. {rel.price.toLocaleString('en-IN')}</Typography>
+                <Typography variant="subtitle1" fontWeight={700} align="center" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{rel.name}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rel.description}</Typography>
+                <Typography variant="body2" fontWeight={700} color="primary" align="center">Rs. {rel.price.toLocaleString('en-IN')}</Typography>
               </Paper>
             </Grid>
           ))}

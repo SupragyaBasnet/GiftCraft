@@ -50,6 +50,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { useCart } from '../context/CartContext';
+import { products } from '../data/products';
 
 // Import product images from products directory
 import frame1 from "../assets/products/frame1.jpg";
@@ -526,6 +527,146 @@ export function getAutoFitFontSize({
   return best;
 }
 
+// Add this function below the imports or near the other helpers:
+function calculateCustomizationPrice(basePrice: number, type: string, customization: any) {
+  let extra = 0;
+  if (!customization) return basePrice;
+  // Count elements by type
+  let textCount = 0, imageCount = 0, artCount = 0, stickerCount = 0, shapeCount = 0, toolCount = 0;
+  if (customization.elements && Array.isArray(customization.elements)) {
+    for (const el of customization.elements) {
+      if (el.type === 'text') textCount++;
+      if (el.type === 'image') imageCount++;
+      if (el.type === 'art') artCount++;
+      if (el.type === 'sticker') stickerCount++;
+      if (el.type === 'shape') shapeCount++;
+      if (el.type === 'tool') toolCount++;
+    }
+  }
+  const t = type.toLowerCase();
+  if (t === 'tshirt' || t === 't-shirt') {
+    if (customization.color && customization.color !== '#ffffff') extra += 100;
+    extra += textCount * 150;
+    extra += imageCount * 300;
+    extra += artCount * 220;
+    extra += stickerCount * 180;
+    extra += shapeCount * 120;
+    extra += toolCount * 120;
+  } else if (t === 'mug') {
+    if (customization.color && customization.color !== '#ffffff') extra += 60;
+    extra += textCount * 120;
+    extra += imageCount * 220;
+    extra += artCount * 180;
+    extra += stickerCount * 150;
+    extra += shapeCount * 90;
+    extra += toolCount * 90;
+  } else if (t === 'notebook') {
+    if (customization.color && customization.color !== '#ffffff') extra += 40;
+    extra += textCount * 80;
+    extra += imageCount * 150;
+    extra += artCount * 100;
+    extra += stickerCount * 100;
+    extra += shapeCount * 60;
+    extra += toolCount * 60;
+  } else if (t === 'frame') {
+    if (customization.color && customization.color !== '#ffffff') extra += 80;
+    extra += textCount * 140;
+    extra += imageCount * 250;
+    extra += artCount * 200;
+    extra += stickerCount * 160;
+    extra += shapeCount * 100;
+    extra += toolCount * 100;
+  } else if (t === 'keychain') {
+    if (customization.color && customization.color !== '#ffffff') extra += 30;
+    extra += textCount * 60;
+    extra += imageCount * 120;
+    extra += artCount * 80;
+    extra += stickerCount * 80;
+    extra += shapeCount * 40;
+    extra += toolCount * 40;
+  } else if (t === 'waterbottle') {
+    if (customization.color && customization.color !== '#ffffff') extra += 50;
+    extra += textCount * 100;
+    extra += imageCount * 180;
+    extra += artCount * 120;
+    extra += stickerCount * 120;
+    extra += shapeCount * 70;
+    extra += toolCount * 70;
+  } else if (t === 'cap') {
+    if (customization.color && customization.color !== '#ffffff') extra += 50;
+    extra += textCount * 100;
+    extra += imageCount * 180;
+    extra += artCount * 120;
+    extra += stickerCount * 120;
+    extra += shapeCount * 70;
+    extra += toolCount * 70;
+  } else if (t === 'pen') {
+    if (customization.color && customization.color !== '#ffffff') extra += 20;
+    extra += textCount * 40;
+    extra += imageCount * 80;
+    extra += artCount * 60;
+    extra += stickerCount * 60;
+    extra += shapeCount * 30;
+    extra += toolCount * 30;
+  } else if (t === 'phonecase') {
+    if (customization.color && customization.color !== '#ffffff') extra += 70;
+    extra += textCount * 130;
+    extra += imageCount * 240;
+    extra += artCount * 180;
+    extra += stickerCount * 160;
+    extra += shapeCount * 90;
+    extra += toolCount * 90;
+  } else if (t === 'pillowcase') {
+    if (customization.color && customization.color !== '#ffffff') extra += 60;
+    extra += textCount * 120;
+    extra += imageCount * 220;
+    extra += artCount * 180;
+    extra += stickerCount * 150;
+    extra += shapeCount * 90;
+    extra += toolCount * 90;
+  } else {
+    if (customization.color && customization.color !== '#ffffff') extra += 50;
+    extra += textCount * 100;
+    extra += imageCount * 200;
+    extra += artCount * 150;
+    extra += stickerCount * 120;
+    extra += shapeCount * 80;
+    extra += toolCount * 80;
+  }
+  return basePrice + extra;
+}
+
+// Helper to fetch product by category and name from backend
+async function fetchProductId(category: string, name: string) {
+  const res = await fetch(`/api/products/find?category=${category}&name=${encodeURIComponent(name)}`);
+  if (res.ok) {
+    const product = await res.json();
+    return product._id;
+  }
+  return null;
+}
+
+// Add this helper function near the top of the file:
+function getStarPoints(width: number, height: number, spikes: number, cx: number, cy: number, outerRadius: number, innerRadius: number) {
+  const step = Math.PI / spikes;
+  let points = '';
+  let rotation = Math.PI / 2 * 3;
+  let x = cx;
+  let y = cy;
+  for (let i = 0; i < spikes; i++) {
+    x = cx + Math.cos(rotation) * outerRadius;
+    y = cy + Math.sin(rotation) * outerRadius;
+    points += `${x},${y} `;
+    rotation += step;
+
+    x = cx + Math.cos(rotation) * innerRadius;
+    y = cy + Math.sin(rotation) * innerRadius;
+    points += `${x},${y} `;
+    rotation += step;
+  }
+  return points.trim();
+}
+
 const ProductCustomize: React.FC = () => {
   const { product } = useParams<{ product: string }>();
   const navigate = useNavigate();
@@ -569,6 +710,28 @@ const ProductCustomize: React.FC = () => {
           ? "pillowcase"
           : product) as ProductType)
       : "tshirt";
+
+  // --- Load product info from products.ts for basePrice and productId ---
+  const productCategoryMap: Record<ProductType, string> = {
+    tshirt: 'tshirts',
+    mug: 'mugs',
+    phonecase: 'phonecases',
+    frame: 'frames',
+    keychain: 'keychains',
+    pillowcase: 'pillowcases',
+    waterbottle: 'waterbottles',
+    pen: 'pens',
+    notebook: 'notebooks',
+    cap: 'caps',
+  };
+  const productData = products.find(
+    (p) => p.category === productCategoryMap[selectedProduct]
+  );
+  const basePrice = productData ? productData.price : 1000;
+  const productId = productData ? productData.id : null;
+
+  // --- Add state to track if customization is saved ---
+  const [isSaved, setIsSaved] = useState(false);
 
   // Add authentication check on page load
   useEffect(() => {
@@ -703,28 +866,35 @@ const ProductCustomize: React.FC = () => {
 
   const colorPickerOpen = Boolean(colorAnchorEl);
 
-  const handleImageUpload = (url: string) => {
-    if (url) {
-      const newElement: Element = {
-        id: Date.now().toString(),
-        type: "image",
-        content: url,
-        x: 50,
-        y: 50,
-        width: 120,
-        height: 120,
-        shape: "rectangle",
-        imageOffsetX: 0,
-        imageOffsetY: 0,
-        imageScale: 1,
-      };
-      setElements([...elements, newElement]);
-      setSnackbar({
-        open: true,
-        message: "Image uploaded successfully!",
-        severity: "success",
-      });
-    }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (f) => {
+      const url = f.target?.result as string;
+      if (url) {
+        const newElement: Element = {
+          id: Date.now().toString(),
+          type: "image",
+          content: url, // Store as data URL
+          x: 50,
+          y: 50,
+          width: 120,
+          height: 120,
+          shape: "rectangle",
+          imageOffsetX: 0,
+          imageOffsetY: 0,
+          imageScale: 1,
+        };
+        setElements([...elements, newElement]);
+        setSnackbar({
+          open: true,
+          message: "Image uploaded successfully!",
+          severity: "success",
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAddText = () => {
@@ -796,97 +966,125 @@ const ProductCustomize: React.FC = () => {
 
   const handleSave = () => {
     try {
-      // Simulate save logic
+      setIsSaved(true);
       setSnackbar({ open: true, message: 'Customization saved!', severity: 'success' });
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
     }
   };
 
-  const handleAddToCart = async () => {
+  // Dedicated add-to-cart for custom products
+  const handleAddToCartCustom = async () => {
+    if (!isSaved) {
+      setSnackbar({ open: true, message: 'Please save your customization before adding to cart.', severity: 'error' });
+      return;
+    }
+    // Fetch the real MongoDB _id for the product
+    const productId = await fetchProductId(productCategoryMap[selectedProduct], productData?.name || '');
+    if (!productId) {
+      setSnackbar({ open: true, message: 'Product not found in database.', severity: 'error' });
+      return;
+    }
+    // Build the customization object from current state
+    const customization = {
+      productType: selectedProduct,
+      viewIndex: hasArrayViews ? currentArrayIndex : currentView,
+      size:
+        selectedProduct === 'notebook'
+          ? selectedNotebookSize
+          : selectedProduct === 'tshirt'
+          ? selectedTshirtSize
+          : selectedProduct === 'waterbottle'
+          ? selectedWaterBottleSize
+          : undefined,
+      color: color,
+      elements: elements,
+      image: currentImage,
+    };
+    const token = localStorage.getItem('giftcraftToken');
+    const customPrice = calculateCustomizationPrice(basePrice, selectedProduct, customization);
+    const payload = {
+      product: productId,
+      quantity: 1,
+      customization,
+      price: customPrice,
+    };
     try {
-      const isLoggedIn = localStorage.getItem('giftcraftUser');
-      if (!isLoggedIn) {
-        setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
-        return;
-      }
-      await addToCart({
-        id: Date.now().toString(),
-        name: selectedProduct.charAt(0).toUpperCase() + selectedProduct.slice(1),
-        price: 0, // Set price as needed
-        image: currentImage,
-        category: selectedProduct,
-        description: 'Customized product',
+      const res = await fetch('/api/auth/customization/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
       });
-      setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
-      navigate('/cart');
+      if (res.ok) {
+        setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+        setTimeout(() => {
+          navigate('/cart');
+        }, 1500);
+      } else {
+        setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
+      }
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
+    if (!isSaved) {
+      setSnackbar({ open: true, message: 'Please save your customization before buying.', severity: 'error' });
+      return;
+    }
+    // Fetch the real MongoDB _id for the product
+    const productId = await fetchProductId(productCategoryMap[selectedProduct], productData?.name || '');
+    if (!productId) {
+      setSnackbar({ open: true, message: 'Product not found in database.', severity: 'error' });
+      return;
+    }
+    // Build the customization object from current state
+    const customization = {
+      productType: selectedProduct,
+      viewIndex: hasArrayViews ? currentArrayIndex : currentView,
+      size:
+        selectedProduct === 'notebook'
+          ? selectedNotebookSize
+          : selectedProduct === 'tshirt'
+          ? selectedTshirtSize
+          : selectedProduct === 'waterbottle'
+          ? selectedWaterBottleSize
+          : undefined,
+      color: color,
+      elements: elements,
+      image: currentImage,
+    };
+    const token = localStorage.getItem('giftcraftToken');
+    const customPrice = calculateCustomizationPrice(basePrice, selectedProduct, customization);
+    const payload = {
+      product: productId,
+      quantity: 1,
+      customization,
+      price: customPrice,
+    };
     try {
-      const isLoggedIn = localStorage.getItem('giftcraftUser');
-      if (!isLoggedIn) {
-        setSnackbar({ open: true, message: 'Please log in to buy.', severity: 'error' });
-        // Save current customization to localStorage to restore after login
-        const currentCustomization = {
-          productType: selectedProduct,
-          viewIndex: hasArrayViews ? currentArrayIndex : currentView,
-          size:
-            selectedProduct === 'notebook'
-              ? selectedNotebookSize
-              : selectedProduct === 'tshirt'
-              ? selectedTshirtSize
-              : selectedProduct === 'waterbottle'
-              ? selectedWaterBottleSize
-              : undefined,
-          color: color,
-          elements: elements.map((el) => ({
-            id: el.id,
-            type: el.type,
-            content: el.content,
-            x: el.x,
-            y: el.y,
-            width: el.width,
-            height: el.height,
-            color: el.type === 'text' && el.color ? el.color : undefined,
-            fontFamily: el.fontFamily,
-            textStyle: el.textStyle,
-            imageOffsetX: el.imageOffsetX,
-            imageOffsetY: el.imageOffsetY,
-            imageScale: el.imageScale,
-          })),
-          image: currentImage,
-        };
-        localStorage.setItem('giftcraftPendingCustomization', JSON.stringify(currentCustomization));
-        navigate('/login');
-        return;
+      const res = await fetch('/api/auth/customization/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setSnackbar({ open: true, message: 'Added to cart! Proceeding to checkout...', severity: 'success' });
+        setTimeout(() => {
+          navigate('/checkout');
+        }, 1200);
+      } else {
+        setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
       }
-      // Simulate buy logic
-      setSnackbar({ open: true, message: 'Purchase successful!', severity: 'success' });
-      // Proceed to checkout
-      const customizedProduct = {
-        id: Date.now(),
-        productType: selectedProduct,
-        viewIndex: hasArrayViews ? currentArrayIndex : currentView,
-        size:
-          selectedProduct === 'notebook'
-            ? selectedNotebookSize
-            : selectedProduct === 'tshirt'
-            ? selectedTshirtSize
-            : selectedProduct === 'waterbottle'
-            ? selectedWaterBottleSize
-            : undefined,
-        color: color,
-        elements: elements,
-        image: currentImage,
-      };
-      localStorage.setItem('giftcraftCheckoutItem', JSON.stringify(customizedProduct));
-      navigate('/checkout');
     } catch (err) {
-      setSnackbar({ open: true, message: 'Failed to complete purchase.', severity: 'error' });
+      setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
     }
   };
 
@@ -1184,7 +1382,7 @@ const ProductCustomize: React.FC = () => {
   }, [selectedElementId, elements]);
 
   // 2. When the input changes and a text element is selected, update the element's content
-  const handleTextInputChange = (e) => {
+  const handleTextInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
     if (selectedElementId) updateElement(selectedElementId, { content: e.target.value });
   };
@@ -1850,6 +2048,7 @@ const ProductCustomize: React.FC = () => {
                     component="img"
                     src={el.content}
                     alt="uploaded"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     sx={{
                       width: "100%",
                       height: "100%",
@@ -2008,6 +2207,7 @@ const ProductCustomize: React.FC = () => {
                     component="img"
                     src={el.content}
                     alt="art"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     sx={{
                       width: "100%",
                       height: "100%",
@@ -2022,8 +2222,8 @@ const ProductCustomize: React.FC = () => {
                   />
                 )
               )}
-              {el.type === "shape" &&
-                (el.content === "rectangle" ? (
+              {el.type === "shape" && (
+                el.content === "rectangle" ? (
                   <Box
                     sx={{
                       width: "100%",
@@ -2034,15 +2234,25 @@ const ProductCustomize: React.FC = () => {
                     }}
                   />
                 ) : el.content === "circle" ? (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      bgcolor: el.fill ? el.color : "transparent",
-                      border: `2px solid ${el.borderColor}`,
-                      borderRadius: "50%",
-                    }}
-                  />
+                  <svg width="100%" height="100%" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      fill={el.fill ? el.color : "transparent"}
+                      stroke={el.borderColor}
+                      strokeWidth="4"
+                    />
+                  </svg>
+                ) : el.content === "triangle" ? (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100">
+                    <polygon
+                      points="50,10 90,90 10,90"
+                      fill={el.fill ? el.color : "transparent"}
+                      stroke={el.borderColor}
+                      strokeWidth="4"
+                    />
+                  </svg>
                 ) : el.content === "stripe" ? (
                   <Box
                     sx={{
@@ -2080,49 +2290,11 @@ const ProductCustomize: React.FC = () => {
                       transform: "rotate(-45deg)",
                     }}
                   />
-                ) : el.content === "triangle" ? (
-                  <Box
-                    sx={{
-                      width: 0,
-                      height: 0,
-                      borderLeft: "30px solid transparent",
-                      borderRight: "30px solid transparent",
-                      borderBottom: el.fill ? `60px solid ${el.color}` : "none",
-                      borderTop: !el.fill ? `60px solid transparent` : "none",
-                      borderBottomColor: el.fill ? el.color : "transparent",
-                      borderTopColor: !el.fill ? el.borderColor : "transparent",
-                      borderWidth: el.fill
-                        ? "0 30px 60px 30px"
-                        : "0 30px 0 30px",
-                    }}
-                  />
                 ) : el.content === "arrow" ? (
-                  <Box sx={{ position: "relative", width: 60, height: 40 }}>
-                    <Box
-                      sx={{
-                        width: 0,
-                        height: 0,
-                        borderTop: "15px solid transparent",
-                        borderBottom: "15px solid transparent",
-                        borderLeft: `40px solid ${el.color}`,
-                        position: "absolute",
-                        left: 0,
-                        top: 5,
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        width: 0,
-                        height: 0,
-                        borderTop: "30px solid transparent",
-                        borderBottom: "30px solid transparent",
-                        borderLeft: `20px solid ${el.color}`,
-                        position: "absolute",
-                        left: 40,
-                        top: -10,
-                      }}
-                    />
-                  </Box>
+                  <svg width="100%" height="100%" viewBox="0 0 100 100">
+                    <line x1="10" y1="50" x2="70" y2="50" stroke={el.borderColor} strokeWidth="8" />
+                    <polygon points="70,35 95,50 70,65" fill={el.fill ? el.color : el.borderColor} stroke={el.borderColor} strokeWidth="4" />
+                  </svg>
                 ) : el.content === "pentagon" ? (
                   <svg width="100%" height="100%" viewBox="0 0 100 100">
                     <polygon
@@ -2943,43 +3115,51 @@ const ProductCustomize: React.FC = () => {
           </Box>
         )}
         {/* Add to Cart and Buy Now buttons at the bottom */}
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
           <Button
             variant="contained"
+            color="primary"
             startIcon={<ShoppingCart />}
-            onClick={handleAddToCart}
+            onClick={handleAddToCartCustom}
+            disabled={!isSaved}
             sx={{
-              borderRadius: 8,
+              minWidth: 180,
+              height: 48,
               fontWeight: 700,
-              px: 4,
-              bgcolor: '#f46a6a',
+              bgcolor: '#e16a6a',
               color: 'white',
               boxShadow: 2,
               '&:hover': {
-                bgcolor: '#e05555',
-                boxShadow: 3,
+                bgcolor: '#c94b4b',
               },
+              borderRadius: 2,
+              fontSize: '1rem',
             }}
+            title={!isSaved ? 'Please save your customization first' : ''}
           >
             Add to Cart
           </Button>
           <Button
             variant="outlined"
-            startIcon={<Payment />}
+            color="primary"
             onClick={handleBuyNow}
+            disabled={!isSaved}
             sx={{
-              borderRadius: 8,
+              minWidth: 180,
+              height: 48,
               fontWeight: 700,
-              px: 4,
-              color: '#f46a6a',
-              borderColor: '#f46a6a',
+              color: '#e16a6a',
+              borderColor: '#e16a6a',
               background: 'white',
               '&:hover': {
-                color: '#f46a6a',
-                background: 'white',
-                borderColor: '#f46a6a',
+                color: 'white',
+                background: '#e16a6a',
+                borderColor: '#c94b4b',
               },
+              borderRadius: 2,
+              fontSize: '1rem',
             }}
+            title={!isSaved ? 'Please save your customization first' : ''}
           >
             Buy Now
           </Button>

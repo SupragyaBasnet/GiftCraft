@@ -16,7 +16,7 @@ import planewhiteframe from '../assets/planewhiteframe.jpg';
 import planewhitemug from '../assets/planewhitemug.jpg';
 import planewhiteshirt from '../assets/planewhiteshirt.webp';
 import { Add, Remove } from "@mui/icons-material";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { products } from '../data/products';
 
 const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
@@ -36,6 +36,7 @@ const CustomizeProduct: React.FC = () => {
   const [text, setText] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const navigate = useNavigate();
 
   const productImages: Record<string, string> = {
     tshirt: planewhiteshirt,
@@ -99,6 +100,11 @@ const CustomizeProduct: React.FC = () => {
 
   const handleAddToCart = () => {
     console.log("Added to cart:", { id, text, image, quantity });
+    navigate('/cart');
+  };
+
+  const handleBuyNow = () => {
+    navigate('/checkout');
   };
 
   const handleQuantityChange = (amount: number) => {
@@ -209,6 +215,9 @@ const CustomizeProduct: React.FC = () => {
           </Paper>
           <Button variant="contained" color="primary" onClick={handleAddToCart} sx={{ mt: 2, width: '100%' }}>
             Add to Cart
+          </Button>
+          <Button variant="outlined" color="primary" onClick={handleBuyNow} sx={{ mt: 2, width: '100%' }}>
+            Buy Now
           </Button>
         </Grid>
       </Grid>

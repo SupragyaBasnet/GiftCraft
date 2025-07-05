@@ -16,14 +16,11 @@ import notebook1 from '../assets/notebook1.jpg';
 import pen1 from '../assets/pen1.webp';
 import phonecase1 from '../assets/phonecase1.jpg';
 import photoframe1 from '../assets/photoframe1.jpg';
-import ring1 from '../assets/ring1.webp';
+
+
 import tshirt1 from '../assets/tshirt1.jpg';
-import PaymentMethods from '../components/PaymentMethods';
+
 import RotatingHeroSection from './RotatingHeroSection';
-import keychain1 from '../assets/keychain1.webp';
-import cap1 from '../assets/cap1.jpg';
-import pillowcase1 from '../assets/pillowcase1.jpg';
-import waterbottle1 from '../assets/waterbottle1.jpeg';
 import { products } from '../data/products';
 
 const featuredProductIds = [1, 9, 3, 2, 6, 7, 8, 4, 5, 10];
@@ -138,7 +135,6 @@ const Home: React.FC = () => {
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       {/* Hero Section */}
       <RotatingHeroSection />
-
 
       {/* Why Choose Us Section */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -338,6 +334,78 @@ const Home: React.FC = () => {
             </Grid>
           ))}
         </Grid>
+      
+      </Container>
+
+      {/* Special Offers Section */}
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          align="center"
+          sx={{ fontWeight: 800, fontSize: { xs: '2rem', md: '2.2rem' }, mb: 0 }}
+        >
+          Special Offers
+        </Typography>
+        <div className="heading-dash" />
+        <Grid container spacing={4} sx={{ mt: 2, mb: 2 }}>
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                p: 3,
+                textAlign: 'center',
+                height: '100%',
+                bgcolor: 'grey.100',
+                color: '#222',
+                borderRadius: 4,
+                boxShadow: '0 2px 12px 0 rgba(0,0,0,0.04)',
+                transition: 'transform 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 6px 24px 0 rgba(244,106,106,0.10)',
+                },
+              }}
+            >
+              <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+                🚚
+              </Typography>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
+                Free Delivery Over Rs. 3000
+              </Typography>
+              <Typography variant="body2">
+                Enjoy free delivery on all orders above Rs. 3000. Shop more, save more!
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                p: 3,
+                textAlign: 'center',
+                height: '100%',
+                bgcolor: 'grey.100',
+                color: '#222',
+                borderRadius: 4,
+                boxShadow: '0 2px 12px 0 rgba(0,0,0,0.04)',
+                transition: 'transform 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 6px 24px 0 rgba(244,106,106,0.10)',
+                },
+              }}
+            >
+              <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+                🎉
+              </Typography>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
+                20% Off Over Rs. 6000
+              </Typography>
+              <Typography variant="body2">
+                Get a flat 20% discount on purchases over Rs. 6000. Limited time offer!
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
       </Container>
 
       {/* How It Works Section */}
@@ -428,8 +496,7 @@ const Home: React.FC = () => {
         </Grid>
       </Container>
 
-      {/* Payment Methods Section */}
-      <PaymentMethods />
+
 
       {/* Testimonials Section */}
       <Box sx={{ bgcolor: 'grey.50', py: 8 }}>

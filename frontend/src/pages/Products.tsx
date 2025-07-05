@@ -58,7 +58,8 @@ const Products: React.FC = () => {
   // Sorting logic
   if (sortBy === 'priceLowHigh') filteredProducts = filteredProducts.sort((a, b) => a.price - b.price);
   if (sortBy === 'priceHighLow') filteredProducts = filteredProducts.sort((a, b) => b.price - a.price);
-  if (sortBy === 'rating') filteredProducts = filteredProducts.sort((a, b) => b.rating - a.rating);
+  if (sortBy === 'ratingLowHigh') filteredProducts = filteredProducts.sort((a, b) => a.rating - b.rating);
+  if (sortBy === 'ratingHighLow') filteredProducts = filteredProducts.sort((a, b) => b.rating - a.rating);
 
   // Sidebar content
   const sidebar = (
@@ -173,7 +174,8 @@ const Products: React.FC = () => {
                   </MenuItem>
                   <MenuItem value="priceLowHigh">Price: Low to High</MenuItem>
                   <MenuItem value="priceHighLow">Price: High to Low</MenuItem>
-                  <MenuItem value="rating">Rating</MenuItem>
+                  <MenuItem value="ratingLowHigh">Rating: Low to High</MenuItem>
+                  <MenuItem value="ratingHighLow">Rating: High to Low</MenuItem>
                 </Select>
               </FormControl>
             </Box>

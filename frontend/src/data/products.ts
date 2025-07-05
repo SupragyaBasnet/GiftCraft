@@ -67,7 +67,7 @@ export const products: Product[] = [
   {
     id: 1,
     name: "Classic Custom T-Shirt",
-    price: 3200,
+    price: 1500,
     image: tshirt1,
     images: [tshirt1, tshirt2, tshirt3, tshirt4, tshirt5],
     description: "Personalize your own t-shirt with custom designs and text",
@@ -122,7 +122,7 @@ export const products: Product[] = [
   {
     id: 2,
     name: "Classic Custom Mug",
-    price: 1200,
+    price: 900,
     image: mug1,
     images: [mug1, mug2, mug3, mug4, mug5, mug],
     description: "Create your own personalized mug",
