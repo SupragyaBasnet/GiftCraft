@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 const { changePassword, updateProfileImage, removeProfileImage, getCart, addToCart, updateCartItem, removeFromCart, clearCart } = require('../controllers/authController');
 const axios = require('axios');
 const { EsewaPaymentGateway, EsewaCheckStatus, generateUniqueId } = require('esewajs');
+const customizationController = require('../controllers/customizationController');
 require('dotenv').config();
 
 router.post('/register', authController.register);
@@ -71,5 +72,8 @@ router.post('/payment/esewa/status', async (req, res) => {
     return res.status(500).json({ error: 'Failed to check payment status' });
   }
 });
+
+// Add this route for customization add-to-cart
+router.post('/customization/cart', auth, customizationController.addToCartCustom);
 
 module.exports = router; 
