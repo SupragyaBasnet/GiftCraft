@@ -257,7 +257,12 @@ exports.updateCartItem = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     const { product, quantity } = req.body;
-    const item = user.cart.find(item => item.product.toString() === product);
+    // Try to find by product ObjectId first
+    let item = user.cart.find(item => item.product && item.product.toString() === product);
+    // If not found, try to find by customizationId
+    if (!item) {
+      item = user.cart.find(item => item.customizationId && item.customizationId === product);
+    }
     if (!item) return res.status(404).json({ message: 'Cart item not found' });
     item.quantity = quantity;
     await user.save();
@@ -273,7 +278,12 @@ exports.removeFromCart = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     const { product } = req.body;
-    user.cart = user.cart.filter(item => item.product.toString() !== product);
+    user.cart = user.cart.filter(item => {
+      // Remove by product ObjectId or by customizationId
+      if (item.product && item.product.toString() === product) return false;
+      if (item.customizationId && item.customizationId === product) return false;
+      return true;
+    });
     await user.save();
     res.json(user.cart);
   } catch (err) {

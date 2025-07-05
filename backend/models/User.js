@@ -16,9 +16,13 @@ const userSchema = new mongoose.Schema({
   profileImage: { type: String },
   cart: [
     {
-      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: false },
+      customizationId: { type: String },
+      category: { type: String },
+      customization: { type: mongoose.Schema.Types.Mixed },
+      price: { type: Number },
+      image: { type: String },
       quantity: { type: Number, default: 1 },
-      // Optionally add customization fields here
     }
   ],
 });

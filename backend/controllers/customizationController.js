@@ -114,27 +114,23 @@ exports.addToCartCustom = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    const { product, quantity, customization, price } = req.body;
-    const productDoc = await Product.findById(product);
-    if (!productDoc) return res.status(404).json({ message: 'Product not found' });
-    if (!customization || Object.keys(customization).length === 0) {
-      return res.status(400).json({ message: 'Customization required.' });
+    const { customizationId, category, customization, price, image, quantity } = req.body;
+    if (!customizationId || !category || !customization || typeof price !== 'number') {
+      return res.status(400).json({ message: 'Missing required customization fields.' });
     }
-    const expectedPrice = calculateCustomizationPrice(productDoc, customization);
-    if (typeof price !== 'number' || price !== expectedPrice) {
-      return res.status(400).json({ message: 'Invalid price for customization.' });
-    }
-    // Check for existing item with same product and customization
-    const existingItem = user.cart.find(item => item.product.toString() === product && JSON.stringify(item.customization) === JSON.stringify(customization));
+    // Optionally: validate price using your own logic for the category and customization
+    // For now, just accept the price as sent from frontend
+    // Check for existing item with same customizationId
+    const existingItem = user.cart.find(item => item.customizationId === customizationId);
     if (existingItem) {
       existingItem.quantity += quantity || 1;
     } else {
-      user.cart.push({ product, quantity: quantity || 1, customization, price });
+      user.cart.push({ customizationId, category, customization, price, image, quantity: quantity || 1 });
     }
     await user.save();
     res.json(user.cart);
   } catch (err) {
-    console.error('Add to Cart Customization Error:', err); // <-- Add this line
+    console.error('Add to Cart Customization Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 }; 
