@@ -1,30 +1,21 @@
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import {
   AddPhotoAlternate,
   Brush,
   ColorLens,
   Create,
   Edit,
-  EmojiEmotions,
-  FormatShapes,
-  Palette,
-  Payment,
-  Save,
+  EmojiEmotions, FormatAlignCenter, FormatAlignJustify, FormatAlignLeft, FormatAlignRight, FormatShapes, Height, Palette, Save,
   ShoppingCart,
-  TextFields,
-  FormatAlignLeft,
-  FormatAlignCenter,
-  FormatAlignRight,
-  FormatAlignJustify,
-  Height,
+  TextFields
 } from "@mui/icons-material";
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
-import RotateRightIcon from "@mui/icons-material/RotateRight";
 import {
   Alert,
   Box,
   Button,
-  Container,
-  IconButton,
+  Container, Grid, IconButton,
   MenuItem,
   Paper,
   Popover,
@@ -34,11 +25,7 @@ import {
   Tabs,
   TextField,
   ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-  Divider,
-  Grid,
-  Tooltip,
+  ToggleButtonGroup, Tooltip, Typography
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
@@ -47,8 +34,6 @@ import CanvasDraw from "react-canvas-draw";
 import { ChromePicker, ColorResult } from "react-color";
 import { Rnd } from "react-rnd";
 import { useNavigate, useParams } from "react-router-dom";
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
 import { useCart } from '../context/CartContext';
 import { products } from '../data/products';
 
@@ -76,23 +61,21 @@ import circleKeychain from "../assets/products/circle-keychain.jpg";
 import keychainLeather from "../assets/products/keychain-leather.jpg";
 
 // Import requested images from ../assets/
-import squareBack from "../assets/products/whitepillow-back.webp";
-import squareFront from "../assets/products/whitepillow-front.webp";
+
 import heartshapedFront from "../assets/products/heartshaped-front.jpg";
-import heartshapedBack from "../assets/products/heartshaped-back.jpg";
-import starshapedFront from "../assets/products/starshaped-front.jpg";
-import starshapedBack from "../assets/products/starshaped-back.jpg";
+import squareFront from "../assets/products/whitepillow-front.webp";
+
+
 import circleshapedFront from "../assets/products/circleshaped-front.jpg";
-import circleshapedBack from "../assets/products/circleshaped-back.jpg";
+import starshapedBack from "../assets/products/starshaped-back.jpg";
 
 
 
-import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
-import phonecaseiphone10 from "../assets/products/phonecaseiphone10.jpg";
-import phonecaseiphone11 from "../assets/products/phonecaseiphone11.jpg";
-import phonecaseiphone12 from "../assets/products/phonecaseiphone12.jpg";
+
+
 import phonecaseiphone13promax from "../assets/products/phonecaseiphone13promax and 12 pro max.jpg";
 import phonecaseiphone14 from "../assets/products/phonecaseiphone14.jpg";
+import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
 import phonecases21ultra from "../assets/products/phonecases21ultra.jpg";
 import phonecases23ultra from "../assets/products/phonecases23 ultra.jpg";
 
@@ -103,7 +86,6 @@ import planewhitecap from "../assets/products/planewhitecap.jpg";
 import planewhitekeychain from "../assets/products/planewhitekeychain.jpg";
 
 // At the top of the file, add:
-import colorPaletteImg from '../assets/effects/sample-effect1.png';
 
 // Assuming this is the correct filename
 
@@ -129,30 +111,6 @@ interface ProductView {
 
 // Define types for elements (should match the type in CustomizedProductImage.tsx)
 interface Element {
-  id: string;
-  type: "image" | "text" | "sticker" | "art" | "shape";
-  content: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color?: string;
-  borderColor?: string;
-  fill?: boolean;
-  fontFamily?: string;
-  textStyle?: "straight" | "arcUp" | "arcDown" | "wavy";
-  shape?: "rectangle" | "circle" | "oval" | "heart" | "star" | "square";
-  shapeSize?: number;
-  rotation?: number;
-  imageOffsetX?: number;
-  imageOffsetY?: number;
-  imageScale?: number;
-  fontSize?: number;
-  fontWeight?: number;
-  isBold?: boolean;
-  isItalic?: boolean;
-  lineHeight?: number;
-  textAlign?: 'left' | 'center' | 'right' | 'justify';
 }
 
 // Map product type to images
@@ -166,7 +124,6 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     back: notebookBack, // use the new image for the back
   },
   pen: [
-    // Use array for multiple pen options
     penFront,
     planepen1,
   ],
@@ -183,9 +140,6 @@ const productImages: Record<ProductType, ProductView | string[]> = {
   ],
   phonecase: [
     phonecaseiphone8plus,
-    phonecaseiphone10,
-    phonecaseiphone11,
-    phonecaseiphone12,
     phonecaseiphone13promax,
     phonecaseiphone14,
     phonecases21ultra,
@@ -453,9 +407,6 @@ const validAllArtImages = allArtImages.filter((img) =>
 // Phonecase model labels for the new images
 const phonecaseLabels = [
   "iPhone 8 Plus",
-  "iPhone 10",
-  "iPhone 11",
-  "iPhone 12",
   "iPhone 13 Pro Max / 12 Pro Max",
   "iPhone 14",
   "Samsung S21 Ultra",
@@ -484,7 +435,7 @@ export function getAutoFitFontSize({
 }) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  if (!ctx) return minFontSize;
+  if (!ctx) return minFontSize ?? 10;
   function measureStraight(fontSize: number) {
     ctx.font = `${fontSize}px ${fontFamily}`;
     const lines = text.split('\n');
@@ -668,67 +619,30 @@ function getStarPoints(width: number, height: number, spikes: number, cx: number
 }
 
 const ProductCustomize: React.FC = () => {
-  const { product } = useParams<{ product: string }>();
+  // Use both category and id from the URL
+  const { category, id } = useParams<{ category: string; id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Validate product type from URL and provide default
-  const selectedProduct: ProductType =
-    product &&
-    (Object.keys(productImages).includes(product) ||
-      (product === "mugs" && Object.keys(productImages).includes("mug")) ||
-      (product === "waterbottles" &&
-        Object.keys(productImages).includes("waterbottle")) ||
-      (product === "caps" && Object.keys(productImages).includes("cap")) ||
-      (product === "notebooks" &&
-        Object.keys(productImages).includes("notebook")) ||
-      (product === "pens" && Object.keys(productImages).includes("pen")) ||
-      (product === "phonecases" &&
-        Object.keys(productImages).includes("phonecase")) ||
-      (product === "keychains" &&
-        Object.keys(productImages).includes("keychain")) ||
-      (product === "frames" && Object.keys(productImages).includes("frame")) ||
-      (product === "pillowcases" &&
-        Object.keys(productImages).includes("pillowcase")))
-      ? ((product === "mugs"
-          ? "mug"
-          : product === "waterbottles"
-          ? "waterbottle"
-          : product === "caps"
-          ? "cap"
-          : product === "notebooks"
-          ? "notebook"
-          : product === "pens"
-          ? "pen"
-          : product === "phonecases"
-          ? "phonecase"
-          : product === "keychains"
-          ? "keychain"
-          : product === "frames"
-          ? "frame"
-          : product === "pillowcases"
-          ? "pillowcase"
-          : product) as ProductType)
-      : "tshirt";
+  // Find the product by id (not by category/name)
+  const productData = products.find((p) => p.id == id);
+  // Derive selectedProduct from the found product's category
+  const selectedProduct = productData ? productData.category.replace(/s$/, '') : '';
 
-  // --- Load product info from products.ts for basePrice and productId ---
-  const productCategoryMap: Record<ProductType, string> = {
-    tshirt: 'tshirts',
-    mug: 'mugs',
-    phonecase: 'phonecases',
-    frame: 'frames',
-    keychain: 'keychains',
-    pillowcase: 'pillowcases',
-    waterbottle: 'waterbottles',
-    pen: 'pens',
-    notebook: 'notebooks',
-    cap: 'caps',
-  };
-  const productData = products.find(
-    (p) => p.category === productCategoryMap[selectedProduct]
-  );
-  const basePrice = productData ? productData.price : 1000;
-  const productId = productData ? productData.id : null;
+  // If product not found, show a friendly error
+  if (!productData) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 8 }}>
+        <Alert severity="error" sx={{ mt: 4 }}>
+          Product not found. Please return to the <Button component={RouterLink} to="/customize" color="primary">Customize page</Button> and select a product.
+        </Alert>
+      </Container>
+    );
+  }
+
+  // Use the product's MongoDB _id for backend requests
+  const basePrice = productData.price;
+  const productId = productData._id; // Use this for backend
 
   // --- Add state to track if customization is saved ---
   const [isSaved, setIsSaved] = useState(false);
@@ -872,27 +786,27 @@ const ProductCustomize: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (f) => {
       const url = f.target?.result as string;
-      if (url) {
-        const newElement: Element = {
-          id: Date.now().toString(),
-          type: "image",
+    if (url) {
+      const newElement: Element = {
+        id: Date.now().toString(),
+        type: "image",
           content: url, // Store as data URL
-          x: 50,
-          y: 50,
-          width: 120,
-          height: 120,
-          shape: "rectangle",
-          imageOffsetX: 0,
-          imageOffsetY: 0,
-          imageScale: 1,
-        };
-        setElements([...elements, newElement]);
-        setSnackbar({
-          open: true,
-          message: "Image uploaded successfully!",
-          severity: "success",
-        });
-      }
+        x: 50,
+        y: 50,
+        width: 120,
+        height: 120,
+        shape: "rectangle",
+        imageOffsetX: 0,
+        imageOffsetY: 0,
+        imageScale: 1,
+      };
+      setElements([...elements, newElement]);
+      setSnackbar({
+        open: true,
+        message: "Image uploaded successfully!",
+        severity: "success",
+      });
+    }
     };
     reader.readAsDataURL(file);
   };
@@ -967,11 +881,21 @@ const ProductCustomize: React.FC = () => {
   const handleSave = () => {
     try {
       setIsSaved(true);
-      setSnackbar({ open: true, message: 'Customization saved!', severity: 'success' });
+      setSnackbar({ open: true, message: 'Customization saved successfully!', severity: 'success' });
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
     }
   };
+
+  // --- Get the correct product name for the selected variant (for backend lookup) ---
+  function getSelectedProductName() {
+    // For products with multiple variants (array views), use the productImageInfo name
+    if (hasArrayViews && productImageInfo[selectedProduct] && productImageInfo[selectedProduct][currentArrayIndex]) {
+      return productImageInfo[selectedProduct][currentArrayIndex].name;
+    }
+    // For single-variant products, fallback to productData?.name
+    return productData?.name || '';
+  }
 
   // Dedicated add-to-cart for custom products
   const handleAddToCartCustom = async () => {
@@ -979,8 +903,9 @@ const ProductCustomize: React.FC = () => {
       setSnackbar({ open: true, message: 'Please save your customization before adding to cart.', severity: 'error' });
       return;
     }
-    // Fetch the real MongoDB _id for the product
-    const productId = await fetchProductId(productCategoryMap[selectedProduct], productData?.name || '');
+    // Fetch the real MongoDB _id for the product variant
+    const productName = getSelectedProductName();
+    const productId = await fetchProductId(productCategoryMap[selectedProduct], productName);
     if (!productId) {
       setSnackbar({ open: true, message: 'Product not found in database.', severity: 'error' });
       return;
@@ -1008,6 +933,7 @@ const ProductCustomize: React.FC = () => {
       quantity: 1,
       customization,
       price: customPrice,
+      image: productData.image, // Add the correct product image for cart display
     };
     try {
       const res = await fetch('/api/auth/customization/cart', {
@@ -1036,8 +962,9 @@ const ProductCustomize: React.FC = () => {
       setSnackbar({ open: true, message: 'Please save your customization before buying.', severity: 'error' });
       return;
     }
-    // Fetch the real MongoDB _id for the product
-    const productId = await fetchProductId(productCategoryMap[selectedProduct], productData?.name || '');
+    // Fetch the real MongoDB _id for the product variant
+    const productName = getSelectedProductName();
+    const productId = await fetchProductId(productCategoryMap[selectedProduct], productName);
     if (!productId) {
       setSnackbar({ open: true, message: 'Product not found in database.', severity: 'error' });
       return;
@@ -1065,6 +992,7 @@ const ProductCustomize: React.FC = () => {
       quantity: 1,
       customization,
       price: customPrice,
+      image: productData.image, // Add the correct product image for cart display
     };
     try {
       const res = await fetch('/api/auth/customization/cart', {
@@ -1365,7 +1293,7 @@ const ProductCustomize: React.FC = () => {
 
   // Add these inside the ProductCustomize component, near the other useState hooks:
   const [fontSize, setFontSize] = useState<'auto' | number>('auto');
-  const [fontWeight, setFontWeight] = useState<400 | 600 | 700>(400);
+  const [fontWeight, setFontWeight] = useState<number | 400 | 600 | 700>(400);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
 
@@ -1405,35 +1333,35 @@ const ProductCustomize: React.FC = () => {
   }, [selectedElementId, elements]);
 
   // 2. When a control is changed and a text element is selected, update the element's style
-  const handleFontSizeChange = (value) => {
+  const handleFontSizeChange = (value: number) => {
     setFontSize(value);
     if (selectedElementId) updateElement(selectedElementId, { fontSize: value });
   };
-  const handleFontWeightChange = (value) => {
+  const handleFontWeightChange = (value: number) => {
     setFontWeight(value);
     if (selectedElementId) updateElement(selectedElementId, { fontWeight: value });
   };
-  const handleBoldChange = (value) => {
+  const handleBoldChange = (value: boolean) => {
     setIsBold(value);
     if (selectedElementId) updateElement(selectedElementId, { isBold: value });
   };
-  const handleItalicChange = (value) => {
+  const handleItalicChange = (value: boolean) => {
     setIsItalic(value);
     if (selectedElementId) updateElement(selectedElementId, { isItalic: value });
   };
-  const handleFontChange = (value) => {
+  const handleFontChange = (value: string) => {
     setSelectedFont(value);
     if (selectedElementId) updateElement(selectedElementId, { fontFamily: value });
   };
-  const handleTextStyleChange = (value) => {
+  const handleTextStyleChange = (value: 'straight' | 'arcUp' | 'arcDown' | 'wavy') => {
     setTextStyle(value);
     if (selectedElementId) updateElement(selectedElementId, { textStyle: value });
   };
-  const handleLineHeightChange = (value) => {
+  const handleLineHeightChange = (value: number) => {
     setLineHeight(value);
     if (selectedElementId) updateElement(selectedElementId, { lineHeight: value });
   };
-  const handleTextAlignChange = (value) => {
+  const handleTextAlignChange = (value: 'left' | 'center' | 'right' | 'justify') => {
     setTextAlign(value);
     if (selectedElementId) updateElement(selectedElementId, { textAlign: value });
   };
@@ -1574,14 +1502,14 @@ const ProductCustomize: React.FC = () => {
       { name: 'Classic Frame', description: 'A timeless classic frame for any photo.' },
     ],
     phonecase: [
-      { name: 'iPhone 8 Plus Case', description: 'Premium case for iPhone 8 Plus.' },
-      { name: 'iPhone 10 Case', description: 'Premium case for iPhone 10.' },
-      { name: 'iPhone 11 Case', description: 'Premium case for iPhone 11.' },
-      { name: 'iPhone 12 Case', description: 'Premium case for iPhone 12.' },
-      { name: 'iPhone 13 Pro Max / 12 Pro Max Case', description: 'Premium case for iPhone 13 Pro Max or 12 Pro Max.' },
-      { name: 'iPhone 14 Case', description: 'Premium case for iPhone 14.' },
-      { name: 'Samsung S21 Ultra Case', description: 'Premium case for Samsung S21 Ultra.' },
-      { name: 'Samsung S23 Ultra Case', description: 'Premium case for Samsung S23 Ultra.' },
+      { name: 'iPhone 8 Plus Phone Case', description: 'Premium case for iPhone 8 Plus.' },
+      { name: 'iPhone 10 Phone Case', description: 'Premium case for iPhone 10.' },
+      { name: 'iPhone 11 Phone Case', description: 'Premium case for iPhone 11.' },
+      { name: 'iPhone 12 Phone Case', description: 'Premium case for iPhone 12.' },
+      { name: 'iPhone 13 Pro Max / 12 Pro Max Phone Case', description: 'Premium case for iPhone 13 Pro Max or 12 Pro Max.' },
+      { name: 'iPhone 14 Phone Case', description: 'Premium case for iPhone 14.' },
+      { name: 'Samsung S21 Ultra Phone Case', description: 'Premium case for Samsung S21 Ultra.' },
+      { name: 'Samsung S23 Ultra Phone Case', description: 'Premium case for Samsung S23 Ultra.' },
     ],
     keychain: [
       { name: 'Classic Keychain', description: 'A simple and classic keychain.' },
@@ -1601,6 +1529,10 @@ const ProductCustomize: React.FC = () => {
       { name: 'Heart Pillow', description: 'A lovely heart-shaped pillow for special moments.' },
       { name: 'Star Pillow', description: 'A star-shaped pillow to brighten any room.' },
       { name: 'Square Pillow', description: 'A classic square pillow for everyday use.' },
+    ],
+    notebook: [
+      { name: 'Notebook Front', description: 'Notebook with customizable front cover.' },
+      { name: 'Notebook Back', description: 'Notebook with customizable back cover.' },
     ],
   };
 
@@ -1624,10 +1556,8 @@ const ProductCustomize: React.FC = () => {
               gap: 2,
               mb: 3,
             }}
-          >
-
-          </Box>
-        ) : hasArrayViews && selectedProduct === "pen" ? null : hasMultipleViews /* Existing View Toggle for products with front/back/side */ ? (
+          />
+        ) : hasArrayViews && selectedProduct === "pen" ? null : hasMultipleViews ? (
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <ToggleButtonGroup
               value={currentView}
@@ -1659,8 +1589,7 @@ const ProductCustomize: React.FC = () => {
               )}
             </ToggleButtonGroup>
           </Box>
-        ) : /* Render nothing for single-image products */
-        null}
+        ) : null}
 
         {/* View Options for phonecase: dropdown below current view, right-aligned, no thumbnails */}
         {selectedProduct === 'phonecase' && hasArrayViews ? (
@@ -1779,6 +1708,21 @@ const ProductCustomize: React.FC = () => {
               <MenuItem value="XXL">XXL</MenuItem>
             </TextField>
           )}
+          {selectedProduct === "pen" && (
+            <TextField
+              select
+              label="Pen Type"
+              value={currentArrayIndex}
+              onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+              sx={{ minWidth: 150 }}
+            >
+              {productImageInfo.pen.map((info, idx) => (
+                <MenuItem key={info.name} value={idx}>
+                  {info.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           {selectedProduct === "waterbottle" && hasArrayViews && (
             <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
 
@@ -1885,51 +1829,64 @@ const ProductCustomize: React.FC = () => {
             position: "relative",
           }}
         >
-          {selectedProduct === "cap" ? (
-            <Box
-              component="img"
-              src={planewhitecap}
-              alt="cap"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                filter:
-                  color !== "#ffffff"
-                    ? `brightness(0) saturate(100%) sepia(1) hue-rotate(${
-                        hexToHsl(color).h
-                      }deg) saturate(500%)`
-                    : "none",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 2,
-              }}
-            />
-          ) : (
-            <Box
-              component="img"
-              src={currentImage}
-              alt="product"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 1,
-                pointerEvents: "none",
-                p: 2,
-                ...getProductStyle(selectedProduct),
-                filter:
-                  color === "#ffffff"
-                    ? "none"
-                    : `brightness(0) saturate(100%) sepia(1) hue-rotate(${
-                        hexToHsl(color).h
-                      }deg) saturate(500%)`,
-              }}
-            />
+          {/* Product image */}
+          <Box
+            component="img"
+            src={currentImage}
+            alt="product"
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: 1,
+              pointerEvents: "none",
+              p: 2,
+              ...getProductStyle(selectedProduct),
+            }}
+          />
+          {/* Color overlay as tint for all products, but mask for phonecase */}
+          {color !== "#ffffff" && (
+            selectedProduct === "phonecase" ? (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  zIndex: 2,
+                  pointerEvents: "none",
+                  background: color,
+                  opacity: 0.32,
+                  WebkitMaskImage: `url(${currentImage})`,
+                  WebkitMaskRepeat: 'no-repeat',
+                  WebkitMaskSize: 'contain',
+                  maskImage: `url(${currentImage})`,
+                  maskRepeat: 'no-repeat',
+                  maskSize: 'contain',
+                  borderRadius: 'inherit',
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  zIndex: 2,
+                  pointerEvents: "none",
+                  background: color,
+                  opacity: 0.32,
+                  mixBlendMode: "multiply",
+                  borderRadius: "inherit",
+                }}
+              />
+            )
           )}
           {tab === 6 && (
             <Box
@@ -3165,6 +3122,17 @@ const ProductCustomize: React.FC = () => {
           </Button>
         </Box>
       </Paper>
+      {/* Snackbar for success/error messages */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2500}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

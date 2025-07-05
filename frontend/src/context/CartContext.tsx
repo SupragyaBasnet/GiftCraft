@@ -8,6 +8,8 @@ interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  category?: string;
+  description?: string;
 }
 
 interface CartContextType {
@@ -69,8 +71,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           name: item.name,
           price: item.price,
           image: item.image,
-          category: (item as any).category || '',
-          description: (item as any).description || '',
+          category: item.category || '',
+          description: item.description || '',
         }),
       });
       if (res.ok) {
@@ -130,7 +132,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
-      setCartItems([]);
+    setCartItems([]);
     }
   };
 

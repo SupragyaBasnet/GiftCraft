@@ -40,7 +40,7 @@ const ForgotPassword: React.FC = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send OTP');
     } finally {
-      setLoading(false);
+    setLoading(false);
     }
   };
 
@@ -69,29 +69,29 @@ const ForgotPassword: React.FC = () => {
             </Alert>
           )}
           <Box component="form" onSubmit={handleSendOtp}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading || !email}
-            >
-              Send OTP
-            </Button>
-          </Box>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading || !email}
+              >
+                Send OTP
+              </Button>
+            </Box>
         </Paper>
       </Box>
     </Container>

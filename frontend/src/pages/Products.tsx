@@ -1,4 +1,4 @@
-import { DesignServices, Star, Visibility } from '@mui/icons-material';
+import { ShoppingCart, Star, Visibility } from '@mui/icons-material';
 import {
   Box, Button, Card, CardActions, CardContent,
   CardMedia, Container,
@@ -8,6 +8,9 @@ import React, { useState } from 'react';
 import { Link as RouterLink, useSearchParams, useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import { products, Product } from '../data/products';
+import { useCart } from '../context/CartContext';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 // Only use products with a defined price for filtering, sorting, and min/max calculations
 const baseProducts = products.filter(
@@ -112,6 +115,9 @@ const Products: React.FC = () => {
     </Box>
   );
 
+  const { addToCart } = useCart();
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh'}}>
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
@@ -215,7 +221,9 @@ const Products: React.FC = () => {
                           },
                           mx: 'auto',
                           overflow: 'hidden',
+                          cursor: 'pointer',
                         }}
+                        onClick={() => navigate(`/products/${product.id}`)}
                       >
                         <CardMedia
                           component="img"
@@ -240,84 +248,6 @@ const Products: React.FC = () => {
                             Rs. {typeof product.price === 'number' ? product.price.toLocaleString('en-IN') : 'N/A'}
                           </Typography>
                         </CardContent>
-                        <CardActions
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            gap: 1,
-                            width: '100%',
-                            px: 0,
-                            pb: 2,
-                            mt: 'auto',
-                          }}
-                        >
-                          <Button
-                            component={RouterLink}
-                            to={`/customize/${product.category}`}
-                            variant="contained"
-                            size="large"
-                            onClick={(e) => {
-                              const isLoggedIn = localStorage.getItem('giftcraftUser');
-                              if (!isLoggedIn) {
-                                e.preventDefault();
-                                localStorage.setItem('giftcraftPendingProduct', product.category);
-                                navigate('/login');
-                              }
-                            }}
-                            sx={{
-                              borderRadius: 8,
-                              fontWeight: 700,
-                              backgroundColor: '#F46A6A',
-                              color: 'white',
-                              flex: 1,
-                              minWidth: 0,
-                              minHeight: 44,
-                              px: 0,
-                              fontSize: { xs: '0.95rem', sm: '0.7rem' },
-                              justifyContent: 'center',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              '& .MuiButton-startIcon': {
-                                marginRight: 1,
-                                '& svg': { fontSize: 22 },
-                              },
-                              '&:hover': { backgroundColor: '#e05555' },
-                            }}
-                            startIcon={<DesignServices />}
-                          >
-                            Customize
-                          </Button>
-                          <Button
-                            component={RouterLink}
-                            to={`/products/${product.id}`}
-                            variant="outlined"
-                            size="large"
-                            sx={{
-                              borderRadius: 8,
-                              fontWeight: 700,
-                              borderColor: '#F46A6A',
-                              flex: 1,
-                              minWidth: 0,
-                              minHeight: 44,
-                              px: 0,
-                              fontSize: { xs: '0.95rem', sm: '0.7rem' },
-                              justifyContent: 'center',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              color: '#F46A6A',
-                              '& .MuiButton-startIcon': {
-                                marginRight: 1,
-                                '& svg': { fontSize: 22 },
-                              },
-                              '&:hover': { borderColor: '#e05555', backgroundColor: 'rgba(244,106,106,0.04)' },
-                            }}
-                            startIcon={<Visibility />}
-                          >
-                            View
-                          </Button>
-                        </CardActions>
                       </Card>
                     </Grid>
                   );
@@ -327,6 +257,16 @@ const Products: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2500}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <MuiAlert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

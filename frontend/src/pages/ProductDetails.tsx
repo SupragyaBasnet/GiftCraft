@@ -8,6 +8,7 @@ import { products, Product } from '../data/products';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { keyframes } from '@mui/system';
 import { useCart } from '../context/CartContext';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 function getProductStory(product: Product) {
   const uniqueDescriptions: Record<number, string> = {
@@ -143,13 +144,40 @@ const ProductDetails: React.FC = () => {
         name: product.name,
         price: product.price,
         image: product.image,
-        category: product.category,      // <-- add this
-        description: product.description // <-- add this
+        category: product.category,
+        description: product.description
       }, quantity);
       setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
       navigate('/cart');
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
+    }
+  };
+
+  const handleProceedToCheckout = async () => {
+    if (!product) return;
+    try {
+      const isLoggedIn = localStorage.getItem('giftcraftUser');
+      if (!isLoggedIn) {
+        setSnackbar({ open: true, message: 'Please log in to proceed to checkout.', severity: 'error' });
+        navigate('/login');
+        return;
+      }
+      await addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        cartItemId: '',
+        category: product.category,
+        description: product.description,
+      });
+      setSnackbar({ open: true, message: 'Proceeding to checkout...', severity: 'success' });
+      setTimeout(() => {
+        navigate(`/checkout?singleItemId=${product.id}`);
+      }, 800);
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to proceed to checkout.', severity: 'error' });
     }
   };
 
@@ -253,35 +281,26 @@ const ProductDetails: React.FC = () => {
               +
             </Button>
           </Box>
-          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              onClick={handleAddToCart}
+              sx={{ mt: 1, fontWeight: 700, px: 4, borderColor: 'rgb(255,106,106)', color: 'rgb(255,106,106)', '&:hover': { borderColor: 'rgb(255,100,100)', backgroundColor: 'rgba(220,80,80,0.04)' } }}
+            >
+              ADD TO CART
+            </Button>
             <Button
               variant="contained"
-              size="large"
-              sx={{ borderRadius: 8, fontWeight: 700, backgroundColor: '#F46A6A', color: 'white', '&:hover': { backgroundColor: '#e05555' } }}
-              startIcon={<ShoppingCart />}
-              onClick={handleAddToCart}
+              color="primary"
+              sx={{ mt: 1, backgroundColor: 'rgb(255,106,106)', '&:hover': { backgroundColor: 'rgb(220,80,80)' } }}
+              size="small"
+              onClick={() => navigate(`/checkout?singleItemId=${product.id}`, { state: { items: [{ ...product, quantity, price: product.price, total: product.price * quantity }] } })}
             >
-              Add to Cart
+              Proceed to Checkout
             </Button>
-            <Button
-              component={RouterLink}
-              to={`/customize/${product.category}`}
-              variant="outlined"
-              size="large"
-              onClick={(e) => {
-                const isLoggedIn = localStorage.getItem('giftcraftUser');
-                if (!isLoggedIn) {
-                  e.preventDefault();
-                  localStorage.setItem('giftcraftPendingProduct', product.category);
-                  navigate('/login');
-                }
-              }}
-              sx={{ borderRadius: 8, fontWeight: 700, color: '#F46A6A', borderColor: '#F46A6A', '&:hover': { borderColor: '#e05555', backgroundColor: 'rgba(244,106,106,0.04)' } }}
-              startIcon={<DesignServices />}
-            >
-              Customize
-            </Button>
-          </Stack>
+          </Box>
         </Grid>
       </Grid>
       <Box sx={{
@@ -400,7 +419,7 @@ const ProductDetails: React.FC = () => {
           ))}
         </Grid>
       </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={2000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+      <Snackbar open={snackbar.open} autoHideDuration={2500} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
         <MuiAlert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </MuiAlert>

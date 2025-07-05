@@ -27,6 +27,7 @@ import SetNewPassword from './pages/SetNewPassword';
 import PaymentSuccess from './pages/payment-success';
 import PaymentFailure from './pages/payment-failure';
 import OrderConfirmed from './pages/orderconfirmed';
+import Customize from './pages/Customize';
 
 const theme = createTheme({
   palette: {
@@ -72,6 +73,7 @@ const App: React.FC = () => {
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:id" element={<ProductDetails />} />
                   <Route path="/about" element={<AboutUs />} />
+                  <Route path="/customize" element={<Customize />} />
                   <Route path="/customize/:product" element={<ProductCustomize />} />
                   <Route
                     path="/cart"

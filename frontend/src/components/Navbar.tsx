@@ -334,6 +334,19 @@ const Navbar: React.FC = () => {
               >
                 Products
               </Button>
+              <Button
+                component={RouterLink}
+                to="/customize"
+                color="inherit"
+                startIcon={<DesignServices />}
+                sx={{
+                  borderBottom: isActive("/customize") ? "2px solid black" : "none",
+                  borderRadius: 0,
+                  "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.05)" },
+                }}
+              >
+                Customize
+              </Button>
               <Popover
                 id="products-mega-menu"
                 open={productsMenuOpen}
@@ -518,21 +531,6 @@ const Navbar: React.FC = () => {
                   </Grid>
                 </Grid>
               </Popover>
-              <Button
-                component={RouterLink}
-                to="/about"
-                color="inherit"
-                startIcon={<InfoOutlined />}
-                sx={{
-                  borderBottom: isActive("/about") ? "2px solid black" : "none",
-                  borderRadius: 0,
-                  "&:hover": {
-                    backgroundColor: "rgba(0, 0, 0, 0.05)",
-                  },
-                }}
-              >
-                About Us
-              </Button>
             </Box>
             <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               {user && (

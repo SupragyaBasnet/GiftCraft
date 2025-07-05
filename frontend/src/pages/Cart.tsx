@@ -62,7 +62,7 @@ const Cart: React.FC = () => {
                     <CardMedia
                       component="img"
                       height="100"
-                      image={item.image}
+                      image={item.image || '/placeholder.png'}
                       alt={item.name}
                       sx={{ objectFit: 'contain' }}
                     />

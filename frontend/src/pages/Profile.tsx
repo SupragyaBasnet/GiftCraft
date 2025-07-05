@@ -321,7 +321,7 @@ const Profile: React.FC = () => {
         }
       };
       fetchOrders();
-    }
+  }
   }, [tab]);
 
   // Remove handleSubmitReview's localStorage logic
@@ -497,12 +497,12 @@ const Profile: React.FC = () => {
                   }}
                   autoComplete="off"
                 />
-                <Button
-                  type="submit"
+                <Button 
+                  type="submit" 
                   size="small"
                   variant="outlined"
-                  sx={{
-                    mt: 3,
+                  sx={{ 
+                    mt: 3, 
                     mb: 2,
                     color: 'rgb(255,106,106)',
                     borderColor: 'rgb(255,106,106)',
