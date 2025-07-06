@@ -110,14 +110,19 @@ const ProductDetails: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const product = products.find(p => p.id === Number(id));
-        if (product) {
-          setProduct(product);
+        // Try to fetch from backend by MongoDB ObjectId
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error('Product not found');
+        const backendProduct = await res.json();
+        setProduct(backendProduct);
+      } catch (e) {
+        // Fallback to local array for display only
+        const localProduct = products.find(p => String(p.id) === String(id) || p._id === id);
+        if (localProduct) {
+          setProduct(localProduct);
         } else {
           setError("Product not found");
-        }}
- catch (e) {
-  setError("An error occurred");
+        }
       } finally {
         setLoading(false);
       }
@@ -137,8 +142,9 @@ const ProductDetails: React.FC = () => {
         setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
         return;
       }
+      // Always use product._id for cart operations if available
       await addToCart({
-        id: String(product.id),
+        id: product._id || product.id,
         cartItemId: Date.now().toString(),
         name: product.name,
         price: product.price,

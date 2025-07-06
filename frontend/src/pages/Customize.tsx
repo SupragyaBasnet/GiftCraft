@@ -181,7 +181,10 @@ const Customize: React.FC = () => {
             </Box>
           )}
           {/* For other categories with types, show button picker */}
-          {selectedCategory !== 'keychains' && categoryTypes[selectedCategory] && !selectedType && (
+          {selectedCategory === 'phonecases' && !selectedType && (
+            <ProductCustomize categoryOverride={selectedCategory} />
+          )}
+          {selectedCategory !== 'keychains' && selectedCategory !== 'phonecases' && categoryTypes[selectedCategory] && !selectedType && (
             <Box sx={{ mb: 4, textAlign: 'center' }}>
               <Typography variant="h6" sx={{ mb: 2 }}>Select Type</Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2 }}>
