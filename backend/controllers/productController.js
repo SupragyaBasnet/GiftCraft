@@ -57,6 +57,19 @@ exports.placeOrder = async (req, res) => {
   try {
     const { items, total, address, paymentMethod } = req.body;
     const userId = req.user.id;
+    // Validate items
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'No items to order.' });
+    }
+    for (const item of items) {
+      if (!item.product && !item.customizationId) {
+        return res.status(400).json({ message: 'Each item must have either a product or a customizationId.' });
+      }
+      if (typeof item.quantity !== 'number' || typeof item.price !== 'number') {
+        return res.status(400).json({ message: 'Each item must have quantity and price.' });
+      }
+    }
+    // Store all fields as received (product, customizationId, customization, image, name, quantity, price)
     const order = new Order({ user: userId, items, total, address, paymentMethod });
     await order.save();
     res.status(201).json(order);
