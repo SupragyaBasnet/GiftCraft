@@ -3,6 +3,8 @@ import { useAuth } from './AuthContext';
 import { products, Product } from '../data/products';
 
 interface CartItem {
+  customization: any;
+  customizationId: any;
   id: string; // product id
   cartItemId: string; // cart item id
   name: string;
@@ -105,6 +107,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addToCart = async (item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     const token = localStorage.getItem('giftcraftToken');
     let productId = item.id;
+    let cartItemId;
+    // If not a valid ObjectId, treat as customization
+    if (!/^[a-fA-F0-9]{24}$/.test(productId)) {
+      // Customization: use customizationId as cartItemId
+      cartItemId = item.customizationId;
+    } else {
+      // Normal product: use productId-Date.now()
+      cartItemId = `${productId}-${Date.now()}`;
+    }
     
     console.log('[addToCart] Adding item:', item, 'with quantity:', quantity);
     

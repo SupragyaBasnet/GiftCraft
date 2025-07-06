@@ -918,7 +918,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
         setIsSaved(true);
         setSnackbar({ open: true, message: 'Customization saved to MongoDB!', severity: 'success' });
       } else {
-        setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
+      setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
       }
     } catch (err) {
       setSnackbar({ open: true, message: 'Error saving customization.', severity: 'error' });

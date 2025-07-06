@@ -132,11 +132,28 @@ const CheckoutPage: React.FC = () => {
   // Order confirmation logic
   const handleConfirmOrder = async () => {
     if (!validateAddress()) return;
-    const items = itemsToCheckout.map((item: any) => ({
-      product: item._id || item.id,
-      quantity: item.quantity,
-      price: item.price,
-    }));
+    const items = itemsToCheckout.map((item: any) => {
+      const isProduct = item._id && /^[a-fA-F0-9]{24}$/.test(item._id);
+      if (isProduct) {
+        return {
+          product: item._id,
+          image: item.image,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        };
+      } else if (item.customizationId) {
+        return {
+          customizationId: item.customizationId,
+          customization: item.customization,
+          image: item.image,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        };
+      }
+      return null;
+    }).filter(Boolean);
     if (selectedPaymentMethod === 'eSewa') {
       setIsRedirecting(true);
       try {
