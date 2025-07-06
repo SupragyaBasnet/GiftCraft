@@ -76,4 +76,11 @@ router.post('/payment/esewa/status', async (req, res) => {
 // Add this route for customization add-to-cart
 router.post('/customization/cart', auth, customizationController.addToCartCustom);
 
+// Customization CRUD routes
+router.post('/customizations', auth, customizationController.createCustomization);
+router.get('/customizations', auth, customizationController.getCustomizationsForUser);
+router.get('/customizations/:customizationId', auth, customizationController.getCustomizationById);
+router.put('/customizations/:customizationId', auth, customizationController.updateCustomization);
+router.delete('/customizations/:customizationId', auth, customizationController.deleteCustomization);
+
 module.exports = router; 

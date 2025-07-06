@@ -252,12 +252,10 @@ exports.addToCart = async (req, res) => {
     let price = dbProduct ? dbProduct.price : undefined;
     const existingItem = user.cart.find(item => item.product && item.product.toString() === product);
     if (existingItem) {
-      existingItem.quantity += quantity || 1;
-      // Clamp again in case of overflow
-      existingItem.quantity = Math.max(1, Math.min(10, existingItem.quantity));
+      existingItem.quantity = Math.max(1, Math.min(10, quantity || 1));
       if (image && !existingItem.image) existingItem.image = image;
       if (typeof price === 'number' && !existingItem.price) existingItem.price = price;
-      console.log('[addToCart] Updated existing item quantity to:', existingItem.quantity);
+      console.log('[addToCart] Set existing item quantity to:', existingItem.quantity);
     } else {
       user.cart.push({ product, quantity, image, price });
       console.log('[addToCart] Added new item to cart');
@@ -277,6 +275,8 @@ exports.updateCartItem = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     const { product, quantity } = req.body;
+    // Clamp quantity between 1 and 10
+    const newQuantity = Math.max(1, Math.min(10, parseInt(quantity) || 1));
     // Try to find by product ObjectId first
     let item = user.cart.find(item => item.product && item.product.toString() === product);
     // If not found, try to find by customizationId
@@ -284,10 +284,12 @@ exports.updateCartItem = async (req, res) => {
       item = user.cart.find(item => item.customizationId && item.customizationId === product);
     }
     if (!item) return res.status(404).json({ message: 'Cart item not found' });
-    item.quantity = quantity;
+    item.quantity = newQuantity;
+    console.log('[updateCartItem] Set quantity for', product, 'to', newQuantity);
     await user.save();
     res.json(user.cart);
   } catch (err) {
+    console.error('[updateCartItem] Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

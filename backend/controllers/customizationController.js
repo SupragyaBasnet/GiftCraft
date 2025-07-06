@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
+const Customization = require('../models/Customization');
 
 // Calculate price for any customized product (same logic as before)
 function calculateCustomizationPrice(productDoc, customization) {
@@ -131,6 +132,86 @@ exports.addToCartCustom = async (req, res) => {
     res.json(user.cart);
   } catch (err) {
     console.error('Add to Cart Customization Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Create a new customized product
+exports.createCustomization = async (req, res) => {
+  try {
+    const { customizationId, category, productType, type, size, color, elements, image, price } = req.body;
+    const user = req.user.id;
+    if (!customizationId || !category || !productType || typeof price !== 'number') {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+    const customization = new Customization({
+      customizationId,
+      user,
+      category,
+      productType,
+      type,
+      size,
+      color,
+      elements,
+      image,
+      price,
+    });
+    await customization.save();
+    res.status(201).json(customization);
+  } catch (err) {
+    console.error('[createCustomization] Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get all customizations for the logged-in user
+exports.getCustomizationsForUser = async (req, res) => {
+  try {
+    const user = req.user.id;
+    const customizations = await Customization.find({ user });
+    res.json(customizations);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get a single customization by customizationId
+exports.getCustomizationById = async (req, res) => {
+  try {
+    const { customizationId } = req.params;
+    const customization = await Customization.findOne({ customizationId });
+    if (!customization) return res.status(404).json({ message: 'Not found' });
+    res.json(customization);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update a customization by customizationId
+exports.updateCustomization = async (req, res) => {
+  try {
+    const { customizationId } = req.params;
+    const update = req.body;
+    const customization = await Customization.findOneAndUpdate(
+      { customizationId, user: req.user.id },
+      update,
+      { new: true }
+    );
+    if (!customization) return res.status(404).json({ message: 'Not found' });
+    res.json(customization);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Delete a customization by customizationId
+exports.deleteCustomization = async (req, res) => {
+  try {
+    const { customizationId } = req.params;
+    const customization = await Customization.findOneAndDelete({ customizationId, user: req.user.id });
+    if (!customization) return res.status(404).json({ message: 'Not found' });
+    res.json({ message: 'Customization deleted' });
+  } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 }; 
