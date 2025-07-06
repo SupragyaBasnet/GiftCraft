@@ -17,7 +17,7 @@ import mug5 from "../assets/mug5.jpg";
 import notebook1 from "../assets/notebook1.jpeg";
 import notebook2 from "../assets/notebook2.jpeg";
 import notebook3 from "../assets/notebook3.jpg";
-import notebook4webp from "../assets/notebook4.jpg";
+import notebook4 from "../assets/notebook4.jpg";
 import notebook5 from "../assets/notebook5.webp";
 import pen1 from "../assets/pen1.webp";
 import pen2 from "../assets/pen2.jpeg";
@@ -183,17 +183,7 @@ export const products: Product[] = [
     rating: 4.4,
     reviews: 45,
   },
-  {
-    id: 43,
-    name: "Phone Case",
-    price: 1850,
-    image: phonecase4,
-    images: [phonecase1, phonecase2, phonecase3, phonecase4],
-    description: "Minimalist signature case",
-    category: "phonecases",
-    rating: 4.6,
-    reviews: 39,
-  },
+
 
 
 
@@ -331,7 +321,7 @@ export const products: Product[] = [
     name: "Premium Named Notebook",
     price: 500,
     image: notebook1,
-    images: [notebook1, notebook2, notebook3, notebook4webp, notebook5],
+    images: [notebook1, notebook2, notebook3, notebook4, notebook5],
     description: "Personalized notebook for notes and sketches",
     category: "notebooks",
     rating: 4.4,
@@ -342,7 +332,7 @@ export const products: Product[] = [
     name: "Premium Named Notebook",
     price: 700,
     image: notebook2,
-    images: [notebook2, notebook1, notebook3, notebook4webp, notebook5],
+    images: [notebook2, notebook1, notebook3, notebook4, notebook5],
     description: "High-quality paper notebook with custom cover",
     category: "notebooks",
     rating: 4.6,
@@ -353,7 +343,7 @@ export const products: Product[] = [
     name: "Couple Notebook",
     price: 600,
     image: notebook3,
-    images: [notebook3, notebook1, notebook2, notebook4webp, notebook5],
+    images: [notebook3, notebook1, notebook2, notebook4, notebook5],
     description: "Artist sketchbook with personalized design",
     category: "notebooks",
     rating: 4.5,
@@ -363,8 +353,8 @@ export const products: Product[] = [
     id: 52,
     name: "Basis Name Notebook",
     price: 900,
-    image: notebook4webp,
-    images: [notebook4webp, notebook1, notebook2, notebook3, notebook5],
+    image: notebook4,
+    images: [notebook4, notebook1, notebook2, notebook3, notebook5],
     description: "Premium leather cover with custom embossing",
     category: "notebooks",
     rating: 4.7,
@@ -375,7 +365,7 @@ export const products: Product[] = [
     name: "Picture Notebook",
     price: 400,
     image: notebook5,
-    images: [notebook5, notebook1, notebook2, notebook3, notebook4webp],
+    images: [notebook5, notebook1, notebook2, notebook3, notebook4],
     description: "Compact notebook with custom cover",
     category: "notebooks",
     rating: 4.3,

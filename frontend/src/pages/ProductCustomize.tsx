@@ -78,6 +78,9 @@ import phonecaseiphone13promax from "../assets/products/phonecaseiphone13promax 
 import phonecaseiphone14 from "../assets/products/phonecaseiphone14.jpg";
 import phonecases21ultra from "../assets/products/phonecases21ultra.jpg";
 import phonecases23ultra from "../assets/products/phonecases23 ultra.jpg";
+import phonecaseiphone10 from "../assets/products/phonecaseiphone10.jpg";
+import phonecaseiphone11 from "../assets/products/phonecaseiphone11.jpg";
+import phonecaseiphone12 from "../assets/products/phonecaseiphone12.jpg";
 
 import keychainJpg from "../assets/products/keychain.jpg";
 import planemetalkeychain from "../assets/products/planemetalkeychain.jpg";
@@ -93,7 +96,6 @@ import planewhitekeychain from "../assets/products/planewhitekeychain.jpg";
 type ProductType =
   | "mug"
   | "tshirt"
-  | "phonecase"
   | "frame"
   | "keychain"
   | "pillowcase"
@@ -132,18 +134,10 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     side: mugSideImage,
   },
   frame: [
-    // Use array for multiple frame options
     frame1,
     frame2,
     frame3,
-    frame4, // Add frame4 as the fourth option
-  ],
-  phonecase: [
-    phonecaseiphone8plus,
-    phonecaseiphone13promax,
-    phonecaseiphone14,
-    phonecases21ultra,
-    phonecases23ultra,
+    frame4,
   ],
   keychain: [
     keychainJpg,
@@ -154,7 +148,6 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     keychainLeather,
   ],
   waterbottle: [
-    // Use array for multiple water bottle views
     bottle1White,
     bottleWhite2,
     bottleWhite3,
@@ -163,12 +156,11 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     front: planewhitecap,
   },
   pillowcase: [
-    circleshapedFront, // 0: Circle
-    heartshapedFront,  // 1: Heart
-    starshapedBack,    // 2: Star
-    squareFront,       // 3: Square
+    circleshapedFront,
+    heartshapedFront,
+    starshapedBack,
+    squareFront,
   ],
-  
 };
 
 const stickers = ["🎉", "❤️", "🌟", "🎁", "😊", "🔥", "🥳", "💐", "👑", "🍰"];
@@ -891,12 +883,36 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      setIsSaved(true);
-      setSnackbar({ open: true, message: 'Customization saved successfully!', severity: 'success' });
+      const token = localStorage.getItem('giftcraftToken');
+      const payload = {
+        customizationId,
+        category: productType,
+        productType,
+        type: phonecaseType || selectedType || "", // always send a string
+        size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", // always send a string
+        color,
+        elements,
+        image: currentImage,
+        price: calculateCustomizationPrice(basePrice, productType, { customizationId, category: productType, productType, type: phonecaseType || selectedType || "", size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", color, elements, image: currentImage }),
+      };
+      const res = await fetch('/api/auth/customizations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setIsSaved(true);
+        setSnackbar({ open: true, message: 'Customization saved to MongoDB!', severity: 'success' });
+      } else {
+        setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
+      }
     } catch (err) {
-      setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
+      setSnackbar({ open: true, message: 'Error saving customization.', severity: 'error' });
     }
   };
 
@@ -1073,8 +1089,10 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
   }, [productType, navigate, hasArrayViews]); // Added hasArrayViews to dependencies
 
   // Determine the current image based on selected product and view
-  let currentImage = baseImage;
-  if (hasArrayViews) {
+  let currentImage = productType === "phonecase"
+    ? phonecaseTypeInfo[phonecaseType]?.image || phonecaseTypeInfo["iPhone 8 Plus"].image
+    : baseImage;
+  if (productType !== "phonecase" && hasArrayViews) {
     currentImage = Array.isArray(productImages[productType as keyof typeof productImages]) && productImages[productType as keyof typeof productImages][currentArrayIndex]
       ? productImages[productType as keyof typeof productImages][currentArrayIndex]
       : productImages[productType as keyof typeof productImages][0];
@@ -1590,7 +1608,51 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
   // Add this near the other useState hooks at the top of the component
   const [quantity, setQuantity] = useState(1);
 
-  const [phonecaseType, setPhonecaseType] = useState<string>('iPhone 11'); // default value
+ 
+  const [phonecaseType, setPhonecaseType] = useState<string>('iPhone 8 Plus');
+
+  const phonecaseTypeInfo: Record<string, { image: string; name: string; description: string }> = {
+    "iPhone 8 Plus": {
+      image: phonecaseiphone8plus,
+      name: 'iPhone 8 Plus Phone Case',
+      description: 'Premium case for iPhone 8 Plus.'
+    },
+    "iPhone 10": {
+      image: phonecaseiphone10,
+      name: 'iPhone 10 Phone Case',
+      description: 'Premium case for iPhone 10.'
+    },
+    "iPhone 11": {
+      image: phonecaseiphone11,
+      name: 'iPhone 11 Phone Case',
+      description: 'Premium case for iPhone 11.'
+    },
+    "iPhone 12": {
+      image: phonecaseiphone12,
+      name: 'iPhone 12 Phone Case',
+      description: 'Premium case for iPhone 12.'
+    },
+    "iPhone 13 Pro Max / 12 Pro Max": {
+      image: phonecaseiphone13promax,
+      name: 'iPhone 13 Pro Max / 12 Pro Max Phone Case',
+      description: 'Premium case for iPhone 13 Pro Max or 12 Pro Max.'
+    },
+    "iPhone 14": {
+      image: phonecaseiphone14,
+      name: 'iPhone 14 Phone Case',
+      description: 'Premium case for iPhone 14.'
+    },
+    "Samsung S21 Ultra": {
+      image: phonecases21ultra,
+      name: 'Samsung S21 Ultra Phone Case',
+      description: 'Premium case for Samsung S21 Ultra.'
+    },
+    "Samsung S23 Ultra": {
+      image: phonecases23ultra,
+      name: 'Samsung S23 Ultra Phone Case',
+      description: 'Premium case for Samsung S23 Ultra.'
+    },
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -1599,6 +1661,35 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
           Customize Your {selectedType ? selectedType.replace(/([A-Z])/g, ' $1').trim() : (productType ? productType.charAt(0).toUpperCase() + productType.slice(1).replace("-", " ") : "Product")}
         </Typography>
         <Box sx={{ width: 60, height: 3, bgcolor: '#F46A6A', borderRadius: 2, mx: 'auto', mb: 3 }} />
+
+        {/* Phonecase type dropdown - moved above the canvas/image area */}
+        {productType === "phonecase" && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <FormControl size="medium" sx={{ minWidth: 140, maxWidth: 180 }}>
+              <InputLabel>Phonecase Model</InputLabel>
+              <Select
+                value={phonecaseType}
+                label="Phonecase Model"
+                onChange={e => setPhonecaseType(e.target.value)}
+              >
+                {Object.keys(phonecaseTypeInfo).map(type => (
+                  <MenuItem key={type} value={type}>{type}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        )}
+
+        {productType === "phonecase" && (
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
+              {phonecaseTypeInfo[phonecaseType]?.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {phonecaseTypeInfo[phonecaseType]?.description}
+            </Typography>
+          </Box>
+        )}
 
         {/* View Options */}
         {hasArrayViews && productType !== "pen" ? (
@@ -1798,10 +1889,11 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
           }}
         >
           {/* Product image */}
+          {currentImage ? (
             <Box
               component="img"
-            src={currentImage}
-            alt="product"
+              src={currentImage}
+              alt="product"
               sx={{
                 width: "100%",
                 height: "100%",
@@ -1809,12 +1901,17 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
                 position: "absolute",
                 top: 0,
                 left: 0,
-              zIndex: 1,
-              pointerEvents: "none",
-              p: 2,
-              ...getProductStyle(productType),
+                zIndex: 1,
+                pointerEvents: "none",
+                p: 2,
+                ...getProductStyle(productType),
               }}
             />
+          ) : (
+            <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#f8d7da", color: "#721c24", borderRadius: 2 }}>
+              <Typography variant="h6">Image not available for this phonecase model.</Typography>
+            </Box>
+          )}
           {/* Color overlay as tint for all products, but mask for phonecase */}
           {color !== "#ffffff" && (
             productType === "phonecase" ? (
