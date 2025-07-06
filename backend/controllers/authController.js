@@ -224,8 +224,14 @@ exports.getCart = async (req, res) => {
     const user = await User.findById(req.user.id).populate('cart.product');
     if (!user) return res.status(404).json({ message: 'User not found' });
     console.log('[getCart] User:', req.user.id, 'Cart:', user.cart);
+    console.log('[getCart] Cart items with populated products:', user.cart.map(item => ({
+      product: item.product ? { _id: item.product._id, name: item.product.name } : null,
+      quantity: item.quantity,
+      customizationId: item.customizationId
+    })));
     res.json(user.cart);
   } catch (err) {
+    console.error('[getCart] Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -235,18 +241,32 @@ exports.addToCart = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    const { product, quantity } = req.body;
+    let { product, quantity } = req.body;
+    // Clamp quantity between 1 and 10
+    quantity = Math.max(1, Math.min(10, parseInt(quantity) || 1));
     console.log('[addToCart] User:', req.user.id, 'Product:', product, 'Quantity:', quantity);
-    const existingItem = user.cart.find(item => item.product.toString() === product);
+    console.log('[addToCart] User cart before:', user.cart);
+    // Try to find the product in the database
+    const dbProduct = await require('../models/Product').findById(product);
+    let image = dbProduct ? dbProduct.image : undefined;
+    let price = dbProduct ? dbProduct.price : undefined;
+    const existingItem = user.cart.find(item => item.product && item.product.toString() === product);
     if (existingItem) {
       existingItem.quantity += quantity || 1;
+      // Clamp again in case of overflow
+      existingItem.quantity = Math.max(1, Math.min(10, existingItem.quantity));
+      if (image && !existingItem.image) existingItem.image = image;
+      if (typeof price === 'number' && !existingItem.price) existingItem.price = price;
+      console.log('[addToCart] Updated existing item quantity to:', existingItem.quantity);
     } else {
-      user.cart.push({ product, quantity: quantity || 1 });
+      user.cart.push({ product, quantity, image, price });
+      console.log('[addToCart] Added new item to cart');
     }
     await user.save();
     console.log('[addToCart] Updated Cart:', user.cart);
     res.json(user.cart);
   } catch (err) {
+    console.error('[addToCart] Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
