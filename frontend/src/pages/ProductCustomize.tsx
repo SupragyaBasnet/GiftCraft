@@ -29,13 +29,14 @@ import {
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import CanvasDraw from "react-canvas-draw";
 import { ChromePicker, ColorResult } from "react-color";
 import { Rnd } from "react-rnd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from '../context/CartContext';
 import { products } from '../data/products';
+import html2canvas from 'html2canvas';
 
 // Import product images from products directory
 import frame1 from "../assets/products/frame1.jpg";
@@ -883,9 +884,17 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     });
   };
 
+  async function exportPreviewImage() {
+    // The main preview area is the CanvasBox. Give it a ref and use html2canvas.
+    if (!previewRef.current) return null;
+    const canvas = await html2canvas(previewRef.current, {backgroundColor: null, useCORS: true, scale: 2});
+    return canvas.toDataURL('image/png');
+  }
+
   const handleSave = async () => {
     try {
       const token = localStorage.getItem('giftcraftToken');
+      const previewImage = await exportPreviewImage();
       const payload = {
         customizationId,
         category: productType,
@@ -894,8 +903,8 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
         size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", // always send a string
         color,
         elements,
-        image: currentImage,
-        price: calculateCustomizationPrice(basePrice, productType, { customizationId, category: productType, productType, type: phonecaseType || selectedType || "", size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", color, elements, image: currentImage }),
+        image: previewImage || currentImage,
+        price: calculateCustomizationPrice(basePrice, productType, { customizationId, category: productType, productType, type: phonecaseType || selectedType || "", size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", color, elements, image: previewImage || currentImage }),
       };
       const res = await fetch('/api/auth/customizations', {
         method: 'POST',
@@ -932,6 +941,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
       setSnackbar({ open: true, message: 'Please save your customization before adding to cart.', severity: 'error' });
         return;
       }
+    const previewImage = await exportPreviewImage();
     // Build the customization object from current state
     const customization = {
       customizationId,
@@ -949,7 +959,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
           : undefined,
       color: color,
       elements: elements,
-      image: currentImage,
+      image: previewImage || currentImage,
     };
     const token = localStorage.getItem('giftcraftToken');
     const customPrice = calculateCustomizationPrice(basePrice, productType, customization);
@@ -959,7 +969,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
       type: selectedType,
       customization,
       price: customPrice,
-      image: currentImage,
+      image: previewImage || currentImage,
       quantity: 1,
     };
     try {
@@ -984,7 +994,8 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
+    const previewImage = await exportPreviewImage();
     // Build the customized item object
     const customItem = {
       customizationId: customizationId || Date.now().toString(),
@@ -1000,7 +1011,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
               : undefined,
       color,
       elements,
-          image: currentImage,
+      image: previewImage || currentImage,
       quantity,
       price: calculateCustomizationPrice(basePrice, productType, {
         customizationId,
@@ -1011,12 +1022,12 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
             ? selectedNotebookSize
           : productType === 'tshirt'
             ? selectedTshirtSize
-          : productType === 'waterbottle'
+            : productType === 'waterbottle'
             ? selectedWaterBottleSize
             : undefined,
         color,
         elements,
-        image: currentImage,
+        image: previewImage || currentImage,
       }),
       total: calculateCustomizationPrice(basePrice, productType, {
         customizationId,
@@ -1032,7 +1043,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
           : undefined,
         color,
         elements,
-        image: currentImage,
+        image: previewImage || currentImage,
       }) * quantity,
     };
     navigate(`/checkout?singleItemId=${customItem.customizationId}`, {
@@ -1654,6 +1665,9 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     },
   };
 
+  // Move previewRef definition to the top of the component, before any usage
+  const previewRef = React.useRef<HTMLDivElement>(null);
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
@@ -1881,6 +1895,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
 
         {/* Customization Canvas */}
         <CanvasBox
+          ref={previewRef}
           sx={{
             mb: 3,
             height: canvasHeight,
