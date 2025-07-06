@@ -25,7 +25,7 @@ import {
   Tabs,
   TextField,
   ToggleButton,
-  ToggleButtonGroup, Tooltip, Typography
+  ToggleButtonGroup, Tooltip, Typography, FormControl, InputLabel
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
@@ -73,9 +73,9 @@ import starshapedBack from "../assets/products/starshaped-back.jpg";
 
 
 
+import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
 import phonecaseiphone13promax from "../assets/products/phonecaseiphone13promax and 12 pro max.jpg";
 import phonecaseiphone14 from "../assets/products/phonecaseiphone14.jpg";
-import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
 import phonecases21ultra from "../assets/products/phonecases21ultra.jpg";
 import phonecases23ultra from "../assets/products/phonecases23 ultra.jpg";
 
@@ -914,8 +914,8 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
   const handleAddToCartCustom = async () => {
     if (!isSaved) {
       setSnackbar({ open: true, message: 'Please save your customization before adding to cart.', severity: 'error' });
-      return;
-    }
+        return;
+      }
     // Build the customization object from current state
     const customization = {
       customizationId,
@@ -956,9 +956,9 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
         body: JSON.stringify(payload),
       });
       if (res.ok) {
-        setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+      setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
         setTimeout(() => {
-          navigate('/cart');
+      navigate('/cart');
         }, 1500);
       } else {
         setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
@@ -968,61 +968,60 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     }
   };
 
-  const handleBuyNow = async () => {
-    if (!isSaved) {
-      setSnackbar({ open: true, message: 'Please save your customization before buying.', severity: 'error' });
-      return;
-    }
-    // Build the customization object from current state
-    const customization = {
-      customizationId,
+  const handleBuyNow = () => {
+    // Build the customized item object
+    const customItem = {
+      customizationId: customizationId || Date.now().toString(),
       category,
       productType,
       type: selectedType,
-      viewIndex: hasArrayViews ? currentArrayIndex : currentView,
-      size:
-        productType === 'notebook'
+      size: productType === 'notebook'
+              ? selectedNotebookSize
+        : productType === 'tshirt'
+              ? selectedTshirtSize
+        : productType === 'waterbottle'
+              ? selectedWaterBottleSize
+              : undefined,
+      color,
+      elements,
+          image: currentImage,
+      quantity,
+      price: calculateCustomizationPrice(basePrice, productType, {
+        customizationId,
+        category,
+        productType,
+        type: selectedType,
+        size: productType === 'notebook'
+            ? selectedNotebookSize
+          : productType === 'tshirt'
+            ? selectedTshirtSize
+          : productType === 'waterbottle'
+            ? selectedWaterBottleSize
+            : undefined,
+        color,
+        elements,
+        image: currentImage,
+      }),
+      total: calculateCustomizationPrice(basePrice, productType, {
+        customizationId,
+        category,
+        productType,
+        type: selectedType,
+        size: productType === 'notebook'
           ? selectedNotebookSize
           : productType === 'tshirt'
           ? selectedTshirtSize
           : productType === 'waterbottle'
           ? selectedWaterBottleSize
           : undefined,
-      color: color,
-      elements: elements,
-      image: currentImage,
+        color,
+        elements,
+        image: currentImage,
+      }) * quantity,
     };
-    const token = localStorage.getItem('giftcraftToken');
-    const customPrice = calculateCustomizationPrice(basePrice, productType, customization);
-    const payload = {
-      customizationId,
-      category,
-      type: selectedType,
-      customization,
-      price: customPrice,
-      image: currentImage,
-      quantity: 1,
-    };
-    try {
-      const res = await fetch('/api/auth/customization/cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        setSnackbar({ open: true, message: 'Added to cart! Proceeding to checkout...', severity: 'success' });
-        setTimeout(() => {
-          navigate('/checkout');
-        }, 1200);
-      } else {
-        setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
-      }
-    } catch (err) {
-      setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
-    }
+    navigate(`/checkout?singleItemId=${customItem.customizationId}`, {
+      state: { items: [customItem] }
+    });
   };
 
   // Add useEffect to restore customization after login
@@ -1588,6 +1587,11 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     },
   };
 
+  // Add this near the other useState hooks at the top of the component
+  const [quantity, setQuantity] = useState(1);
+
+  const [phonecaseType, setPhonecaseType] = useState<string>('iPhone 11'); // default value
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
@@ -1794,33 +1798,33 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
           }}
         >
           {/* Product image */}
-          <Box
-            component="img"
+            <Box
+              component="img"
             src={currentImage}
             alt="product"
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              position: "absolute",
-              top: 0,
-              left: 0,
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                position: "absolute",
+                top: 0,
+                left: 0,
               zIndex: 1,
               pointerEvents: "none",
               p: 2,
               ...getProductStyle(productType),
-            }}
-          />
+              }}
+            />
           {/* Color overlay as tint for all products, but mask for phonecase */}
           {color !== "#ffffff" && (
             productType === "phonecase" ? (
-              <Box
-                sx={{
+            <Box
+              sx={{
                   position: "absolute",
                   top: 0,
                   left: 0,
-                  width: "100%",
-                  height: "100%",
+                width: "100%",
+                height: "100%",
                   zIndex: 2,
                   pointerEvents: "none",
                   background: color,
@@ -1837,13 +1841,13 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
             ) : (
               <Box
                 sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
+                position: "absolute",
+                top: 0,
+                left: 0,
                   width: "100%",
                   height: "100%",
                   zIndex: 2,
-                  pointerEvents: "none",
+                pointerEvents: "none",
                   background: color,
                   opacity: 0.32,
                   mixBlendMode: "multiply",

@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Typography, Container, Grid, Button, Rating, Stack, Paper, CircularProgress, Alert, IconButton } from '@mui/material';
-import { DesignServices, ShoppingCart, Add, Remove } from '@mui/icons-material';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
-import { products, Product } from '../data/products';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import { Box, Button, Container, Grid, Paper, Rating, Stack, Typography } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import { keyframes } from '@mui/system';
+import React, { useEffect, useState } from 'react';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 function getProductStory(product: Product) {
   const uniqueDescriptions: Record<number, string> = {
@@ -106,29 +103,42 @@ const ProductDetails: React.FC = () => {
   const [mainIdx, setMainIdx] = useState(0);
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
   const { addToCart } = useCart();
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        // Try to fetch from backend by MongoDB ObjectId
         const res = await fetch(`/api/products/${id}`);
         if (!res.ok) throw new Error('Product not found');
         const backendProduct = await res.json();
         setProduct(backendProduct);
       } catch (e) {
-        // Fallback to local array for display only
-        const localProduct = products.find(p => String(p.id) === String(id) || p._id === id);
-        if (localProduct) {
-          setProduct(localProduct);
-        } else {
-          setError("Product not found");
-        }
+        setError("Product not found");
       } finally {
         setLoading(false);
       }
     };
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (product && product.category && product._id) {
+      const fetchRelated = async () => {
+        try {
+          const res = await fetch('/api/products');
+          if (!res.ok) return;
+          const all = await res.json();
+          const related = all.filter((p: any) =>
+            p.category && product.category &&
+            p.category.toLowerCase().replace(/s$/, '') === product.category.toLowerCase().replace(/s$/, '') &&
+            p._id !== product._id
+          ).slice(0, 4);
+          setRelatedProducts(related);
+        } catch {}
+      };
+      fetchRelated();
+    }
+  }, [product]);
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => {
@@ -141,30 +151,25 @@ const ProductDetails: React.FC = () => {
   const handleAddToCart = async () => {
     if (!product) return;
     try {
-      console.log('Adding to cart with quantity:', quantity);
       const isLoggedIn = localStorage.getItem('giftcraftUser');
       if (!isLoggedIn) {
         setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
         return;
       }
-      
-      // Use the correct product ID - prefer _id from backend, fallback to id
-      const productId = product._id || product.id;
-      
+      // Always use MongoDB _id
+      const productId = product._id;
       await addToCart({
         id: productId,
-        cartItemId: Date.now().toString(),
+        cartItemId: `${productId}-${Date.now()}`,
         name: product.name,
         price: product.price,
         image: product.image,
         category: product.category,
         description: product.description
       }, quantity);
-      
       setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
       navigate('/cart');
     } catch (err) {
-      console.error('Add to cart error:', err);
       setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
     }
   };
@@ -178,18 +183,19 @@ const ProductDetails: React.FC = () => {
         navigate('/login');
         return;
       }
+      const productId = product._id;
       await addToCart({
-        id: product.id,
+        id: productId,
+        cartItemId: `${productId}-checkout-${Date.now()}`,
         name: product.name,
         price: product.price,
         image: product.image,
-        cartItemId: '',
         category: product.category,
         description: product.description,
-      });
+      }, quantity);
       setSnackbar({ open: true, message: 'Proceeding to checkout...', severity: 'success' });
       setTimeout(() => {
-        navigate(`/checkout?singleItemId=${product.id}`);
+        navigate(`/checkout?singleItemId=${productId}`);
       }, 800);
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to proceed to checkout.', severity: 'error' });
@@ -213,14 +219,7 @@ const ProductDetails: React.FC = () => {
     );
   }
 
-  const images = product.images && product.images.length > 0 ? product.images : [product.image || ''];
-  // Pick 2 other products from the same category, or any 2 others
-  let relatedProducts = products.filter(p => p.id !== product.id && p.category === product.category);
-  if (relatedProducts.length < 2) {
-    relatedProducts = products.filter(p => p.id !== product.id).slice(0, 2);
-  } else {
-    relatedProducts = relatedProducts.slice(0, 2);
-  }
+  const images = product && product.images && product.images.length > 0 ? product.images : [product?.image || ''];
 
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
@@ -233,32 +232,7 @@ const ProductDetails: React.FC = () => {
               alt={product.name || ''}
               sx={{ width: 350, height: 350, borderRadius: 4, boxShadow: 3, mb: 2, objectFit: 'contain', bgcolor: 'white', p: 0, m: 0, display: 'block' }}
             />
-            {/* Show all products in the same category as thumbnails */}
-            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 1 }}>
-              {products.filter(p => p.category === product.category).map((catProd) => (
-                <Box
-                  key={catProd.id}
-                  component="img"
-                  src={catProd.image}
-                  alt={catProd.name}
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    objectFit: 'cover',
-                    borderRadius: 2,
-                    border: catProd.id === product.id ? '2px solid #F46A6A' : '1px solid #eee',
-                    cursor: catProd.id === product.id ? 'default' : 'pointer',
-                    opacity: catProd.id === product.id ? 1 : 0.7,
-                    transition: 'border 0.2s',
-                  }}
-                  onClick={() => {
-                    if (catProd.id !== product.id) {
-                      navigate(`/products/${catProd.id}`);
-                    }
-                  }}
-                />
-              ))}
-            </Box>
+            {/* Thumbnails of related products removed for now (no products array) */}
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -284,24 +258,7 @@ const ProductDetails: React.FC = () => {
             >
               -
             </Button>
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={quantity}
-              onChange={e => {
-                let val = parseInt(e.target.value, 10);
-                if (isNaN(val)) val = 1;
-                setQuantity(val);
-              }}
-              onBlur={e => {
-                let val = parseInt(e.target.value, 10);
-                if (isNaN(val)) val = 1;
-                val = Math.max(1, Math.min(10, val));
-                setQuantity(val);
-              }}
-              style={{ width: 48, textAlign: 'center', margin: '0 8px', borderRadius: 4, border: '1px solid #ccc', height: 32 }}
-            />
+            <span style={{ fontWeight: 500, margin: '0 16px', fontSize: '0.98rem', color: '#888' }}>Quantity: {quantity}</span>
             <Button
               size="small"
               variant="outlined"
@@ -327,7 +284,14 @@ const ProductDetails: React.FC = () => {
               color="primary"
               sx={{ mt: 1, backgroundColor: 'rgb(255,106,106)', '&:hover': { backgroundColor: 'rgb(220,80,80)' } }}
               size="small"
-              onClick={() => navigate(`/checkout?singleItemId=${product.id}`, { state: { items: [{ ...product, quantity, price: product.price, total: product.price * quantity }] } })}
+              onClick={() => {
+                if (!product._id) {
+                  setSnackbar({ open: true, message: 'This product cannot be ordered. Please contact support.', severity: 'error' });
+                  return;
+                }
+                navigate(`/checkout?singleItemId=${product._id}`,
+                  { state: { items: [{ ...product, _id: product._id, quantity, price: product.price, total: product.price * quantity }] } });
+              }}
             >
               Proceed to Checkout
             </Button>
@@ -409,11 +373,14 @@ const ProductDetails: React.FC = () => {
       <Box sx={{ mt: 8 }}>
         <Typography variant="h5" fontWeight={700} gutterBottom>Related Products</Typography>
         <Grid container spacing={3}>
-          {relatedProducts.map((rel) => (
-            <Grid item xs={12} sm={6} md={4} key={rel.id}>
+          {relatedProducts.length === 0 ? (
+            <Grid item xs={12}><Typography color="text.secondary">No related products found.</Typography></Grid>
+          ) : (
+            relatedProducts.map((rel) => (
+              <Grid item xs={12} sm={6} md={3} key={rel._id}>
               <Paper
                 component={RouterLink}
-                to={`/products/${rel.id}`}
+                  to={`/products/${rel._id}`}
                 sx={{
                   p: 2,
                   textDecoration: 'none',
@@ -428,26 +395,27 @@ const ProductDetails: React.FC = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   cursor: 'pointer',
-                  minWidth: 220,
-                  maxWidth: 240,
-                  minHeight: 260,
-                  maxHeight: 280,
-                  mx: 'auto',
-                  justifyContent: 'center',
+                    minWidth: 180,
+                    maxWidth: 220,
+                    minHeight: 220,
+                    maxHeight: 260,
+                    mx: 'auto',
+                    justifyContent: 'center',
                 }}
               >
                 <Box
                   component="img"
                   src={rel.image}
                   alt={rel.name}
-                  sx={{ width: 100, height: 100, objectFit: 'contain', mb: 1, borderRadius: 2, bgcolor: 'white' }}
-                />
-                <Typography variant="subtitle1" fontWeight={700} align="center" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{rel.name}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rel.description}</Typography>
-                <Typography variant="body2" fontWeight={700} color="primary" align="center">Rs. {rel.price.toLocaleString('en-IN')}</Typography>
+                    sx={{ width: 80, height: 80, objectFit: 'contain', mb: 1, borderRadius: 2, bgcolor: 'white' }}
+                  />
+                  <Typography variant="subtitle1" fontWeight={700} align="center" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{rel.name}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rel.description}</Typography>
+                  <Typography variant="body2" fontWeight={700} color="primary" align="center">Rs. {rel.price?.toLocaleString('en-IN') ?? 'N/A'}</Typography>
               </Paper>
             </Grid>
-          ))}
+            ))
+          )}
         </Grid>
       </Box>
       <Snackbar open={snackbar.open} autoHideDuration={2500} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
@@ -460,3 +428,18 @@ const ProductDetails: React.FC = () => {
 };
 
 export default ProductDetails; 
+
+if (typeof window !== 'undefined') {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  `;
+  document.head.appendChild(style);
+} 

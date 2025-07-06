@@ -133,7 +133,7 @@ const CheckoutPage: React.FC = () => {
   const handleConfirmOrder = async () => {
     if (!validateAddress()) return;
     const items = itemsToCheckout.map((item: any) => ({
-      product: item.id || item._id,
+      product: item._id || item.id,
       quantity: item.quantity,
       price: item.price,
     }));
@@ -261,15 +261,15 @@ const CheckoutPage: React.FC = () => {
               <Alert severity="error" sx={{ mb: 2 }}>{orderConfirmedMessage}</Alert>
             ) : (
               <>
-                <Confetti width={window.innerWidth} height={window.innerHeight} />
-                <Typography variant="h5" color="success.main" fontWeight={700} gutterBottom>
-                  Order Confirmed!
-                </Typography>
-                {orderConfirmedMessage.split('\n\n').map((paragraph, index) => (
-                  <Typography key={index} variant="body1" gutterBottom={index < orderConfirmedMessage.split('\n\n').length - 1}>
-                    {paragraph}
-                  </Typography>
-                ))}
+            <Confetti width={window.innerWidth} height={window.innerHeight} />
+            <Typography variant="h5" color="success.main" fontWeight={700} gutterBottom>
+              Order Confirmed!
+            </Typography>
+            {orderConfirmedMessage.split('\n\n').map((paragraph, index) => (
+              <Typography key={index} variant="body1" gutterBottom={index < orderConfirmedMessage.split('\n\n').length - 1}>
+                {paragraph}
+              </Typography>
+            ))}
               </>
             )}
           </Box>
@@ -282,8 +282,8 @@ const CheckoutPage: React.FC = () => {
                 <Box key={item.id || item._id} sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                   <Box sx={{ width: 80, height: 80, mr: 2 }}>
                     <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  </Box>
-                  <Box>
+                </Box>
+                <Box>
                     <Typography variant="subtitle1" fontWeight={700}>{item.name}</Typography>
                     <Typography variant="body2">Quantity: {item.quantity}</Typography>
                   </Box>
@@ -406,10 +406,10 @@ const CheckoutPage: React.FC = () => {
             </Box>
             {/* Actions */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 3 }}>
-              <Button
-                variant="contained"
+              <Button 
+                variant="contained" 
                 color="primary"
-                size="large"
+                size="large" 
                 sx={{
                   mt: 3,
                   backgroundColor: 'rgb(255,106,106)',

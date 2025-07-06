@@ -91,6 +91,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         })
       );
+      console.log('Cart items after fetchCart:', data);
     } else {
       setCartItems([]);
     }
@@ -170,6 +171,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateQuantity = async (id: string, quantity: number) => {
     // Enforce min/max
     const newQuantity = Math.max(1, Math.min(10, quantity));
+    console.log('Calling updateQuantity for id:', id, 'quantity:', newQuantity);
     const token = localStorage.getItem('giftcraftToken');
     const res = await fetch('/api/auth/cart', {
       method: 'PUT',
@@ -180,7 +182,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       body: JSON.stringify({ product: id, quantity: newQuantity }),
     });
     if (res.ok) {
+      console.log('updateQuantity success, fetching cart...');
       await fetchCart();
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      console.error('updateQuantity failed:', res.status, errorData);
     }
   };
 

@@ -104,7 +104,59 @@ const CustomizeProduct: React.FC = () => {
   };
 
   const handleBuyNow = () => {
-    navigate('/checkout');
+    // Build the customized item object for any customize product
+    const customItem = {
+      customizationId: customizationId || Date.now().toString(),
+      category,
+      productType,
+      type: selectedType,
+      size: productType === 'notebook'
+        ? selectedNotebookSize
+        : productType === 'tshirt'
+        ? selectedTshirtSize
+        : productType === 'waterbottle'
+        ? selectedWaterBottleSize
+        : undefined,
+      color,
+      elements,
+      image: currentImage,
+      quantity,
+      price: calculateCustomizationPrice(basePrice, productType, {
+        customizationId,
+        category,
+        productType,
+        type: selectedType,
+        size: productType === 'notebook'
+          ? selectedNotebookSize
+          : productType === 'tshirt'
+          ? selectedTshirtSize
+          : productType === 'waterbottle'
+          ? selectedWaterBottleSize
+          : undefined,
+        color,
+        elements,
+        image: currentImage,
+      }),
+      total: calculateCustomizationPrice(basePrice, productType, {
+        customizationId,
+        category,
+        productType,
+        type: selectedType,
+        size: productType === 'notebook'
+          ? selectedNotebookSize
+          : productType === 'tshirt'
+          ? selectedTshirtSize
+          : productType === 'waterbottle'
+          ? selectedWaterBottleSize
+          : undefined,
+        color,
+        elements,
+        image: currentImage,
+      }) * quantity,
+    };
+    navigate(`/checkout?singleItemId=${customItem.customizationId}`, {
+      state: { items: [customItem] }
+    });
   };
 
   const handleQuantityChange = (amount: number) => {

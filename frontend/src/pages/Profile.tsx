@@ -321,7 +321,7 @@ const Profile: React.FC = () => {
         }
       };
       fetchOrders();
-  }
+    }
   }, [tab]);
 
   // Remove handleSubmitReview's localStorage logic
@@ -528,16 +528,16 @@ const Profile: React.FC = () => {
                     <Typography variant="body1" align="center">No orders found.</Typography>
                   ) : (
                     orderHistory.map((order) => (
-                      <React.Fragment key={order.id}>
-                        <ListItem button onClick={() => handleToggleExpand(order.id)}>
+                      <React.Fragment key={order._id}>
+                        <ListItem button onClick={() => handleToggleExpand(order._id)}>
                           <ListItemText
                             primary={
-                              <Typography variant="body1" fontWeight={700}>Order ID: {order.id}</Typography>
+                              <Typography variant="body1" fontWeight={700}>Order ID: {order._id}</Typography>
                             }
                             secondary={
                               <React.Fragment>
                                 <Typography component="span" variant="body2" color="text.primary">
-                                  Date: {new Date(order.date).toLocaleDateString()}
+                                  Date: {new Date(order.createdAt).toLocaleDateString()}
                                 </Typography>
                                 <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'block' }}>
                                   Total: Rs. {order.total}
@@ -548,40 +548,40 @@ const Profile: React.FC = () => {
                               </React.Fragment>
                             }
                           />
-                          {expandedOrder === order.id ? <ExpandLess /> : <ExpandMore />}
+                          {expandedOrder === order._id ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
-                        <Collapse in={expandedOrder === order.id} timeout="auto" unmountOnExit>
+                        <Collapse in={expandedOrder === order._id} timeout="auto" unmountOnExit>
                           <Box sx={{ pl: 4, pr: 2, pb: 2, borderBottom: '1px solid #eee' }}>
                             <Typography variant="subtitle1" fontWeight={700} gutterBottom>Items:</Typography>
-                            {/* Display order items - Assuming 'item' in order object has name, qty, price */} {/* Use CustomizedProductImage here */}
-                            {order.item ? (
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            {order.items && order.items.length > 0 ? (
+                              order.items.map((item: any, idx: number) => (
+                                <Box key={idx} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                 <Box sx={{ width: 60, height: 60, mr: 2 }}>
                                   <CustomizedProductImage 
-                                    baseImage={order.item.image} 
-                                    elements={order.item.elements || []} 
-                                    color={order.item.color || '#ffffff'} 
-                                    productType={order.item.productType}
+                                      baseImage={item.product?.image || item.image || '/placeholder.png'}
+                                      elements={item.customization?.elements || []}
+                                      color={item.customization?.color || item.color || '#ffffff'}
+                                      productType={item.product?.category || item.category || item.productType}
                                   />
                                 </Box>
                                 <Box>
                                    <Typography variant="body2" fontWeight={600}>
-                                     {order.item.productType.charAt(0).toUpperCase() + order.item.productType.slice(1).replace('-', ' ')}
-                                     {order.item.size ? ` - Size: ${order.item.size}` : ''}
+                                      {(item.product?.name || item.name || 'Product')}
+                                      {item.size ? ` - Size: ${item.size}` : ''}
                                    </Typography>
-                                    <Typography variant="body2">Color: {order.item.color}</Typography>
-                                     {order.item.elements && order.item.elements.length > 0 && (
-                                       <Typography variant="body2">Elements: {order.item.elements.length} added</Typography>
-                                     )}
-                                   <Typography variant="body2">Price: Rs. {productPrices[order.item.productType] || 0}</Typography>
+                                    <Typography variant="body2">Quantity: {item.quantity}</Typography>
+                                    <Typography variant="body2">Price: Rs. {item.price}</Typography>
+                                    {item.customization && (
+                                      <Typography variant="body2">Customized</Typography>
+                                    )}
+                                  </Box>
                                 </Box>
-                              </Box>
+                              ))
                             ) : (
                               <Typography variant="body2" color="error" sx={{ mb: 2 }}>
                                 Order item details missing.
                               </Typography>
                             )}
-
                             {/* Display Address */}
                             {order.address && (
                               <Box sx={{ mt: 2 }}>
@@ -589,7 +589,6 @@ const Profile: React.FC = () => {
                                 <Typography variant="body2">{order.address}</Typography>
                               </Box>
                             )}
-
                             {/* Display Review and Rating if available */}
                             {order.review ? (
                               <Box sx={{ mt: 2 }}>
@@ -612,12 +611,11 @@ const Profile: React.FC = () => {
                                     boxShadow: 'none',
                                   }
                                 }}
-                                onClick={() => handleOpenReviewModal(order.id)}
+                                onClick={() => handleOpenReviewModal(order._id)}
                               >
                                 Leave a Review
                               </Button>
                             )}
-
                             <Typography variant="subtitle1" fontWeight={700} gutterBottom sx={{ mt: 2 }}>Tracking:</Typography>
                             {/* Display tracking information - Assuming 'tracking' in order object is an array */} {/* Mock Tracking data - Replace with real logic if needed */}
                              <List dense disablePadding>
@@ -630,7 +628,6 @@ const Profile: React.FC = () => {
                                   </ListItem>
                                ))}
                              </List>
-
                           </Box>
                         </Collapse>
                         <Divider />

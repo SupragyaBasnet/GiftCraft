@@ -30,10 +30,11 @@ const productPrices: Record<string, number> = {
 const DELIVERY_CHARGE = 100; // Example fixed delivery charge
 
 const CartPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  // Remove local cartItems state
+  // const [cartItems, setCartItems] = useState<any[]>([]);
   const [openPayment, setOpenPayment] = useState(false); // State for payment dialog
   const navigate = useNavigate();
-  const { updateQuantity } = useCart();
+  const { cartItems, updateQuantity } = useCart();
 
   // Calculate total price including delivery charge
   const subtotal = cartItems.reduce((sum, item) => sum + (productPrices[item.productType] || 0) * item.quantity, 0);
@@ -44,7 +45,7 @@ const CartPage: React.FC = () => {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart).map((item: any) => ({ ...item, quantity: item.quantity || 1 })); // Ensure quantity exists
-        setCartItems(parsedCart);
+        // setCartItems(parsedCart);
         console.log('Cart data loaded from localStorage:', parsedCart); // Log loaded data
       } catch (e) {
         console.error('Failed to load cart data from localStorage', e);
@@ -69,11 +70,11 @@ const CartPage: React.FC = () => {
   };
 
   const handleRemoveItem = (id: number) => {
-    setCartItems(prevCartItems => {
-      const newCartItems = prevCartItems.filter(item => item.id !== id);
-      localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems)); // Save updated cart to localStorage
-      return newCartItems;
-    });
+    // setCartItems(prevCartItems => {
+    //   const newCartItems = prevCartItems.filter(item => item.id !== id);
+    //   localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems)); // Save updated cart to localStorage
+    //   return newCartItems;
+    // });
   };
 
   const handleBuyNow = () => {
@@ -145,7 +146,7 @@ const CartPage: React.FC = () => {
                   />
                   {/* Add quantity controls */}
                   <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
-                    <IconButton size="small" onClick={async () => { handleQuantityChange(item.id, -1); await updateQuantity(item.id, Math.max(1, item.quantity - 1)); }} disabled={item.quantity <= 1}>
+                    <IconButton size="small" onClick={async () => { await updateQuantity(item.id, Math.max(1, item.quantity - 1)); }} disabled={item.quantity <= 1}>
                       <Remove />
                     </IconButton>
                     <input
@@ -157,31 +158,17 @@ const CartPage: React.FC = () => {
                         let val = parseInt(e.target.value, 10);
                         if (isNaN(val)) val = 1;
                         val = Math.max(1, Math.min(10, val));
-                        setCartItems(prevCartItems => {
-                          const newCartItems = prevCartItems.map(ci =>
-                            ci.id === item.id ? { ...ci, quantity: val } : ci
-                          );
-                          localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems));
-                          return newCartItems;
-                        });
                         updateQuantity(item.id, val);
                       }}
                       onBlur={e => {
                         let val = parseInt(e.target.value, 10);
                         if (isNaN(val)) val = 1;
                         val = Math.max(1, Math.min(10, val));
-                        setCartItems(prevCartItems => {
-                          const newCartItems = prevCartItems.map(ci =>
-                            ci.id === item.id ? { ...ci, quantity: val } : ci
-                          );
-                          localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems));
-                          return newCartItems;
-                        });
                         updateQuantity(item.id, val);
                       }}
                       style={{ width: 48, textAlign: 'center', margin: '0 8px', borderRadius: 4, border: '1px solid #ccc', height: 32 }}
                     />
-                    <IconButton size="small" onClick={async () => { handleQuantityChange(item.id, 1); await updateQuantity(item.id, Math.min(10, item.quantity + 1)); }} disabled={item.quantity >= 10}>
+                    <IconButton size="small" onClick={async () => { await updateQuantity(item.id, Math.min(10, item.quantity + 1)); }} disabled={item.quantity >= 10}>
                       <Add />
                     </IconButton>
                   </Box>

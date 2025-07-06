@@ -110,10 +110,10 @@ const Customize: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
-      <Typography variant="h3" align="center" fontWeight={800} gutterBottom sx={{ color: '#111', fontSize: { xs: '2rem', md: '2.2rem' } }}>
+      {/* <Typography variant="h3" align="center" fontWeight={800} gutterBottom sx={{ color: '#111', fontSize: { xs: '2rem', md: '2.2rem' } }}>
         Customize Any Product
-      </Typography>
-      <Box sx={{ width: 120, height: 4, bgcolor: '#F46A6A', borderRadius: 2, mx: 'auto', mb: 4 }} />
+      </Typography> */}
+      {/* <Box sx={{ width: 120, height: 4, bgcolor: '#F46A6A', borderRadius: 2, mx: 'auto', mb: 4 }} /> */}
       {!selectedCategory ? (
         <Grid container spacing={4} justifyContent="center">
           {categories.map((cat) => (
@@ -171,9 +171,7 @@ const Customize: React.FC = () => {
           {/* If keychains, show grid of cards for each type */}
           {selectedCategory === 'keychains' && !selectedType && (
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" align="center" sx={{ mb: 3, color: '#F46A6A' }}>
-                Select the keychain type from the dropdown inside the customization UI below.
-              </Typography>
+             
               <ProductCustomize categoryOverride={selectedCategory} />
             </Box>
           )}

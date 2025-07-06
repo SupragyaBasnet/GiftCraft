@@ -4,18 +4,12 @@ import {
   CardMedia, Container,
   Grid, Typography, Rating, Stack, Drawer, IconButton, InputBase, Slider, FormControl, InputLabel, Select, MenuItem, Checkbox, FormGroup, FormControlLabel
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, useSearchParams, useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
-import { products, Product } from '../data/products';
 import { useCart } from '../context/CartContext';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
-
-// Only use products with a defined price for filtering, sorting, and min/max calculations
-const baseProducts = products.filter(
-  (product: any) => typeof product.price === 'number' && product.category !== 'calendars' && product.category !== 'bags'
-) as Product[];
 
 const allCategories = [
   { label: 'T-Shirts', value: 'tshirts' },
@@ -30,9 +24,6 @@ const allCategories = [
   { label: 'Pillow Cases', value: 'pillowcases' },
 ];
 
-const minProductPrice = Math.min(...baseProducts.map(p => p.price));
-const maxProductPrice = Math.max(...baseProducts.map(p => p.price));
-
 const Products: React.FC = () => {
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
@@ -41,7 +32,7 @@ const Products: React.FC = () => {
   // Filter state
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>(categoryParam ? [categoryParam] : []);
-  const [priceRange, setPriceRange] = useState<number[]>([minProductPrice, maxProductPrice]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
   const [minRating, setMinRating] = useState<number>(0);
   const [sortBy, setSortBy] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,12 +40,55 @@ const Products: React.FC = () => {
   // Responsive
   const isMobile = window.innerWidth < 900;
 
+  // Fetch products from backend (hooks must be inside component)
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('/api/products');
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const data = await res.json();
+        setProducts(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch products');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const minProductPrice = products.length > 0 ? Math.min(...products.map(p => p.price)) : 0;
+  const maxProductPrice = products.length > 0 ? Math.max(...products.map(p => p.price)) : 0;
+
+  useEffect(() => {
+    if (products.length > 0) {
+      setPriceRange([minProductPrice, maxProductPrice]);
+    }
+  }, [products, minProductPrice, maxProductPrice]);
+
   // Filtering logic
-  let filteredProducts = baseProducts.filter(product => {
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    const matchesRating = product.rating >= minRating;
-    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+  let filteredProducts = products.filter(product => {
+    const prodName = (product.name || '').toLowerCase();
+    const prodCategory = (product.category || '').toLowerCase();
+    const prodPrice = typeof product.price === 'number' ? product.price : 0;
+    const prodRating = typeof product.rating === 'number' ? product.rating : 0;
+
+    // Optionally hide products with price 0 (uncomment next line if desired)
+    // if (prodPrice === 0) return false;
+
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.some(
+        (cat) => cat.toLowerCase().replace(/s$/, '') === prodCategory.replace(/s$/, '')
+      );
+    const matchesPrice = prodPrice >= priceRange[0] && prodPrice <= priceRange[1];
+    const matchesRating = prodRating >= minRating;
+    const matchesSearch = prodName.includes(search.toLowerCase());
+
     return matchesCategory && matchesPrice && matchesRating && matchesSearch;
   });
 
@@ -93,7 +127,7 @@ const Products: React.FC = () => {
         value={priceRange}
         min={minProductPrice}
         max={maxProductPrice}
-        onChange={(_, val) => setPriceRange(val as number[])}
+        onChange={(_, val) => setPriceRange(val as [number, number])}
         valueLabelDisplay="auto"
         sx={{ mb: 2 }}
       />
@@ -117,6 +151,30 @@ const Products: React.FC = () => {
 
   const { addToCart } = useCart();
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Debug logging to diagnose why products are not visible
+  console.log('Loaded products:', products);
+  console.log('Current filters:', { selectedCategories, priceRange, minRating, search });
+  console.log('Filtered products:', filteredProducts);
+
+  if (loading) {
+    return (
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh'}}>
+        <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+          <Typography variant="h4" align="center" sx={{ mt: 8 }}>Loading products...</Typography>
+        </Container>
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh'}}>
+        <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+          <Typography variant="h4" align="center" color="error" sx={{ mt: 8 }}>{error}</Typography>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh'}}>
@@ -223,7 +281,7 @@ const Products: React.FC = () => {
                           overflow: 'hidden',
                           cursor: 'pointer',
                         }}
-                        onClick={() => navigate(`/products/${product._id || product.id}`)}
+                        onClick={() => navigate(`/products/${product._id}`)}
                       >
                         <CardMedia
                           component="img"
