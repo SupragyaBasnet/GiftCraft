@@ -23,12 +23,12 @@ function getProductStory(product: Product) {
     3: "A phone case that's as unique as they are. Protect their phone and showcase your creativity every day.",
     17: "Premium protection, premium personalization. This phone case is a daily reminder of your special bond.",
     18: "Minimalist design, maximum meaning. Gift a phone case that's both stylish and sentimental.",
-    43: "Signature style, signature memories. This case is for those who want their phone to stand out and feel personal.",
-    4: "A water bottle that keeps them hydrated and connected to you. Perfect for busy days and thoughtful moments.",
+    46: "Signature style, signature memories. This case is for those who want their phone to stand out and feel personal.",
+    47: "A water bottle that keeps them hydrated and connected to you. Perfect for busy days and thoughtful moments.",
     19: "Double-walled and double the love. This bottle is a practical gift with a personal twist.",
     20: "Sports-style and full of spirit. This bottle is for the active soul who loves a custom touch.",
-    46: "Space-saving, heart-filling. This bottle is a unique way to show you care, every single day.",
-    47: "A gift set mug for those who love a coordinated touch. Every piece is a reminder of your thoughtful gesture.",
+    88: "Space-saving, heart-filling. This bottle is a unique way to show you care, every single day.",
+    89: "A gift set mug for those who love a coordinated touch. Every piece is a reminder of your thoughtful gesture.",
     48: "Hand-painted and heartfelt. This artistic mug is a one-of-a-kind gift for a one-of-a-kind person.",
     5: "A classic cap for classic memories. Personalize it for a gift they'll wear with pride.",
     21: "Premium embroidery, premium memories. This cap is a stylish way to show you care.",
@@ -131,20 +131,28 @@ const ProductDetails: React.FC = () => {
   }, [id]);
 
   const handleQuantityChange = (amount: number) => {
-    setQuantity((prev) => Math.max(1, prev + amount));
+    setQuantity((prev) => {
+      const newVal = Math.max(1, Math.min(10, prev + amount));
+      console.log('Quantity changed (button):', newVal);
+      return newVal;
+    });
   };
 
   const handleAddToCart = async () => {
     if (!product) return;
     try {
+      console.log('Adding to cart with quantity:', quantity);
       const isLoggedIn = localStorage.getItem('giftcraftUser');
       if (!isLoggedIn) {
         setSnackbar({ open: true, message: 'Please log in to add to cart.', severity: 'error' });
         return;
       }
-      // Always use product._id for cart operations if available
+      
+      // Use the correct product ID - prefer _id from backend, fallback to id
+      const productId = product._id || product.id;
+      
       await addToCart({
-        id: product._id || product.id,
+        id: productId,
         cartItemId: Date.now().toString(),
         name: product.name,
         price: product.price,
@@ -152,9 +160,11 @@ const ProductDetails: React.FC = () => {
         category: product.category,
         description: product.description
       }, quantity);
+      
       setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
       navigate('/cart');
     } catch (err) {
+      console.error('Add to cart error:', err);
       setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
     }
   };
@@ -274,13 +284,29 @@ const ProductDetails: React.FC = () => {
             >
               -
             </Button>
-            <Typography variant="body2" color="text.secondary" sx={{ mx: 2 }}>
-              Quantity: {quantity}
-            </Typography>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={quantity}
+              onChange={e => {
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val)) val = 1;
+                setQuantity(val);
+              }}
+              onBlur={e => {
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val)) val = 1;
+                val = Math.max(1, Math.min(10, val));
+                setQuantity(val);
+              }}
+              style={{ width: 48, textAlign: 'center', margin: '0 8px', borderRadius: 4, border: '1px solid #ccc', height: 32 }}
+            />
             <Button
               size="small"
               variant="outlined"
               onClick={() => handleQuantityChange(1)}
+              disabled={quantity >= 10}
               sx={{ minWidth: 32, px: 0 }}
             >
               +

@@ -166,10 +166,7 @@ const Customize: React.FC = () => {
       ) : (
         <>
           <Box sx={{ mb: 3 }}>
-            <IconButton onClick={handleBack} sx={{ mb: 1 }}><ArrowBack /></IconButton>
-            <Typography variant="h5" fontWeight={700} sx={{ display: 'inline', ml: 1 }}>
-              {categories.find((c) => c.key === selectedCategory)?.name}
-            </Typography>
+            {/* Removed back arrow and phonecase label */}
           </Box>
           {/* If keychains, show grid of cards for each type */}
           {selectedCategory === 'keychains' && !selectedType && (

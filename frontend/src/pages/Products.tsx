@@ -223,7 +223,7 @@ const Products: React.FC = () => {
                           overflow: 'hidden',
                           cursor: 'pointer',
                         }}
-                        onClick={() => navigate(`/products/${product.id}`)}
+                        onClick={() => navigate(`/products/${product._id || product.id}`)}
                       >
                         <CardMedia
                           component="img"

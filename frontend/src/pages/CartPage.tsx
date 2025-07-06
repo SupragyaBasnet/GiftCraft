@@ -10,6 +10,7 @@ import DialogActions from '@mui/material/DialogActions';
 import { useNavigate } from 'react-router-dom';
 import CustomizedProductImage from '../components/CustomizedProductImage';
 import { Add, Remove } from '@mui/icons-material';
+import { useCart } from '../context/CartContext';
 
 // Simple client-side price map (placeholder)
 const productPrices: Record<string, number> = {
@@ -32,6 +33,7 @@ const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [openPayment, setOpenPayment] = useState(false); // State for payment dialog
   const navigate = useNavigate();
+  const { updateQuantity } = useCart();
 
   // Calculate total price including delivery charge
   const subtotal = cartItems.reduce((sum, item) => sum + (productPrices[item.productType] || 0) * item.quantity, 0);
@@ -58,7 +60,7 @@ const CartPage: React.FC = () => {
     setCartItems(prevCartItems => {
       const newCartItems = prevCartItems.map(item =>
         item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + amount) }
+          ? { ...item, quantity: Math.max(1, Math.min(10, item.quantity + amount)) }
           : item
       );
       localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems));
@@ -143,11 +145,43 @@ const CartPage: React.FC = () => {
                   />
                   {/* Add quantity controls */}
                   <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
-                    <IconButton size="small" onClick={() => handleQuantityChange(item.id, -1)}>
+                    <IconButton size="small" onClick={async () => { handleQuantityChange(item.id, -1); await updateQuantity(item.id, Math.max(1, item.quantity - 1)); }} disabled={item.quantity <= 1}>
                       <Remove />
                     </IconButton>
-                    <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
-                    <IconButton size="small" onClick={() => handleQuantityChange(item.id, 1)}>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={item.quantity}
+                      onChange={e => {
+                        let val = parseInt(e.target.value, 10);
+                        if (isNaN(val)) val = 1;
+                        val = Math.max(1, Math.min(10, val));
+                        setCartItems(prevCartItems => {
+                          const newCartItems = prevCartItems.map(ci =>
+                            ci.id === item.id ? { ...ci, quantity: val } : ci
+                          );
+                          localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems));
+                          return newCartItems;
+                        });
+                        updateQuantity(item.id, val);
+                      }}
+                      onBlur={e => {
+                        let val = parseInt(e.target.value, 10);
+                        if (isNaN(val)) val = 1;
+                        val = Math.max(1, Math.min(10, val));
+                        setCartItems(prevCartItems => {
+                          const newCartItems = prevCartItems.map(ci =>
+                            ci.id === item.id ? { ...ci, quantity: val } : ci
+                          );
+                          localStorage.setItem('giftcraftCart', JSON.stringify(newCartItems));
+                          return newCartItems;
+                        });
+                        updateQuantity(item.id, val);
+                      }}
+                      style={{ width: 48, textAlign: 'center', margin: '0 8px', borderRadius: 4, border: '1px solid #ccc', height: 32 }}
+                    />
+                    <IconButton size="small" onClick={async () => { handleQuantityChange(item.id, 1); await updateQuantity(item.id, Math.min(10, item.quantity + 1)); }} disabled={item.quantity >= 10}>
                       <Add />
                     </IconButton>
                   </Box>

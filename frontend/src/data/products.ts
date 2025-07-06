@@ -1,7 +1,7 @@
-import cap1 from "../assets/cap1.webp";
-import cap2 from "../assets/cap2.jpg";
-import cap3 from "../assets/cap3.jpg";
-import cap4 from "../assets/cap4.webp";
+import cap1 from "../assets/cap1.jpeg";
+import cap2 from "../assets/cap2.jpeg";
+import cap3 from "../assets/cap3.jpeg";
+import cap4 from "../assets/cap4.jpeg";
 // import frame from "../assets/frame.jpg";
 import keychain1 from "../assets/keychain1.jpeg";
 import keychain2 from "../assets/keychain2.webp";
@@ -37,8 +37,6 @@ import pillowcase4 from "../assets/pillowcase4.jpg";
 import pillowcase5 from "../assets/pillowcase5.jpg";
 import pillowcase6 from "../assets/pillowcase6.jpg";
 import pillowcase7 from "../assets/pillowcase7.jpg";
-import pillowcase8 from "../assets/pillowcase8.jpg";
-import pillowcase9 from "../assets/pillowcase9.jpg";
 import tshirt1 from "../assets/tshirt1.jpeg";
 import tshirt2 from "../assets/tshirt2.jpg";
 import tshirt3 from "../assets/tshirt3.jpg";
@@ -196,39 +194,9 @@ export const products: Product[] = [
     rating: 4.6,
     reviews: 39,
   },
-  {
-    id: 46,
-    name: "Large Capacity Mug",
-    price: 1600,
-    image: mug4,
-    images: [mug4, mug1, mug2, mug3, mug5],
-    description: "Extra large mug for your favorite beverages",
-    category: "mugs",
-    rating: 4.5,
-    reviews: 52,
-  },
-  {
-    id: 47,
-    name: "Gift Set Mug",
-    price: 2000,
-    image: mug5,
-    images: [mug5, mug1, mug2, mug3, mug4],
-    description: "Mug set with matching coaster and spoon",
-    category: "mugs",
-    rating: 4.7,
-    reviews: 48,
-  },
-  {
-    id: 48,
-    name: "Artistic Mug",
-    price: 1700,
-    image: mug,
-    images: [mug, mug1, mug2, mug3, mug4, mug5],
-    description: "Hand-painted design with unique patterns",
-    category: "mugs",
-    rating: 4.6,
-    reviews: 42,
-  },
+
+
+
   {
     id: 4,
     name: "Baby and Mother Picture Water Bottle",
@@ -281,7 +249,7 @@ export const products: Product[] = [
     reviews: 38,
   },
   {
-    id: 46,
+    id: 88,
     name: "Avenger Water Bottle",
     price: 1300,
     image: waterbottle4,
@@ -298,7 +266,7 @@ export const products: Product[] = [
     reviews: 31,
   },
   {
-    id: 47,
+    id: 89,
     name: "We bear bears Water Bottle",
     price: 1500,
     image: waterbottle5,
@@ -623,5 +591,12 @@ export const products: Product[] = [
     reviews: 18,
   },
 ];
+
+// TEMP: Export products as JSON for backend script
+if (typeof window === 'undefined') {
+  const fs = require('fs');
+  fs.writeFileSync('./products.json', JSON.stringify(products, null, 2));
+  console.log('Exported products.json');
+}
 
 

@@ -44,19 +44,35 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         data.map((item: any) => {
           // If item.product exists, it's a normal product; else, it's a custom item
           if (item.product) {
-            // Try to get image from backend, else from products array, else fallback
+            // Try to get image from backend, else from products array by _id, else by name+category, else fallback
             let image = item.product.image;
-            if (!image) {
-              const localProduct = products.find((p: Product) => String(p.id) === String(item.product._id));
-              image = localProduct?.image || '/placeholder.png';
+            let price = item.product.price;
+            let localProduct = products.find((p: Product) => String(p.id) === String(item.product._id));
+            if ((!image || typeof image !== 'string') && !localProduct) {
+              // Try by name+category
+              localProduct = products.find((p: Product) => p.name === item.product.name && p.category === item.product.category);
             }
+            if (!image && localProduct) {
+              image = localProduct.image;
+            }
+            if ((typeof price !== 'number' || isNaN(price)) && localProduct) {
+              price = localProduct.price;
+            }
+            if (!image) {
+              image = '/placeholder.png';
+            }
+            if (typeof price !== 'number' || isNaN(price)) {
+              price = 0;
+              console.warn('Cart item has missing price:', item.product);
+            }
+            
             return {
               id: item.product._id,
               cartItemId: item._id || item.customizationId,
               name: item.product.name,
-              price: item.product.price,
+              price,
               image,
-              quantity: item.product.quantity,
+              quantity: typeof item.product.quantity === 'number' && item.product.quantity > 0 ? item.product.quantity : 1,
               category: item.product.category,
               description: item.product.description,
             };
@@ -88,8 +104,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addToCart = async (item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     const token = localStorage.getItem('giftcraftToken');
     let productId = item.id;
+    
+    console.log('[addToCart] Adding item:', item, 'with quantity:', quantity);
+    
     // If not a valid ObjectId, call add-or-get endpoint
     if (!/^[a-fA-F0-9]{24}$/.test(productId)) {
+      console.log('[addToCart] Product ID is not a valid ObjectId, calling add-or-get endpoint');
       const res = await fetch('/api/products/add-or-get', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -104,10 +124,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (res.ok) {
         const data = await res.json();
         productId = data._id;
+        console.log('[addToCart] Got product ID from add-or-get:', productId);
       } else {
+        console.error('[addToCart] Failed to add or get product');
         throw new Error('Failed to add or get product');
       }
     }
+    
+    console.log('[addToCart] Sending to cart with productId:', productId);
+    
     const res = await fetch('/api/auth/cart', {
       method: 'POST',
       headers: {
@@ -116,8 +141,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       },
       body: JSON.stringify({ product: productId, quantity }),
     });
+    
     if (res.ok) {
+      console.log('[addToCart] Successfully added to cart, fetching updated cart');
       await fetchCart();
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      console.error('[addToCart] Failed to add to cart:', res.status, errorData);
+      throw new Error('Failed to add to cart');
     }
   };
 
@@ -137,6 +168,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const updateQuantity = async (id: string, quantity: number) => {
+    // Enforce min/max
+    const newQuantity = Math.max(1, Math.min(10, quantity));
     const token = localStorage.getItem('giftcraftToken');
     const res = await fetch('/api/auth/cart', {
       method: 'PUT',
@@ -144,7 +177,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ product: id, quantity }),
+      body: JSON.stringify({ product: id, quantity: newQuantity }),
     });
     if (res.ok) {
       await fetchCart();
