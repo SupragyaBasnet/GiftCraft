@@ -35,69 +35,83 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Fetch cart from backend
   const fetchCart = async () => {
     if (!user) return setCartItems([]);
+  
     const token = localStorage.getItem('giftcraftToken');
     const res = await fetch('/api/auth/cart', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (res.ok) {
-      const data = await res.json();
-      console.log('Raw cart data from backend:', data);
-      setCartItems(
-        data.map((item: any) => {
-          // If item.product exists, it's a normal product; else, it's a custom item
-          if (item.product) {
-            // Try to get image from backend, else from products array by _id, else by name+category, else fallback
-            let image = item.product.image;
-            let price = item.product.price;
-            let localProduct = products.find((p: Product) => String(p.id) === String(item.product._id));
-            if ((!image || typeof image !== 'string') && !localProduct) {
-              // Try by name+category
-              localProduct = products.find((p: Product) => p.name === item.product.name && p.category === item.product.category);
-            }
-            if (!image && localProduct) {
-              image = localProduct.image;
-            }
-            if ((typeof price !== 'number' || isNaN(price)) && localProduct) {
-              price = localProduct.price;
-            }
-            if (!image) {
-              image = '/placeholder.png';
-            }
-            if (typeof price !== 'number' || isNaN(price)) {
-              price = 0;
-              console.warn('Cart item has missing price:', item.product);
-            }
-            
-            return {
-              id: item.product._id,
-              cartItemId: item._id || item.customizationId,
-              name: item.product.name,
-              price,
-              image,
-              quantity: typeof item.product.quantity === 'number' && item.product.quantity > 0 ? item.product.quantity : 1,
-              category: item.product.category,
-              description: item.product.description,
-            };
-          } else {
-            // Customization item
-            return {
-              id: item.customizationId,
-              cartItemId: item.customizationId,
-              name: item.category ? `Custom ${item.category.charAt(0).toUpperCase() + item.category.slice(1)}` : 'Custom Product',
-              price: item.price,
-              image: item.image || '/placeholder.png',
-              quantity: item.quantity,
-              category: item.category,
-              description: 'Customized product',
-            };
-          }
-        })
-      );
-      console.log('Cart items after fetchCart:', data);
-    } else {
+  
+    if (!res.ok) {
+      console.error('Failed to fetch cart:', res.status);
       setCartItems([]);
+      return;
     }
+  
+    let data = await res.json();
+    console.log('Raw cart data from backend:', data);
+  
+    // 🆕 Merge duplicate products by product._id or customizationId
+    const mergedItems: Record<string, any> = {};
+  
+    data.forEach((item: any) => {
+      const productId = item.product?._id || item.customizationId;
+  
+      if (mergedItems[productId]) {
+        // Sum quantities if duplicate
+        mergedItems[productId].quantity += item.quantity;
+      } else {
+        // Clone item into mergedItems
+        mergedItems[productId] = { ...item };
+      }
+    });
+  
+    const mergedData = Object.values(mergedItems);
+  
+    const mappedCartItems = mergedData.map((item: any) => {
+      if (item.product) {
+        const backendProduct = item.product;
+  
+        // Get fallback image and price from local products array
+        const localProduct = products.find(
+          (p: Product) => String(p.id) === String(backendProduct._id)
+        ) || products.find(
+          (p: Product) => p.name === backendProduct.name && p.category === backendProduct.category
+        );
+  
+        const image = backendProduct.image || localProduct?.image || '/placeholder.png';
+        const price = backendProduct.price ?? localProduct?.price ?? 0;
+  
+        return {
+          id: backendProduct._id,
+          cartItemId: item._id || item.customizationId,
+          name: backendProduct.name,
+          price,
+          image,
+          quantity: item.quantity,
+          category: backendProduct.category,
+          description: backendProduct.description,
+        };
+      } else {
+        // Handle customization items
+        return {
+          id: item.customizationId,
+          cartItemId: item.customizationId,
+          name: item.category
+            ? `Custom ${item.category.charAt(0).toUpperCase() + item.category.slice(1)}`
+            : 'Custom Product',
+          price: item.price,
+          image: item.image || '/placeholder.png',
+          quantity: item.quantity,
+          category: item.category,
+          description: 'Customized product',
+        };
+      }
+    });
+  
+    setCartItems(mappedCartItems);
+    console.log('Cart items after merging duplicates:', mappedCartItems);
   };
+  
 
   useEffect(() => {
     fetchCart();
