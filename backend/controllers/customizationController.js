@@ -119,14 +119,25 @@ exports.addToCartCustom = async (req, res) => {
     if (!customizationId || !category || !customization || typeof price !== 'number') {
       return res.status(400).json({ message: 'Missing required customization fields.' });
     }
-    // Optionally: validate price using your own logic for the category and customization
-    // For now, just accept the price as sent from frontend
+    // Derive a name for the custom product
+    const name = customization.productType
+      ? `${customization.productType.charAt(0).toUpperCase() + customization.productType.slice(1)}`
+      : 'Custom Product';
     // Check for existing item with same customizationId
     const existingItem = user.cart.find(item => item.customizationId === customizationId);
     if (existingItem) {
       existingItem.quantity += quantity || 1;
     } else {
-      user.cart.push({ customizationId, category, customization, price, image, quantity: quantity || 1 });
+      user.cart.push({
+        customizationId,
+        category,
+        customization,
+        price,
+        image,
+        quantity: quantity || 1,
+        name,
+        type: 'custom'
+      });
     }
     await user.save();
     res.json(user.cart);

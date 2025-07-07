@@ -223,13 +223,34 @@ exports.getCart = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate('cart.product');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    console.log('[getCart] User:', req.user.id, 'Cart:', user.cart);
-    console.log('[getCart] Cart items with populated products:', user.cart.map(item => ({
-      product: item.product ? { _id: item.product._id, name: item.product.name } : null,
-      quantity: item.quantity,
-      customizationId: item.customizationId
-    })));
-    res.json(user.cart);
+
+    const cartWithType = user.cart.map(item => {
+      if (item.customizationId) {
+        return {
+          ...item.toObject(),
+          type: 'custom',
+          product: null,
+          customization: item.customization,
+          customizationId: item.customizationId,
+          price: item.price,
+          image: item.image,
+          quantity: item.quantity,
+        };
+      } else {
+        return {
+          ...item.toObject(),
+          type: 'normal',
+          product: item.product,
+          customization: null,
+          customizationId: null,
+          price: item.price,
+          image: item.image,
+          quantity: item.quantity,
+        };
+      }
+    });
+
+    res.json(cartWithType);
   } catch (err) {
     console.error('[getCart] Error:', err);
     res.status(500).json({ message: 'Server error' });
