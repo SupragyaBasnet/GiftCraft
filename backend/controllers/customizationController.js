@@ -123,21 +123,25 @@ exports.addToCartCustom = async (req, res) => {
     const name = customization.productType
       ? `${customization.productType.charAt(0).toUpperCase() + customization.productType.slice(1)}`
       : 'Custom Product';
+    // Build the cart item and ensure no product field is present
+    const cartItem = {
+      customizationId,
+      category,
+      customization,
+      price,
+      image,
+      quantity: quantity || 1,
+      name,
+      type: 'custom'
+    };
+    // Defensive: remove product field if present in req.body
+    if ('product' in cartItem) delete cartItem.product;
     // Check for existing item with same customizationId
     const existingItem = user.cart.find(item => item.customizationId === customizationId);
     if (existingItem) {
       existingItem.quantity += quantity || 1;
     } else {
-      user.cart.push({
-        customizationId,
-        category,
-        customization,
-        price,
-        image,
-        quantity: quantity || 1,
-        name,
-        type: 'custom'
-      });
+      user.cart.push(cartItem);
     }
     await user.save();
     res.json(user.cart);
