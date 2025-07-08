@@ -55,9 +55,18 @@ exports.deleteProduct = async (req, res) => {
 
 exports.placeOrder = async (req, res) => {
   try {
-    const { items, total, address, paymentMethod } = req.body;
-    const userId = req.user.id;
-    // Validate items
+    let { items, total, address, paymentMethod } = req.body;
+
+    // Clean items: remove product field from custom items
+    items = items.map(item => {
+      if (item.type === 'custom' || item.customizationId) {
+        const { product, ...rest } = item;
+        return rest;
+      }
+      return item;
+    });
+
+    // Now validate cleaned items
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: 'No items to order.' });
     }
@@ -69,8 +78,9 @@ exports.placeOrder = async (req, res) => {
         return res.status(400).json({ message: 'Each item must have quantity and price.' });
       }
     }
+
     // Store all fields as received (product, customizationId, customization, image, name, quantity, price)
-    const order = new Order({ user: userId, items, total, address, paymentMethod });
+    const order = new Order({ user: req.user.id, items, total, address, paymentMethod });
     await order.save();
     res.status(201).json(order);
   } catch (err) {
