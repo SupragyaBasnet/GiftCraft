@@ -119,10 +119,21 @@ const Profile: React.FC = () => {
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setTab(newValue);
 
   // Address handlers
-  // Update the handleDeleteAddress to remove from the state array
+  // Update the handleDeleteAddress to remove from the state array and save to localStorage
   const handleDeleteAddress = (addressToDelete: string) => {
-    setAddresses(addresses.filter(addr => addr !== addressToDelete));
+    const updatedAddresses = addresses.filter(addr => addr !== addressToDelete);
+    setAddresses(updatedAddresses);
+    localStorage.setItem('giftcraftAddresses', JSON.stringify(updatedAddresses));
     setSnackbar({open: true, message: 'Address removed from list', severity: 'success'});
+  };
+
+  // Add address handler
+  const handleAddAddress = (newAddress: string) => {
+    if (!newAddress.trim()) return;
+    const updatedAddresses = [...addresses, newAddress];
+    setAddresses(updatedAddresses);
+    localStorage.setItem('giftcraftAddresses', JSON.stringify(updatedAddresses));
+    setSnackbar({open: true, message: 'Address added!', severity: 'success'});
   };
 
   // Profile update handler (mock)
@@ -296,33 +307,29 @@ const Profile: React.FC = () => {
     );
   }
 
-  // Fetch order history from backend when Orders tab is selected
+  // Load order history and addresses from localStorage on mount
   useEffect(() => {
-    if (tab === 1) {
-      const fetchOrders = async () => {
-        try {
-          const res = await fetch('/api/products/orders', {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
-            },
-          });
-          const data = await res.json();
-          if (res.ok) {
-            setOrderHistory(data);
-            // Extract unique addresses from backend order history
-            const uniqueAddresses = Array.from(new Set(data
-              .filter((order: any) => order.address)
-              .map((order: any) => order.address as string)
-            ));
-            setAddresses(uniqueAddresses as string[]);
-          }
-        } catch (err) {
-          // Optionally handle error
-        }
-      };
-      fetchOrders();
+    // Load order history
+    const storedOrderHistory = localStorage.getItem('giftcraftOrderHistory');
+    let orders = [];
+    if (storedOrderHistory) {
+      try {
+        orders = JSON.parse(storedOrderHistory);
+        setOrderHistory(orders);
+      } catch (e) {
+        setOrderHistory([]);
+      }
     }
-  }, [tab]);
+    // Extract unique addresses from order history
+    const uniqueAddresses = Array.from(
+      new Set(
+        orders
+          .map((order: any) => order.address)
+          .filter((address: string) => !!address)
+      )
+    );
+    setAddresses(uniqueAddresses);
+  }, []);
 
   // Remove handleSubmitReview's localStorage logic
   const handleSubmitReview = () => {
@@ -850,6 +857,8 @@ const Profile: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+   
     </Container>
   );
 };
