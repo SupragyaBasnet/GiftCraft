@@ -1,3 +1,4 @@
+import { Add, Remove } from "@mui/icons-material";
 import BrushIcon from '@mui/icons-material/Brush';
 import ClearIcon from '@mui/icons-material/Clear';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -8,15 +9,14 @@ import SaveIcon from '@mui/icons-material/Save';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import UndoIcon from '@mui/icons-material/Undo';
 import {
-  Box, Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, Slider, Tooltip, Typography, TextField
+  Box, Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, Slider, Tooltip, Typography
 } from '@mui/material';
 import { fabric } from 'fabric';
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import planewhiteframe from '../assets/planewhiteframe.jpg';
 import planewhitemug from '../assets/planewhitemug.jpg';
 import planewhiteshirt from '../assets/planewhiteshirt.webp';
-import { Add, Remove } from "@mui/icons-material";
-import { useParams, useNavigate } from 'react-router-dom';
 import { products } from '../data/products';
 
 const sizes = ['S', 'M', 'L', 'XL', 'XXL'];

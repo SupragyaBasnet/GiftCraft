@@ -13,6 +13,7 @@ interface CartItem {
   image: string;
   category?: string;
   description?: string;
+  type?: string; // Added for custom products
 }
 
 interface CartContextType {
@@ -90,6 +91,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           quantity: item.quantity,
           category: backendProduct.category,
           description: backendProduct.description,
+          customization: null,
+          customizationId: null,
+          type: 'normal',
         };
       } else {
         // Handle customization items
@@ -104,6 +108,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           quantity: item.quantity,
           category: item.category,
           description: 'Customized product',
+          customization: item.customization || null,
+          customizationId: item.customizationId,
+          type: 'custom',
         };
       }
     });
@@ -122,16 +129,35 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const token = localStorage.getItem('giftcraftToken');
     let productId = item.id;
     let cartItemId;
-    // If not a valid ObjectId, treat as customization
-    if (!/^[a-fA-F0-9]{24}$/.test(productId)) {
-      // Customization: use customizationId as cartItemId
-      cartItemId = item.customizationId;
-    } else {
-      // Normal product: use productId-Date.now()
-      cartItemId = `${productId}-${Date.now()}`;
+    // If this is a custom product (type: 'custom' or has customizationId), use the custom endpoint
+    if (item.type === 'custom' || item.customizationId) {
+      const payload = {
+        customizationId: item.customizationId,
+        category: item.category,
+        customization: item.customization,
+        price: item.price,
+        image: item.image,
+        quantity,
+        name: item.name,
+        type: 'custom',
+      };
+      const res = await fetch('/api/auth/customization/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await fetchCart();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('[addToCart] Failed to add custom product to cart:', res.status, errorData);
+        throw new Error('Failed to add custom product to cart');
+      }
+      return;
     }
-    
-    console.log('[addToCart] Adding item:', item, 'with quantity:', quantity);
     
     // If not a valid ObjectId, call add-or-get endpoint
     if (!/^[a-fA-F0-9]{24}$/.test(productId)) {

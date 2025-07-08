@@ -15,8 +15,7 @@ import {
   Alert,
   Box,
   Button,
-  Container, Grid, IconButton,
-  MenuItem,
+  Container, FormControl, Grid, IconButton, InputLabel, MenuItem,
   Paper,
   Popover,
   Select,
@@ -25,18 +24,18 @@ import {
   Tabs,
   TextField,
   ToggleButton,
-  ToggleButtonGroup, Tooltip, Typography, FormControl, InputLabel
+  ToggleButtonGroup, Tooltip, Typography
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
-import React, { useEffect, useState, useRef } from "react";
+import html2canvas from 'html2canvas';
+import React, { useEffect, useState } from "react";
 import CanvasDraw from "react-canvas-draw";
 import { ChromePicker, ColorResult } from "react-color";
 import { Rnd } from "react-rnd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from '../context/CartContext';
 import { products } from '../data/products';
-import html2canvas from 'html2canvas';
 
 // Import product images from products directory
 import frame1 from "../assets/products/frame1.jpg";
@@ -50,7 +49,7 @@ import penFront from "../assets/products/planepen.png";
 import planepen1 from "../assets/products/planepen1.jpg";
 import mugSideImage from "../assets/products/side-mug.png";
 import tshirtBack from "../assets/products/whitetshirt-back.png";
-import tshirtFront from "../assets/products/whitetshirt-front.jpg";
+import tshirtFront from "../assets/products/whitetshirtfront.png";
 
 // Import the three new water bottle images
 import bottle1White from "../assets/products/bottle-white1.png";
@@ -75,13 +74,13 @@ import starshapedBack from "../assets/products/starshaped-back.jpg";
 
 
 import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
+import phonecaseiphone10 from "../assets/products/phonecaseiphone10.jpg";
+import phonecaseiphone11 from "../assets/products/phonecaseiphone11.jpg";
+import phonecaseiphone12 from "../assets/products/phonecaseiphone12.jpg";
 import phonecaseiphone13promax from "../assets/products/phonecaseiphone13promax and 12 pro max.jpg";
 import phonecaseiphone14 from "../assets/products/phonecaseiphone14.jpg";
 import phonecases21ultra from "../assets/products/phonecases21ultra.jpg";
 import phonecases23ultra from "../assets/products/phonecases23 ultra.jpg";
-import phonecaseiphone10 from "../assets/products/phonecaseiphone10.jpg";
-import phonecaseiphone11 from "../assets/products/phonecaseiphone11.jpg";
-import phonecaseiphone12 from "../assets/products/phonecaseiphone12.jpg";
 
 import keychainJpg from "../assets/products/keychain.jpg";
 import planemetalkeychain from "../assets/products/planemetalkeychain.jpg";

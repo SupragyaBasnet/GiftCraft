@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Paper, Button, TextField, Alert, Card, CardContent, CardActionArea, Dialog, DialogTitle, DialogContent, DialogActions, Rating } from '@mui/material';
-import { Payment as PaymentIcon, Save, Add, Remove } from '@mui/icons-material';
+import { Payment as PaymentIcon } from '@mui/icons-material';
+import { Alert, Box, Button, Card, CardActionArea, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Rating, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 // Import the new CustomizedProductImage component
-import CustomizedProductImage from '../components/CustomizedProductImage';
 
 // Import payment logos
 import esewaLogo from '../assets/esewa_logo.jpg'; // Assuming path and filename
-import khaltiLogo from '../assets/khalti_logo.png'; // Assuming path and filename
-import imepayLogo from '../assets/imepay_logo.jpg'; // Assuming path and filename
 
 // Simple client-side price map (placeholder) - Needed for calculating subtotal and delivery charge
 const productPrices: Record<string, number> = {
@@ -133,7 +130,7 @@ const CheckoutPage: React.FC = () => {
   const handleConfirmOrder = async () => {
     if (!validateAddress()) return;
     // Transform items for backend
-    const items = itemsToCheckout.map((item: any) => {
+    const items = await Promise.all(itemsToCheckout.map(async (item: any) => {
       if (item.type === 'custom') {
         return {
           customizationId: item.customizationId,
@@ -152,7 +149,7 @@ const CheckoutPage: React.FC = () => {
           name: item.product?.name || item.name,
         };
       }
-    });
+    }));
     if (selectedPaymentMethod === 'eSewa') {
       setIsRedirecting(true);
       try {
