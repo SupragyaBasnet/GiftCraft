@@ -2,11 +2,11 @@ import { Checkroom, DesignServices, Edit, EmojiEmotions, LocalCafe, MenuBook, Op
 import { Box, Button, Card, CardContent, Container, Grid, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import circleKeychain from '../assets/products/circle-keychain.png';
-import keychainLeather from '../assets/products/keychain-leather.jpg';
-import planemetalkeychain from '../assets/products/planemetalkeychain.jpg';
-import planewhitekeychain from '../assets/products/planewhitekeychain.jpg';
-import squareFront from '../assets/products/square-keychain.jpg';
-import starshapedBack from '../assets/products/starshaped-back.jpg';
+import keychainLeather from '../assets/products/keychain-leather.png';
+import planemetalkeychain from '../assets/products/planemetalkeychain.png';
+import planewhitekeychain from '../assets/products/planewhitekeychain.png';
+import squareFront from '../assets/products/square-keychain.png';
+import starshapedBack from '../assets/products/starshaped-back.png';
 import { products } from '../data/products';
 import ProductCustomize from './ProductCustomize';
 

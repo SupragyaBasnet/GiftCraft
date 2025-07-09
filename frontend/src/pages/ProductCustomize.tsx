@@ -38,55 +38,56 @@ import { useCart } from '../context/CartContext';
 import { products } from '../data/products';
 
 // Import product images from products directory
-import frame1 from "../assets/products/frame1.jpg";
-import frame2 from "../assets/products/frame2.jpg";
-import frame3 from "../assets/products/frame3.jpg";
-import frame4 from "../assets/products/frame4.jpg";
+import frame1 from "../assets/products/frame1.png";
+import frame2 from "../assets/products/frame2.png";
+import frame3 from "../assets/products/frame3.png";
+import frame4 from "../assets/products/frame4.png";
 import mugFrontImage from "../assets/products/front-mug.png";
-import notebookFront from "../assets/products/notebook.jpg";
-import notebookBack from "../assets/products/notebookback.jpeg";
+import notebookFront from "../assets/products/notebook.png";
+import notebookBack from "../assets/products/notebookback.png";
 import penFront from "../assets/products/planepen.png";
-import planepen1 from "../assets/products/planepen1.jpg";
+import planepen1 from "../assets/products/planepen1.png";
 import mugSideImage from "../assets/products/side-mug.png";
 import tshirtBack from "../assets/products/whitetshirt-back.png";
 import tshirtFront from "../assets/products/whitetshirtfront.png";
 
 // Import the three new water bottle images
 import bottle1White from "../assets/products/bottle-white1.png";
-import bottleWhite2 from "../assets/products/bottle-white2.jpg";
-import bottleWhite3 from "../assets/products/bottle-white3.jpg";
+import bottleWhite2 from "../assets/products/bottle-white2.png";
+import bottleWhite3 from "../assets/products/bottle-white3.png";
 
 // Import the three new keychain images
 import circleKeychain from "../assets/products/circle-keychain.png";
-import keychainLeather from "../assets/products/keychain-leather.jpg";
+import keychainLeather from "../assets/products/keychain-leather.png";
 
 // Import requested images from ../assets/
 
-import heartshapedFront from "../assets/products/heartshaped-front.jpg";
-import squareFront from "../assets/products/whitepillow-front.webp";
+import heartshapedFront from "../assets/products/heartshaped-front.png";
+import squareFront from "../assets/products/whitepillow-front.png";
 
 
-import circleshapedFront from "../assets/products/circleshaped-front.jpg";
-import starshapedBack from "../assets/products/starshaped-back.jpg";
+import circleshapedFront from "../assets/products/circleshaped-front.png";
+import starshapedBack from "../assets/products/starshaped-back.png";
 
 
 
 
 
-import phonecaseiphone8plus from "../assets/products/phonecaseiphone 8 plus.jpg";
-import phonecaseiphone10 from "../assets/products/phonecaseiphone10.jpg";
-import phonecaseiphone11 from "../assets/products/phonecaseiphone11.jpg";
-import phonecaseiphone12 from "../assets/products/phonecaseiphone12.jpg";
-import phonecaseiphone13promax from "../assets/products/phonecaseiphone13promax and 12 pro max.jpg";
-import phonecaseiphone14 from "../assets/products/phonecaseiphone14.jpg";
-import phonecases21ultra from "../assets/products/phonecases21ultra.jpg";
-import phonecases23ultra from "../assets/products/phonecases23 ultra.jpg";
 
-import keychainJpg from "../assets/products/keychain.jpg";
-import planemetalkeychain from "../assets/products/planemetalkeychain.jpg";
-import planemetalkeychain1 from "../assets/products/planemetalkeychain1.jpg";
-import planewhitecap from "../assets/products/planewhitecap.jpg";
-import planewhitekeychain from "../assets/products/planewhitekeychain.jpg";
+import phonecases21ultra from "../assets/products/phonecase21ultra.png";
+import phonecaseiphone10 from "../assets/products/phonecaseiphone10.png";
+import phonecaseiphone11 from "../assets/products/phonecaseiphone11.png";
+import phonecaseiphone12 from "../assets/products/phonecaseiphone12.png";
+import phonecaseiphone13promax from "../assets/products/phonecaseiphone13.png";
+import phonecaseiphone14 from "../assets/products/phonecaseiphone14.png";
+import phonecaseiphone8plus from "../assets/products/phonecaseiphone_8_plus.png";
+import phonecases23ultra from "../assets/products/phonecases23_ultra.png";
+
+import keychain from "../assets/products/keychain.png";
+import planemetalkeychain from "../assets/products/planemetalkeychain.png";
+import planemetalkeychain1 from "../assets/products/planemetalkeychain1.png";
+import planewhitekeychain from "../assets/products/planewhitekeychain.png";
+import planewhitecap from "../assets/products/whitecap1.png";
 
 // At the top of the file, add:
 
@@ -142,7 +143,7 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     frame4,
   ],
   keychain: [
-    keychainJpg,
+    keychain,
     planewhitekeychain,
     planemetalkeychain,
     planemetalkeychain1,
@@ -165,13 +166,15 @@ const productImages: Record<ProductType, ProductView | string[]> = {
   ],
   phonecase: [
     phonecaseiphone8plus,
-    phonecaseiphone13promax,
-    phonecaseiphone14,
-    phonecases21ultra,
-    phonecases23ultra,
+   
     phonecaseiphone10,
     phonecaseiphone11,
     phonecaseiphone12,
+    phonecaseiphone13promax,
+    phonecaseiphone14,
+    phonecases21ultra,
+    
+    phonecases23ultra,
   ],
   
 };
@@ -301,8 +304,8 @@ const toolsLibrary = [
   },
 ];
 
-// Dynamically import all PNG, JPG, JPEG, and WEBP images from the art folder (Vite way)
-const artModules = import.meta.glob("../assets/art/*.{png,jpg,jpeg,webp}", {
+// Dynamically import all PNG, .png, .png, and .png images from the art folder (Vite way)
+const artModules = import.meta.glob("../assets/art/*.{png,.png,.png,.png}", {
   eager: true,
 });
 const artImages = Object.entries(artModules).map(([path, mod]) => ({
@@ -323,11 +326,11 @@ const exampleArtImages = [
     label: "COLORFUL ABSTRACT",
   },
   {
-    src: "https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/1103970/pexels-photo-1103970.png?auto=compress&w=400",
     label: "PAINT SPLASH",
   },
   {
-    src: "https://images.pexels.com/photos/370799/pexels-photo-370799.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/370799/pexels-photo-370799.png?auto=compress&w=400",
     label: "MODERN ART",
   },
   {
@@ -339,7 +342,7 @@ const exampleArtImages = [
     label: "VIBRANT SPLASH",
   },
   {
-    src: "https://images.pexels.com/photos/459225/pexels-photo-459225.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/459225/pexels-photo-459225.png?auto=compress&w=400",
     label: "WATERCOLOR",
   },
   {
@@ -347,7 +350,7 @@ const exampleArtImages = [
     label: "ABSTRACT FACE",
   },
   {
-    src: "https://images.pexels.com/photos/1103971/pexels-photo-1103971.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/1103971/pexels-photo-1103971.png?auto=compress&w=400",
     label: "COLORFUL LINES",
   },
   {
@@ -355,7 +358,7 @@ const exampleArtImages = [
     label: "PASTEL ART",
   },
   {
-    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.png?auto=compress&w=400",
     label: "CANVAS PAINT",
   },
   // New galaxy, moon, glitter, and cosmic themed images
@@ -368,7 +371,7 @@ const exampleArtImages = [
     label: "MOON NIGHT",
   },
   {
-    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.png?auto=compress&w=400",
     label: "GLITTER CANVAS",
   },
   {
@@ -384,7 +387,7 @@ const exampleArtImages = [
     label: "MOONLIT NIGHT",
   },
   {
-    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.jpeg?auto=compress&w=400",
+    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.png?auto=compress&w=400",
     label: "SPARKLE ART",
   },
 ];
@@ -1559,10 +1562,10 @@ if (!currentImage) currentImage = baseImage;
       { name: 'Modern Pen', description: 'A modern pen with a stylish design.' },
     ],
     frame: [
-      { name: 'Golden Frame', description: 'A luxurious golden frame for your cherished memories.' },
-      { name: 'Black Frame', description: 'A bold black frame for a modern look.' },
-      { name: 'Wooden Frame', description: 'A warm wooden frame for a natural touch.' },
-      { name: 'Classic Frame', description: 'A timeless classic frame for any photo.' },
+      { name: 'White Plain Frame', description: 'A luxurious frame for your cherished memories.' },
+      { name: 'Square Retro Frame', description: 'A bold frame for a modern look.' },
+      { name: 'Circular Retro Frame', description: 'A warm frame for a natural touch.' },
+      { name: 'Circular 90s Frame', description: 'A timeless classic frame for any photo.' },
     ],
     phonecase: [
       { name: 'iPhone 8 Plus Phone Case', description: 'Premium case for iPhone 8 Plus.' },
@@ -1826,10 +1829,10 @@ if (!currentImage) currentImage = baseImage;
               }}
               sx={{ minWidth: 150 }}
             >
-              <MenuItem value={0}>Golden Frame</MenuItem>
-              <MenuItem value={1}>Black Frame</MenuItem>
-              <MenuItem value={2}>Wooden Frame</MenuItem>
-              <MenuItem value={3}>Classic Frame</MenuItem>
+              <MenuItem value={0}>White Plain Frame</MenuItem>
+              <MenuItem value={1}>Square Retro Frame</MenuItem>
+              <MenuItem value={2}>Circular Retro Frame</MenuItem>
+              <MenuItem value={3}>Circular 90s Frame</MenuItem>
             </TextField>
           )}
           {productType === "keychain" && (

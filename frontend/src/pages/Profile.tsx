@@ -100,6 +100,9 @@ const Profile: React.FC = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Add edit mode state
+  const [editMode, setEditMode] = useState(false);
+
   // Password strength validation
   const isStrongPassword = (password: string) => {
     // At least 8 characters, one uppercase, one lowercase, one number, one special character
@@ -107,13 +110,16 @@ const Profile: React.FC = () => {
   };
   const newPasswordError = newPassword && !isStrongPassword(newPassword);
 
-  // Sync local state with user when user changes
-  useEffect(() => {
+  // Only set local state in handleEdit
+  const handleEdit = () => {
     setName(user?.name || '');
     setEmail(user?.email || '');
     setPhone(user?.phone ? user.phone.replace(/^\+977/, '') : '');
-  }, [user]);
-  
+    setEditMode(true);
+  };
+  const handleCancelEdit = () => {
+    setEditMode(false);
+  };
 
   // Tab change handler
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setTab(newValue);
@@ -147,13 +153,13 @@ const Profile: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
         },
-        body: JSON.stringify({ name, phone: '+977' + phone }),
+        body: JSON.stringify({ name, email, phone: '+977' + phone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to update profile');
       setSnackbar({ open: true, message: 'Profile updated!', severity: 'success' });
-      // Update global user state only after successful save
-      setUser && setUser((prev: any) => ({ ...prev, name: data.name, phone: data.phone }));
+      setUser && setUser((prev: any) => ({ ...prev, name: data.name, email: data.email, phone: data.phone }));
+      setEditMode(false);
     } catch (err) {
       setSnackbar({ open: true, message: err instanceof Error ? err.message : 'Failed to update profile', severity: 'error' });
     }
@@ -311,30 +317,35 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchOrderHistory = async () => {
       try {
-        const token = localStorage.getItem('giftcraftToken');
-        const res = await fetch('/api/products/orders', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error('Failed to fetch order history');
-        const orders = await res.json();
-        setOrderHistory(orders);
-        // Extract unique addresses from orders
-        const uniqueAddresses = Array.from(
-          new Set(
-            orders
-              .map((order: any) => order.address)
-              .filter((address: string) => !!address)
-          )
-        );
-        setAddresses(uniqueAddresses as string[]);
+        // Try to get userId from localStorage
+        const userData = JSON.parse(localStorage.getItem('giftcraftUser') || '{}');
+        const userId = userData?._id || user?.id || user?.userId;
+        if (userId) {
+          const res = await fetch(`/api/products/orders?userId=${userId}`);
+          if (!res.ok) throw new Error('Failed to fetch order history');
+          const orders = await res.json();
+          setOrderHistory(orders);
+          // Extract unique addresses from orders
+          const uniqueAddresses = Array.from(
+            new Set(
+              orders
+                .map((order: any) => order.address)
+                .filter((address: string) => !!address)
+            )
+          );
+          setAddresses(uniqueAddresses as string[]);
+        } else {
+          setOrderHistory([]);
+          setAddresses([]);
+        }
       } catch (e) {
         setOrderHistory([]);
         setAddresses([]);
       }
     };
     fetchOrderHistory();
-  }, []);
-
+  }, [user]);
+  
   // Remove handleSubmitReview's localStorage logic
   const handleSubmitReview = () => {
     // In a real app, you would send this review and rating to your backend
@@ -396,6 +407,26 @@ const Profile: React.FC = () => {
     };
     fetchProfileImage();
   }, [setUser]);
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the name input when entering edit mode
+  useEffect(() => {
+    if (editMode && nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, [editMode]);
+
+  useEffect(() => {
+    console.log("Profile mounted");
+    return () => console.log("Profile unmounted");
+  }, []);
+
+  useEffect(() => {
+    console.log("user changed", user);
+  }, [user]);
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -478,6 +509,8 @@ const Profile: React.FC = () => {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   autoComplete="off"
+                  disabled={!editMode}
+                  inputRef={nameInputRef}
                 />
                 <TextField
                   margin="normal"
@@ -488,8 +521,10 @@ const Profile: React.FC = () => {
                   name="email"
                   type="text"
                   value={email}
-                  InputProps={{ readOnly: true }}
+                  onChange={e => setEmail(e.target.value)}
                   autoComplete="off"
+                  disabled={!editMode}
+                  inputRef={emailInputRef}
                 />
                 <TextField
                   margin="normal"
@@ -507,145 +542,72 @@ const Profile: React.FC = () => {
                     ),
                   }}
                   autoComplete="off"
+                  disabled={!editMode}
+                  inputRef={phoneInputRef}
                 />
-                <Button 
-                  type="submit" 
-                  size="small"
-                  variant="outlined"
-                  sx={{ 
-                    mt: 3, 
-                    mb: 2,
-                    color: 'rgb(255,106,106)',
-                    borderColor: 'rgb(255,106,106)',
-                    width: 'auto',
-                    alignSelf: 'flex-start',
-                    '&:hover': {
-                      color: 'rgb(255,106,106)',
-                      borderColor: 'rgb(255,106,106)',
-                      backgroundColor: 'rgba(255,106,106,0.08)',
-                    },
-                  }}
-                >
-                  Save Changes
-                </Button>
+                {!editMode ? (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    sx={{ mt: 3, mb: 2, color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', width: 'auto', alignSelf: 'flex-start', '&:hover': { color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', backgroundColor: 'rgba(255,106,106,0.08)' } }}
+                    onClick={handleEdit}
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <Box sx={{ display: 'flex', gap: 2, mt: 3, mb: 2 }}>
+                    <Button
+                      type="submit"
+                      size="small"
+                      variant="outlined"
+                      sx={{ color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', width: 'auto', alignSelf: 'flex-start', '&:hover': { color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', backgroundColor: 'rgba(255,106,106,0.08)' } }}
+                    >
+                      Save Changes
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="text"
+                      sx={{ color: '#888', alignSelf: 'flex-start' }}
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                )}
               </Box>
             </TabPanel>
             {/* Orders Tab */}
             <TabPanel value={tab} index={1}>
               <Typography variant="h5" fontWeight={700} gutterBottom>Order History</Typography>
               <Paper elevation={0} sx={{ p: 2, borderRadius: 3, background: '#fafbfc', boxShadow: 'none', mt: 2, maxHeight: 400, overflowY: 'auto' }}>
-                <List>
-                  {orderHistory.length === 0 ? (
-                    <Typography variant="body1" align="center">No orders found.</Typography>
-                  ) : (
-                    orderHistory.map((order) => (
-                      <React.Fragment key={order._id}>
-                        <ListItem button onClick={() => handleToggleExpand(order._id)}>
-                          <ListItemText
-                            primary={
-                              <Typography variant="body1" fontWeight={700}>Order ID: {order._id}</Typography>
-                            }
-                            secondary={
-                              <React.Fragment>
-                                <Typography component="span" variant="body2" color="text.primary">
-                                  Date: {new Date(order.createdAt).toLocaleDateString()}
-                                </Typography>
-                                <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'block' }}>
-                                  Total: Rs. {order.total}
-                                </Typography>
-                                <Typography component="span" variant="body2" color="text.secondary" sx={{ display: 'block' }}>
-                                  Status: {order.status}
-                                </Typography>
-                              </React.Fragment>
-                            }
-                          />
-                          {expandedOrder === order._id ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={expandedOrder === order._id} timeout="auto" unmountOnExit>
-                          <Box sx={{ pl: 4, pr: 2, pb: 2, borderBottom: '1px solid #eee' }}>
-                            <Typography variant="subtitle1" fontWeight={700} gutterBottom>Items:</Typography>
-                            {order.items && order.items.length > 0 ? (
-                              order.items.map((item: any, idx: number) => (
-                                <Box key={idx} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <Box sx={{ width: 60, height: 60, mr: 2 }}>
-                                  <CustomizedProductImage 
-                                      baseImage={item.product?.image || item.image || '/placeholder.png'}
-                                      elements={item.customization?.elements || []}
-                                      color={item.customization?.color || item.color || '#ffffff'}
-                                      productType={item.product?.category || item.category || item.productType}
-                                  />
-                                </Box>
-                                <Box>
-                                   <Typography variant="body2" fontWeight={600}>
-                                      {(item.product?.name || item.name || 'Product')}
-                                      {item.size ? ` - Size: ${item.size}` : ''}
-                                   </Typography>
-                                    <Typography variant="body2">Quantity: {item.quantity}</Typography>
-                                    <Typography variant="body2">Price: Rs. {item.price}</Typography>
-                                    {item.customization && (
-                                      <Typography variant="body2">Customized</Typography>
-                                    )}
-                                  </Box>
-                                </Box>
-                              ))
-                            ) : (
-                              <Typography variant="body2" color="error" sx={{ mb: 2 }}>
-                                Order item details missing.
-                              </Typography>
-                            )}
-                            {/* Display Address */}
-                            {order.address && (
-                              <Box sx={{ mt: 2 }}>
-                                <Typography variant="subtitle1" fontWeight={700}>Shipping Address:</Typography>
-                                <Typography variant="body2">{order.address}</Typography>
-                              </Box>
-                            )}
-                            {/* Display Review and Rating if available */}
-                            {order.review ? (
-                              <Box sx={{ mt: 2 }}>
-                                <Typography variant="subtitle1" fontWeight={700}>Your Review:</Typography>
-                                <Rating name="read-only-rating" value={order.rating} readOnly />
-                                <Typography variant="body2">{order.review}</Typography>
-                              </Box>
-                            ) : (
-                              <Button
-                                variant="contained"
-                                sx={{
-                                  mt: 2,
-                                  borderRadius: 2,
-                                  backgroundColor: 'rgb(255,106,106)',
-                                  color: '#fff',
-                                  fontWeight: 700,
-                                  boxShadow: 'none',
-                                  '&:hover': {
-                                    backgroundColor: 'rgb(230,86,86)',
-                                    boxShadow: 'none',
-                                  }
-                                }}
-                                onClick={() => handleOpenReviewModal(order._id)}
-                              >
-                                Leave a Review
-                              </Button>
-                            )}
-                            <Typography variant="subtitle1" fontWeight={700} gutterBottom sx={{ mt: 2 }}>Tracking:</Typography>
-                            {/* Display tracking information - Assuming 'tracking' in order object is an array */} {/* Mock Tracking data - Replace with real logic if needed */}
-                             <List dense disablePadding>
-                               {order.tracking && order.tracking.map((track: any, trackIndex: number) => (
-                                  <ListItem key={trackIndex} disableGutters>
-                                    <ListItemText
-                                       primary={<Typography variant="body2" fontWeight={trackIndex === order.tracking.length - 1 ? 700 : 400}>{track.status}</Typography>}
-                                       secondary={<Typography variant="caption" color="text.secondary">{new Date(track.date).toLocaleString()}</Typography>}
-                                    />
-                                  </ListItem>
-                               ))}
-                             </List>
-                          </Box>
-                        </Collapse>
-                        <Divider />
-                      </React.Fragment>
-                    ))
-                  )}
-                </List>
+                {orderHistory.length === 0 ? (
+                  <Typography variant="body1" align="center">No orders found.</Typography>
+                ) : (
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #eee' }}>
+                        <th style={{ padding: '8px' }}>Order #</th>
+                        <th style={{ padding: '8px' }}>Date</th>
+                        <th style={{ padding: '8px' }}>Status</th>
+                        <th style={{ padding: '8px' }}>Address</th>
+                        <th style={{ padding: '8px' }}>Payment</th>
+                        <th style={{ padding: '8px' }}>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orderHistory.map((order: any) => (
+                        <tr key={order._id} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '8px' }}>{order._id.slice(-6).toUpperCase()}</td>
+                          <td style={{ padding: '8px' }}>{new Date(order.createdAt).toLocaleDateString()}</td>
+                          <td style={{ padding: '8px' }}>{order.status || 'Confirmed'}</td>
+                          <td style={{ padding: '8px' }}>{order.address}</td>
+                          <td style={{ padding: '8px' }}>{order.paymentMethod}</td>
+                          <td style={{ padding: '8px' }}>Rs {order.total?.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </Paper>
             </TabPanel>
             {/* Addresses Tab */}
