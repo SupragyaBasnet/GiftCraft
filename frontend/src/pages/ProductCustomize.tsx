@@ -57,7 +57,7 @@ import bottleWhite2 from "../assets/products/bottle-white2.jpg";
 import bottleWhite3 from "../assets/products/bottle-white3.jpg";
 
 // Import the three new keychain images
-import circleKeychain from "../assets/products/circle-keychain.jpg";
+import circleKeychain from "../assets/products/circle-keychain.png";
 import keychainLeather from "../assets/products/keychain-leather.jpg";
 
 // Import requested images from ../assets/
@@ -1010,6 +1010,8 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
 
   const handleBuyNow = async () => {
     const previewImage = await exportPreviewImage();
+    // Always generate a new unique customizationId for each checkout
+    const newCustomizationId = `${productType}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
     // Build the customized item object
     const customItem = {
       customizationId: customizationId || Date.now().toString(),
@@ -1028,7 +1030,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
       image: previewImage || currentImage,
       quantity,
       price: calculateCustomizationPrice(basePrice, productType, {
-        customizationId,
+        customizationId: newCustomizationId,
         category,
         productType,
         type: selectedType,
@@ -1044,7 +1046,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
         image: previewImage || currentImage,
       }),
       total: calculateCustomizationPrice(basePrice, productType, {
-        customizationId,
+        customizationId: newCustomizationId,
         category,
         productType,
         type: selectedType,

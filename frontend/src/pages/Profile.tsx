@@ -307,28 +307,32 @@ const Profile: React.FC = () => {
     );
   }
 
-  // Load order history and addresses from localStorage on mount
+  // Load order history and addresses from backend on mount
   useEffect(() => {
-    // Load order history
-    const storedOrderHistory = localStorage.getItem('giftcraftOrderHistory');
-    let orders = [];
-    if (storedOrderHistory) {
+    const fetchOrderHistory = async () => {
       try {
-        orders = JSON.parse(storedOrderHistory);
+        const token = localStorage.getItem('giftcraftToken');
+        const res = await fetch('/api/products/orders', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Failed to fetch order history');
+        const orders = await res.json();
         setOrderHistory(orders);
+        // Extract unique addresses from orders
+        const uniqueAddresses = Array.from(
+          new Set(
+            orders
+              .map((order: any) => order.address)
+              .filter((address: string) => !!address)
+          )
+        );
+        setAddresses(uniqueAddresses as string[]);
       } catch (e) {
         setOrderHistory([]);
+        setAddresses([]);
       }
-    }
-    // Extract unique addresses from order history
-    const uniqueAddresses = Array.from(
-      new Set(
-        orders
-          .map((order: any) => order.address)
-          .filter((address: string) => !!address)
-      )
-    );
-    setAddresses(uniqueAddresses);
+    };
+    fetchOrderHistory();
   }, []);
 
   // Remove handleSubmitReview's localStorage logic

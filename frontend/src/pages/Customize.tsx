@@ -1,15 +1,14 @@
+import { Checkroom, DesignServices, Edit, EmojiEmotions, LocalCafe, MenuBook, Opacity, PhoneIphone, Photo, SportsBaseball, VpnKey } from '@mui/icons-material';
+import { Box, Button, Card, CardContent, Container, Grid, Typography } from '@mui/material';
 import React, { useState } from 'react';
-import { Container, Grid, Card, CardContent, Typography, Button, Box, CardMedia, IconButton } from '@mui/material';
-import { DesignServices, LocalCafe, Checkroom, PhoneIphone, Photo, Opacity, MenuBook, Edit, EmojiEmotions, SportsBaseball, VpnKey, ArrowBack } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
-import ProductCustomize from './ProductCustomize';
-import { products } from '../data/products';
-import circleKeychain from '../assets/products/circle-keychain.jpg';
-import squareFront from '../assets/products/square-keychain.jpg';
-import starshapedBack from '../assets/products/starshaped-back.jpg';
+import circleKeychain from '../assets/products/circle-keychain.png';
+import keychainLeather from '../assets/products/keychain-leather.jpg';
 import planemetalkeychain from '../assets/products/planemetalkeychain.jpg';
 import planewhitekeychain from '../assets/products/planewhitekeychain.jpg';
-import keychainLeather from '../assets/products/keychain-leather.jpg';
+import squareFront from '../assets/products/square-keychain.jpg';
+import starshapedBack from '../assets/products/starshaped-back.jpg';
+import { products } from '../data/products';
+import ProductCustomize from './ProductCustomize';
 
 const categoryIcons = {
   mugs: <LocalCafe sx={{ fontSize: 64, color: '#F46A6A' }} />,

@@ -78,9 +78,8 @@ const CartPage: React.FC = () => {
   };
 
   const handleBuyNow = () => {
-    // Save the entire cart to localStorage for checkout
-    localStorage.setItem('giftcraftCheckoutCart', JSON.stringify(cartItems));
-    navigate('/checkout');
+    // Navigate to checkout and pass cartItems as state
+    navigate('/checkout', { state: { items: cartItems } });
   };
 
   // Handle Buy Now for a single item

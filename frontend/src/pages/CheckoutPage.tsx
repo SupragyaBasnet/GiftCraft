@@ -128,10 +128,23 @@ const CheckoutPage: React.FC = () => {
 
   // Order confirmation logic
   const handleConfirmOrder = async () => {
-    if (!validateAddress()) return;
+    // Robust validation for required fields
+    if (!address.trim()) {
+      setAddressError('Address is required');
+      return;
+    }
+    if (!selectedPaymentMethod) {
+      setOrderConfirmedMessage('Please select a payment method.');
+      return;
+    }
     // Transform items for backend
     const items = await Promise.all(itemsToCheckout.map(async (item: any) => {
-      if (item.type === 'custom') {
+      // Fallback: treat as custom if customizationId is present
+      if (item.type === 'custom' || (!!item.customizationId && !item.product)) {
+        if (!item.customizationId || typeof item.quantity !== 'number' || typeof item.price !== 'number') {
+          setOrderConfirmedMessage('Custom item is missing required fields.');
+          throw new Error('Custom item missing required fields');
+        }
         return {
           customizationId: item.customizationId,
           customization: item.customization,
@@ -141,6 +154,10 @@ const CheckoutPage: React.FC = () => {
           name: item.customization?.productType || 'Custom Product',
         };
       } else {
+        if (!item.product?._id && !item.id && !item._id) {
+          setOrderConfirmedMessage('Product item is missing required fields.');
+          throw new Error('Product item missing required fields');
+        }
         return {
           product: item.product?._id || item.id || item._id,
           quantity: item.quantity,
@@ -150,27 +167,9 @@ const CheckoutPage: React.FC = () => {
         };
       }
     }));
-    if (selectedPaymentMethod === 'eSewa') {
-      setIsRedirecting(true);
-      try {
-        const singleItemId = itemsToCheckout.length === 1 ? itemsToCheckout[0].cartItemId : undefined;
-        const res = await fetch('/api/auth/payment/esewa/initiate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ total, orderId: items[0]?.product, singleItemId }),
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        } else {
-          setOrderConfirmedMessage('Failed to initiate eSewa payment.');
-          setIsRedirecting(false);
-        }
-      } catch (err) {
-        setOrderConfirmedMessage('Failed to initiate eSewa payment.');
-        setIsRedirecting(false);
-      }
+    // Validate total
+    if (typeof total !== 'number' || isNaN(total) || total <= 0) {
+      setOrderConfirmedMessage('Order total is invalid.');
       return;
     }
     try {
@@ -180,7 +179,7 @@ const CheckoutPage: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
         },
-        body: JSON.stringify({ items, total, address, paymentMethod: 'Cash on Delivery' }),
+        body: JSON.stringify({ items, total, address, paymentMethod: selectedPaymentMethod }),
       });
       if (!res.ok) throw new Error('Failed to place order');
       // Update cart context for COD before redirect
@@ -198,9 +197,8 @@ const CheckoutPage: React.FC = () => {
         await clearCart();
         navigate('/orderconfirmed');
       }
-      return;
     } catch (err) {
-      setOrderConfirmedMessage('Failed to place order. Please try again.');
+      setOrderConfirmedMessage('Failed to place order. Please check your details and try again.');
     }
   };
 
