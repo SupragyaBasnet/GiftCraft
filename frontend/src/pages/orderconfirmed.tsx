@@ -94,6 +94,7 @@ const OrderConfirmed: React.FC = () => {
           size="large" 
           sx={{ 
             mt: 2, 
+            fontWeight: 700,borderRadius: 7,width:200,
             backgroundColor: 'rgb(255,106,106)', 
             '&:hover': { backgroundColor: 'rgb(220,80,80)' } 
           }}

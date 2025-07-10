@@ -265,10 +265,20 @@ const CustomizeProduct: React.FC = () => {
             <Tooltip title="Clear"><IconButton><ClearIcon /></IconButton></Tooltip>
             <Tooltip title="Save"><IconButton><SaveIcon /></IconButton></Tooltip>
           </Paper>
-          <Button variant="contained" color="primary" onClick={handleAddToCart} sx={{ mt: 2, width: '100%' }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={handleAddToCart}
+            sx={{ mt: 2, fontWeight: 700, px: 3, py: 1.35, borderRadius: 7, width: 200, borderColor: 'rgb(255,106,106)', color: 'rgb(255,106,106)', '&:hover': { borderColor: 'rgb(255,100,100)', backgroundColor: 'rgba(220,80,80,0.04)' } }}
+          >
             Add to Cart
           </Button>
-          <Button variant="outlined" color="primary" onClick={handleBuyNow} sx={{ mt: 2, width: '100%' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleBuyNow}
+            sx={{ mt: 2, fontWeight: 700, borderRadius: 7, px: 3, py: 1.35, width: 200, backgroundColor: 'rgb(255,106,106)', '&:hover': { backgroundColor: 'rgb(220,80,80)' } }}
+          >
             Buy Now
           </Button>
         </Grid>

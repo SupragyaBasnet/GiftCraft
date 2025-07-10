@@ -294,7 +294,10 @@ const Profile: React.FC = () => {
 
   // Review modal handlers
   const handleOpenReviewModal = (orderId: string) => {
+    const order = orderHistory.find((o: any) => o._id === orderId);
     setReviewOrderId(orderId);
+    setReviewText(order?.review || '');
+    setReviewRating(order?.rating || null);
     setOpenReviewModal(true);
   };
   const handleCloseReviewModal = () => {
@@ -346,10 +349,26 @@ const Profile: React.FC = () => {
     fetchOrderHistory();
   }, [user]);
   
-  // Remove handleSubmitReview's localStorage logic
-  const handleSubmitReview = () => {
-    // In a real app, you would send this review and rating to your backend
-    handleCloseReviewModal();
+  // Update handleSubmitReview to call backend and update UI
+  const handleSubmitReview = async () => {
+    if (!reviewOrderId || !reviewText.trim() || !reviewRating) return;
+    try {
+      const res = await fetch(`/api/products/orders/${reviewOrderId}/review`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+        },
+        body: JSON.stringify({ review: reviewText, rating: reviewRating }),
+      });
+      const updatedOrder = await res.json();
+      if (!res.ok) throw new Error(updatedOrder.message || 'Failed to submit review');
+      setOrderHistory((prev) => prev.map((order: any) => order._id === updatedOrder._id ? updatedOrder : order));
+      setSnackbar({ open: true, message: 'Review submitted!', severity: 'success' });
+      handleCloseReviewModal();
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Failed to submit review', severity: 'error' });
+    }
   };
 
   // Change password handler
@@ -505,10 +524,10 @@ const Profile: React.FC = () => {
                   id="name"
                   label="Full Name"
                   name="name"
-                  type="text"
+                  // type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  autoComplete="off"
+                  autoComplete="name"
                   disabled={!editMode}
                   inputRef={nameInputRef}
                 />
@@ -519,10 +538,10 @@ const Profile: React.FC = () => {
                   id="email"
                   label="Email Address"
                   name="email"
-                  type="text"
+                  // type="text"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  autoComplete="off"
+                  autoComplete="email"
                   disabled={!editMode}
                   inputRef={emailInputRef}
                 />
@@ -533,7 +552,7 @@ const Profile: React.FC = () => {
                   id="phone"
                   label="Phone Number"
                   name="phone"
-                  type="text"
+                  // type="text"
                   value={phone}
                   onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   InputProps={{
@@ -541,7 +560,7 @@ const Profile: React.FC = () => {
                       <Box sx={{ mr: 1, color: 'text.secondary' }}>+977</Box>
                     ),
                   }}
-                  autoComplete="off"
+                  autoComplete="phone"
                   disabled={!editMode}
                   inputRef={phoneInputRef}
                 />
@@ -549,7 +568,7 @@ const Profile: React.FC = () => {
                   <Button
                     variant="outlined"
                     size="small"
-                    sx={{ mt: 3, mb: 2, color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', width: 'auto', alignSelf: 'flex-start', '&:hover': { color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', backgroundColor: 'rgba(255,106,106,0.08)' } }}
+                    sx={{ mt: 3, mb: 2,borderRadius: 7, color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', width: 'auto', alignSelf: 'flex-start', '&:hover': { color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', backgroundColor: 'rgba(255,106,106,0.08)' } }}
                     onClick={handleEdit}
                   >
                     Edit
@@ -560,14 +579,14 @@ const Profile: React.FC = () => {
                       type="submit"
                       size="small"
                       variant="outlined"
-                      sx={{ color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', width: 'auto', alignSelf: 'flex-start', '&:hover': { color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', backgroundColor: 'rgba(255,106,106,0.08)' } }}
+                      sx={{ borderRadius: 7,color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', width: 'auto', alignSelf: 'flex-start', '&:hover': { color: 'rgb(255,106,106)', borderColor: 'rgb(255,106,106)', backgroundColor: 'rgba(255,106,106,0.08)' } }}
                     >
                       Save Changes
                     </Button>
                     <Button
                       size="small"
                       variant="text"
-                      sx={{ color: '#888', alignSelf: 'flex-start' }}
+                      sx={{ borderRadius: 7,color: '#888', alignSelf: 'flex-start' }}
                       onClick={handleCancelEdit}
                     >
                       Cancel
@@ -592,6 +611,7 @@ const Profile: React.FC = () => {
                         <th style={{ padding: '8px' }}>Address</th>
                         <th style={{ padding: '8px' }}>Payment</th>
                         <th style={{ padding: '8px' }}>Total</th>
+                        <th style={{ padding: '8px' }}>Review</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -603,6 +623,24 @@ const Profile: React.FC = () => {
                           <td style={{ padding: '8px' }}>{order.address}</td>
                           <td style={{ padding: '8px' }}>{order.paymentMethod}</td>
                           <td style={{ padding: '8px' }}>Rs {order.total?.toFixed(2)}</td>
+                          <td style={{ padding: '8px' }}>
+                            {order.review && order.rating ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                <Rating value={order.rating} readOnly size="small" />
+                                <Typography variant="body2" sx={{ mt: 0.5 }}>{order.review}</Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                                  {order.createdAt ? `Reviewed on ${new Date(order.createdAt).toLocaleDateString()}` : ''}
+                                </Typography>
+                                <Button size="small" variant="text" sx={{ mt: 0.5 }} onClick={() => handleOpenReviewModal(order._id)}>
+                                  Edit Review
+                                </Button>
+                              </Box>
+                            ) : (
+                              <Button size="small" variant="outlined" onClick={() => handleOpenReviewModal(order._id)}>
+                                Leave Review
+                              </Button>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -706,8 +744,9 @@ const Profile: React.FC = () => {
                 <Button
                   variant="outlined"
                   sx={{
+                   
                     mt: 2,
-                    borderRadius: 2,
+                    borderRadius: 7,
                     fontWeight: 700,
                     color: 'rgb(255,106,106)',
                     borderColor: 'rgb(255,106,106)',

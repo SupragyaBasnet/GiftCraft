@@ -426,7 +426,7 @@ const CheckoutPage: React.FC = () => {
                   backgroundColor: 'rgb(255,106,106)',
                   '&:hover': { backgroundColor: 'rgb(220,80,80)' },
                   maxWidth: 320,
-                  width: '100%',
+                  fontWeight: 700,borderRadius: 7,width:200,
                   alignSelf: 'center'
                 }}
                 disabled={!isConfirmButtonEnabled || isRedirecting}

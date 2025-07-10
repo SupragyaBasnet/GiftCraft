@@ -275,14 +275,14 @@ const ProductDetails: React.FC = () => {
               color="inherit"
               size="small"
               onClick={handleAddToCart}
-              sx={{ mt: 1, fontWeight: 700, px: 4, borderColor: 'rgb(255,106,106)', color: 'rgb(255,106,106)', '&:hover': { borderColor: 'rgb(255,100,100)', backgroundColor: 'rgba(220,80,80,0.04)' } }}
+              sx={{ mt: 1, fontWeight: 700,px: 3, py: 1.35, borderRadius: 7,width: 200, borderColor: 'rgb(255,106,106)', color: 'rgb(255,106,106)', '&:hover': { borderColor: 'rgb(255,100,100)', backgroundColor: 'rgba(220,80,80,0.20)' } }}
             >
               ADD TO CART
             </Button>
             <Button
               variant="contained"
               color="primary"
-              sx={{ mt: 1, backgroundColor: 'rgb(255,106,106)', '&:hover': { backgroundColor: 'rgb(220,80,80)' } }}
+              sx={{ mt: 1, fontWeight: 700,borderRadius: 7,px: 3, py: 1.35,width: 200, backgroundColor: 'rgb(255,106,106)', '&:hover': { backgroundColor: 'rgb(220,80,80)' } }}
               size="small"
               onClick={() => {
                 if (!product._id) {
@@ -293,7 +293,7 @@ const ProductDetails: React.FC = () => {
                   { state: { items: [{ ...product, _id: product._id, quantity, price: product.price, total: product.price * quantity }] } });
               }}
             >
-              Proceed to Checkout
+              Buy Now
             </Button>
           </Box>
         </Grid>

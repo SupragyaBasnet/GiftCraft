@@ -3142,52 +3142,53 @@ if (!currentImage) currentImage = baseImage;
         {/* Add to Cart and Buy Now buttons at the bottom */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
           <Button
-            variant="contained"
-            color="primary"
+          variant="outlined"
+            
             startIcon={<ShoppingCart />}
             onClick={handleAddToCartCustom}
             disabled={!isSaved}
             sx={{
-              minWidth: 180,
-              height: 48,
+              borderRadius: 50,
+              px: 4,
+              py: 1.5,
               fontWeight: 700,
-              bgcolor: '#e16a6a',
-              color: 'white',
-              boxShadow: 2,
+              minWidth: 200,
+              height: 48,
+              color: 'rgb(255,106,106)',
+              borderColor: 'rgb(255,106,106)',
+              backgroundColor: 'white',
               '&:hover': {
-                bgcolor: '#c94b4b',
+                backgroundColor: 'rgba(220,80,80,0.30)',
+                borderColor: 'rgb(255,100,100)',
+                color: 'rgb(220,80,80)',
               },
-              borderRadius: 2,
-              fontSize: '1rem',
             }}
             title={!isSaved ? 'Please save your customization first' : ''}
           >
             Add to Cart
           </Button>
           <Button
-            variant="outlined"
-            color="primary"
+            variant="contained"
             onClick={handleBuyNow}
             disabled={!isSaved}
             sx={{
-              minWidth: 180,
-              height: 48,
+              borderRadius: 50,
+              px: 4,
+              py: 1.5,
               fontWeight: 700,
-              color: '#e16a6a',
-              borderColor: '#e16a6a',
-              background: 'white',
+              minWidth: 200,
+              height: 48,
+              color: 'white',
+              backgroundColor: 'rgb(255,106,106)',
               '&:hover': {
+                backgroundColor: 'rgb(220,80,80)',
                 color: 'white',
-                background: '#e16a6a',
-                borderColor: '#c94b4b',
+              
               },
-              borderRadius: 2,
-              fontSize: '1rem',
             }}
             title={!isSaved ? 'Please save your customization first' : ''}
           >
-            PROCEED TO CHECKOUT
-            
+            Buy Now
           </Button>
         </Box>
       </Paper>

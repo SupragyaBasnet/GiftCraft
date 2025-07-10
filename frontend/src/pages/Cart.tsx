@@ -36,8 +36,10 @@ const Cart: React.FC = () => {
           component={RouterLink}
           to="/products"
           sx={{
-            backgroundColor: 'rgb(206,106,106)',
-            '&:hover': { backgroundColor: 'rgb(176,86,86)' }
+            
+            fontWeight: 700,borderRadius: 7,width:200,
+            backgroundColor: 'rgb(255,106,106)', 
+            '&:hover': { backgroundColor: 'rgb(220,80,80)' } 
           }}
         >
           Browse Products
@@ -109,13 +111,14 @@ const Cart: React.FC = () => {
                         color="primary"
                         sx={{
                           mt: 1,
+                          fontWeight: 700,borderRadius: 7,width:150,
                           backgroundColor: 'rgb(255,106,106)',
                           '&:hover': { backgroundColor: 'rgb(220,80,80)' }
                         }}
                         size="small"
                         onClick={() => navigate('/checkout?singleItemId=' + (item.cartItemId || item.id), { state: { items: [{ ...item, total: item.price * item.quantity }] } })}
                       >
-                        Proceed to Checkout
+                        Buy Now
                       </Button>
                     </Grid>
                     <Grid item xs={12} sm={3}>
@@ -180,11 +183,12 @@ const Cart: React.FC = () => {
                 component={RouterLink}
                 to="/checkout"
                 sx={{
+                  fontWeight: 700,borderRadius: 7,
                   backgroundColor: 'rgb(255,106,106)',
                   '&:hover': { backgroundColor: 'rgb(220,80,80)' }
                 }}
               >
-                Proceed to Checkout
+               Buy Now
               </Button>
             </CardContent>
           </Card>
