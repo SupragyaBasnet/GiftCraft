@@ -151,7 +151,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       if (res.ok) {
         await fetchCart();
-      } else {
+    } else {
         const errorData = await res.json().catch(() => ({}));
         console.error('[addToCart] Failed to add custom product to cart:', res.status, errorData);
         throw new Error('Failed to add custom product to cart');

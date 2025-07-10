@@ -23,9 +23,9 @@ const ProfileOrders: React.FC = () => {
     fetchOrderHistory();
   }, [token]);
 
-
   return (
-    <Paper elevation={0} sx={{ p: 2, borderRadius: 3, background: '#fafbfc', boxShadow: 'none', mt: 2, maxHeight: 400, overflowY: 'auto' }}>
+    
+    <Paper sx={{ borderRadius: 5, p: 4, minWidth: 350, maxWidth: 520, minHeight: 510, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', mx: 'auto', width: '100%' }}>
       <Typography variant="h5" fontWeight={700} gutterBottom>Order History</Typography>
       {orderHistory.length === 0 ? (
         <Typography variant="body1" align="center">No orders found.</Typography>

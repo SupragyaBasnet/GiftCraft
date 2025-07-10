@@ -15,7 +15,6 @@ import Login from './pages/Login';
 import ProductCustomize from './pages/ProductCustomize';
 import ProductDetails from './pages/ProductDetails';
 import Products from './pages/Products';
-import Profile from './pages/Profile';
 import Register from './pages/Register';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -28,6 +27,12 @@ import PaymentSuccess from './pages/payment-success';
 import PaymentFailure from './pages/payment-failure';
 import OrderConfirmed from './pages/orderconfirmed';
 import Customize from './pages/Customize';
+import ProfileLayout from './pages/ProfileLayout';
+import ProfileImage from './pages/ProfileImage';
+import ProfileOverview from './pages/ProfileOverview';
+import ProfileOrders from './pages/ProfileOrders';
+import ProfileAddresses from './pages/ProfileAddresses';
+import ProfileSettings from './pages/ProfileSettings';
 
 const theme = createTheme({
   palette: {
@@ -84,13 +89,20 @@ const App: React.FC = () => {
                     }
                   />
                   <Route
-                    path="/profile"
+                    path="/profile/*"
                     element={
                       <PrivateRoute>
-                        <Profile />
+                        <ProfileLayout />
                       </PrivateRoute>
                     }
-                  />
+                  >
+                    <Route index element={<Navigate to="info" replace />} />
+                    <Route path="image" element={<ProfileImage />} />
+                    <Route path="info" element={<ProfileOverview />} />
+                    <Route path="orders" element={<ProfileOrders />} />
+                    <Route path="addresses" element={<ProfileAddresses />} />
+                    <Route path="settings" element={<ProfileSettings />} />
+                  </Route>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />

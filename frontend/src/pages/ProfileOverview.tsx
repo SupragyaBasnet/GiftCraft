@@ -40,8 +40,8 @@ const ProfileOverview: React.FC = () => {
   };
 
   return (
-    <Paper sx={{ p: 4, borderRadius: 4, maxWidth: 400, mx: 'auto', mt: 6 }}>
-      <Typography variant="h5" align="center" gutterBottom>Profile Overview</Typography>
+    <Paper sx={{ borderRadius: 5, p: 4, minWidth: 350, maxWidth: 520, minHeight: 510, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', mx: 'auto', width: '100%' }}>
+      <Typography variant="h5" fontWeight={700} gutterBottom>Profile Overview</Typography>
       <Box component="form" onSubmit={handleProfileSubmit}>
         <TextField
           margin="normal"
@@ -77,20 +77,46 @@ const ProfileOverview: React.FC = () => {
           }}
         />
         {!editMode ? (
+                    
           <Button
             variant="outlined"
-            sx={{ mt: 3 }}
+            sx={{
+              display: 'flex', justifyContent: 'center', mt: 3,
+              color: 'rgb(255,106,106)',
+              borderColor: 'rgb(255,106,106)',
+              
+              borderRadius: 50,
+              px: 4,
+              fontWeight: 700,
+              width:200,
+              textTransform: 'uppercase',
+              mx: 'auto',
+              '&:hover': {
+                color: 'white',
+                backgroundColor: 'rgb(255,106,106)',
+                borderColor: 'rgb(255,106,106)',
+              },
+            }}
             onClick={handleEdit}
             fullWidth
           >
-            Edit
+            EDIT
           </Button>
+         
         ) : (
           <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
             <Button
               type="submit"
               variant="contained"
-              color="primary"
+              sx={{
+                backgroundColor: 'rgb(255,106,106)',
+                color: 'white',
+                borderRadius: 50,
+                px: 4,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                '&:hover': { backgroundColor: 'rgb(220,80,80)' },
+              }}
               fullWidth
             >
               Save Changes
@@ -99,6 +125,12 @@ const ProfileOverview: React.FC = () => {
               variant="text"
               color="secondary"
               onClick={handleCancelEdit}
+              sx={{
+                borderRadius: 50,
+                px: 4,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+              }}
               fullWidth
             >
               Cancel

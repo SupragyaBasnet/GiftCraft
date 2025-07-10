@@ -46,8 +46,8 @@ const ProfileSettings: React.FC = () => {
   };
 
   return (
-    <Paper sx={{ p: 4, borderRadius: 4, maxWidth: 400, mx: 'auto', mt: 6 }}>
-      <Typography variant="h5" gutterBottom>Account Settings</Typography>
+    <Paper sx={{ borderRadius: 5, p: 4, minWidth: 350, maxWidth: 515, minHeight: 510, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', mx: 'auto', width: '100%' }}>
+      <Typography variant="h5" fontWeight={700} gutterBottom>Account Settings</Typography>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mt: 2, mb: 2 }}>
           Change Password
@@ -118,12 +118,17 @@ const ProfileSettings: React.FC = () => {
             ),
           }}
         />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
         <Button
           variant="outlined"
           sx={{
             mt: 2,
-            borderRadius: 2,
+            display: 'flex', justifyContent: 'center',
+            borderRadius: 50,
+            px: 4,
             fontWeight: 700,
+            height:40,
+            textTransform: 'uppercase',
             color: 'rgb(255,106,106)',
             borderColor: 'rgb(255,106,106)',
             '&:hover': {
@@ -137,6 +142,7 @@ const ProfileSettings: React.FC = () => {
         >
           Change Password
         </Button>
+        </Box>
       </Box>
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
