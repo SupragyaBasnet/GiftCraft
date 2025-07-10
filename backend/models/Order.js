@@ -18,6 +18,8 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   address: { type: String, required: true },
   paymentMethod: { type: String, required: true },
+  review: { type: String },
+  rating: { type: Number, min: 1, max: 5 },
 });
 
 module.exports = mongoose.model('Order', orderSchema); 

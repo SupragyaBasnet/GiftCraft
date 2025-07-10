@@ -88,19 +88,56 @@ exports.placeOrder = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+// exports.getUserOrders = async (req, res) => {
+//   console.log('getUserOrders called for user:', req.user);
+//   try {
+//     const userId = req.user.id;
+//     const orders = await Order.find({ user: userId })
+//       .populate({
+//         path: 'items.product',
+//         select: 'name price image category',
+//         options: { strictPopulate: false },
+//       })
+//       .sort({ createdAt: -1 })
+//       .lean(); // make result plain JS object
+
+//     // Clean up orders to avoid frontend errors
+//     const cleanedOrders = orders.map(order => ({
+//       ...order,
+//       items: order.items.map(item => ({
+//         ...item,
+//         product: item.product || null, // fallback if product deleted
+//       })),
+//     }));
+
+//     res.json(cleanedOrders);
+//   } catch (err) {
+//     console.error('Get user orders error:', err);
+//     res.status(500).json({ message: 'Server error fetching orders' });
+//   }
+// };
+
+
 
 exports.getUserOrders = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const orders = await Order.find({ user: userId })
-      .populate('items.product')
-      .sort({ createdAt: -1 });
+    console.log('Fetching orders for user:', req.user.id);
+
+    const orders = await Order.find({ user: req.user.id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log('Orders fetched:', orders.length);
+
     res.json(orders);
   } catch (err) {
-    console.error('Get user orders error:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Full Error:', JSON.stringify(err, null, 2));
+    res.status(500).json({ message: 'Server error fetching orders', error: err.message });
   }
 };
+
+
+
 
 exports.deleteAllUserOrders = async (req, res) => {
   try {
