@@ -77,6 +77,36 @@ router.put('/orders/:orderId/review', auth, async (req, res) => {
       { new: true }
     );
     if (!order) return res.status(404).json({ message: 'Order not found or not yours.' });
+
+    // Update product rating and review count
+    if (order && order.items) {
+      for (const item of order.items) {
+        if (item.product) {
+          // Find all orders with a review for this product
+          const reviewedOrders = await Order.find({
+            'items.product': item.product,
+            rating: { $exists: true, $ne: null }
+          });
+          // Gather all ratings for this product
+          let ratings = [];
+          reviewedOrders.forEach(ord => {
+            ord.items.forEach(ordItem => {
+              if (ordItem.product && ordItem.product.toString() === item.product.toString() && ord.rating) {
+                ratings.push(ord.rating);
+              }
+            });
+          });
+          if (ratings.length > 0) {
+            const avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+            await Product.findByIdAndUpdate(item.product, {
+              rating: avgRating,
+              reviews: ratings.length
+            });
+          }
+        }
+      }
+    }
+
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
