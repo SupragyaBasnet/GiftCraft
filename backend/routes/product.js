@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken'); // Added missing import for jwt
 router.get('/', productController.getAllProducts);
 
 // Handle orders - supports both userId query parameter and authenticated requests
-router.get('/orders', async (req, res) => {
+router.get('/orders', auth, async (req, res) => {
   console.log('getting user orders - route hit');
   
   try {
