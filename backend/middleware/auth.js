@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded || { id: '686e6ec1aea22be77dd530ee', iat: 1752172683, exp: 1752777483 };
+    req.user = decoded;
     console.log('Auth middleware decoded user:', decoded);
     next();
   } catch (err) {

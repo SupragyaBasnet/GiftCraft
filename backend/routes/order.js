@@ -4,6 +4,40 @@ const auth = require('../middleware/auth');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 
+// Get all orders (admin only)
+router.get('/all', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Admin only' });
+  
+  try {
+    const orders = await Order.find()
+      .populate({
+        path: 'user',
+        select: 'name email phone',
+      })
+      .populate({
+        path: 'items.product',
+        select: 'name price image category',
+        options: { strictPopulate: false },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Clean up orders to avoid frontend errors
+    const cleanedOrders = orders.map(order => ({
+      ...order,
+      items: order.items.map(item => ({
+        ...item,
+        product: item.product || null, // fallback if product deleted
+      })),
+    }));
+
+    res.json(cleanedOrders);
+  } catch (err) {
+    console.error('Get all orders error:', err);
+    res.status(500).json({ message: 'Server error fetching all orders' });
+  }
+});
+
 // Get all orders for the logged-in user (with product info)
 router.get('/', auth, async (req, res) => {
   try {

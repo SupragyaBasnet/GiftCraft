@@ -5,15 +5,62 @@ const auth = require('../middleware/auth');
 const Product = require('../models/Product');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
+const jwt = require('jsonwebtoken'); // Added missing import for jwt
 
 router.get('/', productController.getAllProducts);
+
+// Handle orders - supports both userId query parameter and authenticated requests
+router.get('/orders', async (req, res) => {
+  console.log('getting user orders - route hit');
+  
+  try {
+    console.log('Order model:', typeof Order);
+    console.log('About to query database...');
+    
+    const orders = await Order.find({ user: req.user.id })
+      .populate({
+        path: 'items.product',
+        select: 'name price image category',
+        options: { strictPopulate: false },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log('Orders found:', orders.length);
+    console.log('First order:', orders[0]);
+
+    // Clean up orders to avoid frontend errors
+    const cleanedOrders = orders.map(order => ({
+      ...order,
+      items: order.items.map(item => ({
+        ...item,
+        product: item.product || null, // fallback if product deleted
+      })),
+    }));
+
+    console.log('Sending response with', cleanedOrders.length, 'orders');
+    res.json(cleanedOrders);
+  } catch (err) {
+    console.error('Get user orders error - Full error:', err);
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
+    res.status(500).json({ 
+      message: 'Server error fetching orders',
+      error: err.message 
+    });
+  }
+});
+
 router.get('/:id', productController.getProductById);
 router.post('/', auth, productController.createProduct);
 router.put('/:id', auth, productController.updateProduct);
 router.delete('/:id', auth, productController.deleteProduct);
 router.post('/order', auth, productController.placeOrder);
-router.get('/orders', auth, productController.getUserOrders);
+
 router.delete('/orders', auth, productController.deleteAllUserOrders);
+
+// Admin route for getting all orders
+router.get('/all-orders', auth, productController.getAllOrders);
 router.post('/add-or-get', productController.addOrGetProduct);
 
 // Add review to an order
@@ -52,28 +99,6 @@ router.get('/find', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
-});
-
-// // GET /api/products/orders?userId=...
-router.get('/orders', async (req, res, next) => {
-  if (req.query.userId) {
-    const { userId } = req.query;
-    console.log('Fetching orders for userId:', userId);
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      console.log('Invalid userId:', userId);
-      return res.status(400).json({ message: 'Invalid user ID' });
-    }
-    try {
-      const orders = await Order.find({ user: mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
-      console.log('Orders found:', orders);
-      return res.json(orders);
-    } catch (err) {
-      console.error('Order fetch error:', err.message, err.stack);
-
-      return res.status(500).json({ message: 'Server error' });
-    }
-  }
-  next(); // fall through to the authenticated route if no userId param
 });
 
 module.exports = router;
