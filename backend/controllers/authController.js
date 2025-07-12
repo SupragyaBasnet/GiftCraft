@@ -160,19 +160,39 @@ exports.resetPassword = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, phone } = req.body;
+    const { name, phone, email } = req.body;
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
+    let emailChanged = false;
     if (name) user.name = name;
     if (phone) user.phone = phone;
+    if (email && email !== user.email) {
+      // Check if new email is already taken
+      const existing = await User.findOne({ email });
+      if (existing && existing._id.toString() !== userId) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+      user.email = email;
+      emailChanged = true;
+    }
     await user.save();
-    res.json({
+    let response = {
       id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
       profileImage: user.profileImage,
-    });
+    };
+    if (emailChanged) {
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign(
+        { id: user._id, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET || "your_jwt_secret_here",
+        { expiresIn: '7d' }
+      );
+      response.token = token;
+    }
+    res.json(response);
   } catch (err) {
     console.error('Update profile error:', err);
     res.status(500).json({ message: 'Server error' });
@@ -189,7 +209,14 @@ exports.changePassword = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
     user.password = newPassword;
     await user.save();
-    res.json({ message: 'Password changed successfully' });
+    // Generate new token after password change
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET || "your_jwt_secret_here",
+      { expiresIn: '7d' }
+    );
+    res.json({ message: 'Password changed successfully', token });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -245,7 +272,7 @@ exports.getCart = async (req, res) => {
           customizationId: null,
           price: item.price,
           image: item.image,
-          quantity: item.quantity,
+      quantity: item.quantity,
         };
       }
     });

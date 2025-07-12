@@ -54,41 +54,26 @@ router.get('/find', async (req, res) => {
   }
 });
 
-// GET /api/products/orders?userId=...
-// router.get('/orders', async (req, res, next) => {
-//   if (req.query.userId) {
-//     const { userId } = req.query;
-//     console.log('Fetching orders for userId:', userId);
-//     if (!mongoose.Types.ObjectId.isValid(userId)) {
-//       console.log('Invalid userId:', userId);
-//       return res.status(400).json({ message: 'Invalid user ID' });
-//     }
-//     try {
-//       const orders = await Order.find({ user: mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
-//       console.log('Orders found:', orders);
-//       return res.json(orders);
-//     } catch (err) {
-//       console.error('Order fetch error:', err.message, err.stack);
+// // GET /api/products/orders?userId=...
+router.get('/orders', async (req, res, next) => {
+  if (req.query.userId) {
+    const { userId } = req.query;
+    console.log('Fetching orders for userId:', userId);
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Invalid userId:', userId);
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+    try {
+      const orders = await Order.find({ user: mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
+      console.log('Orders found:', orders);
+      return res.json(orders);
+    } catch (err) {
+      console.error('Order fetch error:', err.message, err.stack);
 
-//       return res.status(500).json({ message: 'Server error' });
-//     }
-//   }
-//   next(); // fall through to the authenticated route if no userId param
-// });
-
-
-
-router.get('/orders', auth, async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (err) {
-    console.error('Order fetch error:', err.message, err.stack);
-    res.status(500).json({ message: 'Server error' });
+      return res.status(500).json({ message: 'Server error' });
+    }
   }
+  next(); // fall through to the authenticated route if no userId param
 });
-module.exports = router; 
 
-
-
-
+module.exports = router;

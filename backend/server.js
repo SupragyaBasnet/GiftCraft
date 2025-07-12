@@ -2,6 +2,7 @@ const app = require("./app");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
+const orderRoutes = require('./routes/order');
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com", // or your SMTP host
@@ -35,3 +36,4 @@ app.use((req, res, next) => {
   console.log('Incoming request:', req.method, req.url);
   next();
 });
+app.use('/api/orders', orderRoutes);

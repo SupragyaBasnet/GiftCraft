@@ -12,9 +12,14 @@ app.use(express.json({ limit: '5mb' }));
 
 // Health check route
 app.get('/', (req, res) => {
+  console.log("server is running");
   res.send('GiftCraft backend is running!');
 });
 
+// app.use('/api', (req, res, next) => {
+//   res.set('Cache-Control', 'no-store');
+//   next();
+// });
 // Routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
