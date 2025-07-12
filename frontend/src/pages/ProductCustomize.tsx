@@ -318,14 +318,7 @@ const exampleArtImages = [
     src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
     label: "COLORFUL ABSTRACT",
   },
-  {
-    src: "https://images.pexels.com/photos/1103970/pexels-photo-1103970.png?auto=compress&w=400",
-    label: "PAINT SPLASH",
-  },
-  {
-    src: "https://images.pexels.com/photos/370799/pexels-photo-370799.png?auto=compress&w=400",
-    label: "MODERN ART",
-  },
+
   {
     src: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
     label: "MOUNTAIN ART",
@@ -335,25 +328,14 @@ const exampleArtImages = [
     label: "VIBRANT SPLASH",
   },
   {
-    src: "https://images.pexels.com/photos/459225/pexels-photo-459225.png?auto=compress&w=400",
-    label: "WATERCOLOR",
-  },
-  {
     src: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
     label: "ABSTRACT FACE",
-  },
-  {
-    src: "https://images.pexels.com/photos/1103971/pexels-photo-1103971.png?auto=compress&w=400",
-    label: "COLORFUL LINES",
   },
   {
     src: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80",
     label: "PASTEL ART",
   },
-  {
-    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.png?auto=compress&w=400",
-    label: "CANVAS PAINT",
-  },
+
   // New galaxy, moon, glitter, and cosmic themed images
   {
     src: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=400&q=80",
@@ -362,10 +344,6 @@ const exampleArtImages = [
   {
     src: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&w=400&q=80",
     label: "MOON NIGHT",
-  },
-  {
-    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.png?auto=compress&w=400",
-    label: "GLITTER CANVAS",
   },
   {
     src: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80",
@@ -378,10 +356,6 @@ const exampleArtImages = [
   {
     src: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
     label: "MOONLIT NIGHT",
-  },
-  {
-    src: "https://images.pexels.com/photos/355465/pexels-photo-355465.png?auto=compress&w=400",
-    label: "SPARKLE ART",
   },
 ];
 
@@ -2277,6 +2251,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({
             maxWidth: 350,
             position: "relative",
           }}
+          onClick={() => setSelectedElementId(null)} // <-- clear selection on background click
         >
           {/* Product image */}
           {currentImage && currentImage !== "/placeholder.png" ? (
@@ -2418,7 +2393,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({
               onMouseEnter={() => updateElement(el.id, { __hovered: true })}
               onMouseLeave={() => updateElement(el.id, { __hovered: false })}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.stopPropagation();
+                e.stopPropagation(); // <-- prevent background click
                 setSelectedElementId(el.id);
                 if (el.type === "text") setEditText(el.content);
               }}

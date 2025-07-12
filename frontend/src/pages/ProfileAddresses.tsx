@@ -66,15 +66,24 @@ const ProfileAddresses: React.FC = () => {
         minWidth: 350,
         maxWidth: 520,
         minHeight: 510,
+        maxHeight: 510, // Fix the height
         boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
         mx: "auto",
         width: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Typography variant="h5" fontWeight={700} gutterBottom>
         Address Book
       </Typography>
-      <List>
+      <List
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          maxHeight: 400, // Adjust as needed to fit inside Paper
+        }}
+      >
         {addresses.length === 0 ? (
           <Typography variant="body1" align="center">
             No saved addresses found from orders.
