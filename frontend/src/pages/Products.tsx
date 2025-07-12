@@ -45,20 +45,35 @@ const Products: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Refactored fetchProducts so it can be called from anywhere
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const data = await res.json();
+      setProducts(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('/api/products');
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        setProducts(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch products');
-      } finally {
-        setLoading(false);
+    fetchProducts();
+  }, []);
+
+  // Listen for review-triggered refresh
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'giftcraftProductsRefresh' && e.newValue === 'true') {
+        fetchProducts();
+        localStorage.setItem('giftcraftProductsRefresh', 'false');
       }
     };
-    fetchProducts();
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const minProductPrice = products.length > 0 ? Math.min(...products.map(p => p.price)) : 0;

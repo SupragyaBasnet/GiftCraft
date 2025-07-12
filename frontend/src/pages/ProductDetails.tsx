@@ -135,6 +135,24 @@ const ProductDetails: React.FC = () => {
     fetchProduct();
   }, [id]);
 
+  // Listen for review-triggered refresh
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'giftcraftProductsRefresh' && e.newValue === 'true') {
+        // Refetch product data
+        setLoading(true);
+        fetch(`/api/products/${id}`)
+          .then(res => res.json())
+          .then(backendProduct => setProduct(backendProduct))
+          .catch(() => setError("Product not found"))
+          .finally(() => setLoading(false));
+        localStorage.setItem('giftcraftProductsRefresh', 'false');
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [id]);
+
   useEffect(() => {
     if (product && product.category && product._id) {
       const fetchRelated = async () => {

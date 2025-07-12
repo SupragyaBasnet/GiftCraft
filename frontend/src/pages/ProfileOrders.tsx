@@ -120,7 +120,8 @@ const ProfileOrders = () => {
         message: 'Review submitted successfully!',
         severity: 'success'
       });
-      
+      // Trigger product refresh for product cards
+      localStorage.setItem('giftcraftProductsRefresh', 'true');
       // Reset review form
       setReviewingOrder(null);
       setReviewRating(null);

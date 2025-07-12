@@ -332,6 +332,8 @@ const Profile: React.FC = () => {
       if (!res.ok) throw new Error(updatedOrder.message || 'Failed to submit review');
       setOrderHistory((prev) => prev.map((order: any) => order._id === updatedOrder._id ? updatedOrder : order));
       setSnackbar({ open: true, message: 'Review submitted!', severity: 'success' });
+      // Trigger product refresh for product cards
+      localStorage.setItem('giftcraftProductsRefresh', 'true');
       handleCloseReviewModal();
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to submit review', severity: 'error' });
