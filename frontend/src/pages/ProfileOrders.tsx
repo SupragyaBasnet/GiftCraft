@@ -39,13 +39,14 @@ const statusColors: Record<string, string> = {
 };
 
 const ProfileOrders = () => {
-  const { user, token } = useAuth() as any;
+  const { user } = useAuth() as any;
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrderHistory = async () => {
       try {
+        const token = localStorage.getItem("giftcraftToken");
         const res = await fetch("/api/products/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -58,7 +59,7 @@ const ProfileOrders = () => {
       }
     };
     fetchOrderHistory();
-  }, [token]);
+  }, [user]);
 
   const handleExpandClick = (orderId: string) => {
     setExpanded(expanded === orderId ? null : orderId);
