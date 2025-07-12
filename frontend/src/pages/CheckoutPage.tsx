@@ -182,8 +182,30 @@ const CheckoutPage: React.FC = () => {
         body: JSON.stringify({ items, total, address, paymentMethod: selectedPaymentMethod }),
       });
       if (!res.ok) throw new Error('Failed to place order');
+
+      if (selectedPaymentMethod === 'eSewa') {
+        // Save order items to localStorage for confirmation page
+        localStorage.setItem('giftcraftLastOrderItems', JSON.stringify(items));
+        // Call backend to get eSewa payment URL
+        const esewaRes = await fetch('/api/auth/payment/esewa/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ total }),
+        });
+        const esewaData = await esewaRes.json();
+        if (esewaData.url) {
+          window.location.href = esewaData.url; // Redirect to eSewa
+          return;
+        } else {
+          setOrderConfirmedMessage('Failed to initiate eSewa payment.');
+          return;
+        }
+      }
+
       // Update cart context for COD before redirect
       const singleItemId = itemsToCheckout.length === 1 ? itemsToCheckout[0].cartItemId : undefined;
+      // Save order items to localStorage for confirmation page (COD)
+      localStorage.setItem('giftcraftLastOrderItems', JSON.stringify(items));
       if (singleItemId) {
         // Find the cart item and remove by product id
         const cartItem = cartItems.find((item) => item.cartItemId === singleItemId || item.id === singleItemId);
