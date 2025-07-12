@@ -2253,84 +2253,8 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({
           }}
           onClick={() => setSelectedElementId(null)} // <-- clear selection on background click
         >
-          {/* Product image */}
-          {currentImage && currentImage !== "/placeholder.png" ? (
-            <Box
-              component="img"
-              src={currentImage}
-              alt="product"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 1,
-                pointerEvents: "none",
-                p: 2,
-                ...getProductStyle(productType),
-              }}
-            />
-          ) : (
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "#f8d7da",
-                color: "#721c24",
-                borderRadius: 2,
-              }}
-            >
-              <Typography variant="h6">
-                Image not available for this phonecase model. Check the console
-                for details.
-              </Typography>
-            </Box>
-          )}
-          {/* Color overlay as tint for all products, but mask for phonecase */}
-          {color !== "#ffffff" &&
-            (productType === "phonecase" ? (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  zIndex: 2,
-                  pointerEvents: "none",
-                  background: color,
-                  opacity: 0.32,
-                  WebkitMaskImage: `url(${currentImage})`,
-                  WebkitMaskRepeat: "no-repeat",
-                  WebkitMaskSize: "contain",
-                  maskImage: `url(${currentImage})`,
-                  maskRepeat: "no-repeat",
-                  maskSize: "contain",
-                  borderRadius: "inherit",
-                }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  zIndex: 2,
-                  pointerEvents: "none",
-                  background: color,
-                  opacity: 0.32,
-                  mixBlendMode: "multiply",
-                  borderRadius: "inherit",
-                }}
-              />
-            ))}
+          {/* Product image with canvas-based color application */}
+          <ProductColorCanvas imageUrl={currentImage} color={color} />
           {tab === 6 && (
             <Box
               sx={{
@@ -4119,3 +4043,70 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({
 };
 
 export default ProductCustomize;
+
+// Add this component at the end of the file:
+
+// Canvas-based product color application
+const ProductColorCanvas: React.FC<{ imageUrl: string; color: string }> = ({ imageUrl, color }) => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  React.useEffect(() => {
+    if (!imageUrl) return;
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.src = imageUrl;
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      // Get image data
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      // Parse color
+      const rgb = hexToRgb(color);
+      if (!rgb) return;
+      // Apply color to non-transparent pixels
+      for (let i = 0; i < data.length; i += 4) {
+        // Only colorize if alpha > 0
+        if (data[i + 3] > 0) {
+          // Simple tint: blend selected color with original pixel
+          data[i] = (data[i] * 0.3 + rgb.r * 0.7) | 0;
+          data[i + 1] = (data[i + 1] * 0.3 + rgb.g * 0.7) | 0;
+          data[i + 2] = (data[i + 2] * 0.3 + rgb.b * 0.7) | 0;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+    };
+  }, [imageUrl, color]);
+  // Helper to convert hex to rgb
+  function hexToRgb(hex: string) {
+    let c = hex.replace('#', '');
+    if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+    const num = parseInt(c, 16);
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255,
+    };
+  }
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1,
+        pointerEvents: 'none',
+        borderRadius: 16,
+      }}
+    />
+  );
+};
