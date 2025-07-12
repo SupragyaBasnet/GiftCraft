@@ -373,3 +373,22 @@ exports.clearCart = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 }; 
+
+
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Delete user's orders
+    await require('../models/Order').deleteMany({ user: userId });
+
+    // Delete user account
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    console.error('Delete account error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
