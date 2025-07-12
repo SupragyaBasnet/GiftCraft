@@ -35,14 +35,34 @@ const ProfileSettings: React.FC = () => {
       setSnackbar({ open: true, message: 'New passwords do not match.', severity: 'error' });
       return;
     }
-    // Replace with your API call
-    setSnackbar({ open: true, message: 'Password changed successfully!', severity: 'success' });
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setTimeout(() => {
-      navigate('/login');
-    }, 1500);
+    try {
+      const token = localStorage.getItem('giftcraftToken');
+      const res = await fetch('/api/auth/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSnackbar({ open: true, message: data.message || 'Failed to change password.', severity: 'error' });
+        return;
+      }
+      // If a new token is returned, update localStorage
+      if (data.token) {
+        localStorage.setItem('giftcraftToken', data.token);
+      }
+      setSnackbar({ open: true, message: 'Password changed successfully!', severity: 'success' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      // Optionally, you may want to refresh user context or force re-login
+      setTimeout(() => { navigate('/login'); }, 1500);
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to change password.', severity: 'error' });
+    }
   };
 
   return (

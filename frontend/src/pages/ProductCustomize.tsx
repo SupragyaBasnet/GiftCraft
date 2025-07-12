@@ -1,21 +1,34 @@
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import {
   AddPhotoAlternate,
   Brush,
   ColorLens,
   Create,
   Edit,
-  EmojiEmotions, FormatAlignCenter, FormatAlignJustify, FormatAlignLeft, FormatAlignRight, FormatShapes, Height, Palette, Save,
+  EmojiEmotions,
+  FormatAlignCenter,
+  FormatAlignJustify,
+  FormatAlignLeft,
+  FormatAlignRight,
+  FormatShapes,
+  Height,
+  Palette,
+  Save,
   ShoppingCart,
-  TextFields
+  TextFields,
 } from "@mui/icons-material";
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import {
   Alert,
   Box,
   Button,
-  Container, FormControl, Grid, IconButton, InputLabel, MenuItem,
+  Container,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
   Popover,
   Select,
@@ -24,18 +37,20 @@ import {
   Tabs,
   TextField,
   ToggleButton,
-  ToggleButtonGroup, Tooltip, Typography
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import React, { useEffect, useState } from "react";
 import CanvasDraw from "react-canvas-draw";
 import { ChromePicker, ColorResult } from "react-color";
 import { Rnd } from "react-rnd";
 import { useNavigate, useParams } from "react-router-dom";
-import { useCart } from '../context/CartContext';
-import { products } from '../data/products';
+import { useCart } from "../context/CartContext";
+import { products } from "../data/products";
 
 // Import product images from products directory
 import frame1 from "../assets/products/frame1.png";
@@ -65,14 +80,8 @@ import keychainLeather from "../assets/products/keychain-leather.png";
 import heartshapedFront from "../assets/products/heartshaped-front.png";
 import squareFront from "../assets/products/whitepillow-front.png";
 
-
 import circleshapedFront from "../assets/products/circleshaped-front.png";
 import starshapedBack from "../assets/products/starshaped-back.png";
-
-
-
-
-
 
 import phonecases21ultra from "../assets/products/phonecase21ultra.png";
 import phonecaseiphone10 from "../assets/products/phonecaseiphone10.png";
@@ -115,8 +124,7 @@ interface ProductView {
 }
 
 // Define types for elements (should match the type in CustomizedProductImage.tsx)
-interface Element {
-}
+interface Element {}
 
 // Map product type to images
 const productImages: Record<ProductType, ProductView | string[]> = {
@@ -128,20 +136,12 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     front: notebookFront,
     back: notebookBack, // use the new image for the back
   },
-  pen: [
-    penFront,
-    planepen1,
-  ],
+  pen: [penFront, planepen1],
   mug: {
     front: mugFrontImage,
     side: mugSideImage,
   },
-  frame: [
-    frame1,
-    frame2,
-    frame3,
-    frame4,
-  ],
+  frame: [frame1, frame2, frame3, frame4],
   keychain: [
     keychain,
     planewhitekeychain,
@@ -150,11 +150,7 @@ const productImages: Record<ProductType, ProductView | string[]> = {
     circleKeychain,
     keychainLeather,
   ],
-  waterbottle: [
-    bottle1White,
-    bottleWhite2,
-    bottleWhite3,
-  ],
+  waterbottle: [bottle1White, bottleWhite2, bottleWhite3],
   cap: {
     front: planewhitecap,
   },
@@ -166,20 +162,17 @@ const productImages: Record<ProductType, ProductView | string[]> = {
   ],
   phonecase: [
     phonecaseiphone8plus,
-   
+
     phonecaseiphone10,
     phonecaseiphone11,
     phonecaseiphone12,
     phonecaseiphone13promax,
     phonecaseiphone14,
     phonecases21ultra,
-    
+
     phonecases23ultra,
   ],
-  
 };
-
-
 
 const stickers = ["🎉", "❤️", "🌟", "🎁", "😊", "🔥", "🥳", "💐", "👑", "🍰"];
 
@@ -426,10 +419,10 @@ const phonecaseLabels = [
 // Move this to the top level, before the ProductCustomize component:
 export function getAutoFitFontSize({
   text,
-  fontFamily = 'Arial',
+  fontFamily = "Arial",
   boxWidth,
   boxHeight,
-  textStyle = 'straight',
+  textStyle = "straight",
   lineHeight = 1.2,
   minFontSize = 10,
   maxFontSize = 200,
@@ -443,13 +436,13 @@ export function getAutoFitFontSize({
   minFontSize?: number;
   maxFontSize?: number;
 }) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
   if (!ctx) return minFontSize ?? 10;
   function measureStraight(fontSize: number) {
     if (!ctx) return { width: 0, height: 0 };
     ctx.font = `${fontSize}px ${fontFamily}`;
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     const widths = lines.map((line: string) => ctx.measureText(line).width);
     const maxWidth = Math.max(...widths, 1);
     const totalHeight = lines.length * fontSize * lineHeight;
@@ -463,12 +456,14 @@ export function getAutoFitFontSize({
   function getPathLength() {
     const a = boxWidth / 2;
     const b = boxHeight / 2;
-    return Math.PI * (3*(a+b) - Math.sqrt((3*a+b)*(a+3*b))) / 2;
+    return (Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b)))) / 2;
   }
-  let low = minFontSize, high = maxFontSize, best = minFontSize;
+  let low = minFontSize,
+    high = maxFontSize,
+    best = minFontSize;
   while (low <= high) {
     const mid = Math.floor((low + high) / 2);
-    if (textStyle === 'straight') {
+    if (textStyle === "straight") {
       const { width, height } = measureStraight(mid);
       if (width <= boxWidth && height <= boxHeight) {
         best = mid;
@@ -491,96 +486,105 @@ export function getAutoFitFontSize({
 }
 
 // Add this function below the imports or near the other helpers:
-function calculateCustomizationPrice(basePrice: number, type: string, customization: any) {
+function calculateCustomizationPrice(
+  basePrice: number,
+  type: string,
+  customization: any
+) {
   let extra = 0;
   if (!customization) return basePrice;
   // Count elements by type
-  let textCount = 0, imageCount = 0, artCount = 0, stickerCount = 0, shapeCount = 0, toolCount = 0;
+  let textCount = 0,
+    imageCount = 0,
+    artCount = 0,
+    stickerCount = 0,
+    shapeCount = 0,
+    toolCount = 0;
   if (customization.elements && Array.isArray(customization.elements)) {
     for (const el of customization.elements) {
-      if (el.type === 'text') textCount++;
-      if (el.type === 'image') imageCount++;
-      if (el.type === 'art') artCount++;
-      if (el.type === 'sticker') stickerCount++;
-      if (el.type === 'shape') shapeCount++;
-      if (el.type === 'tool') toolCount++;
+      if (el.type === "text") textCount++;
+      if (el.type === "image") imageCount++;
+      if (el.type === "art") artCount++;
+      if (el.type === "sticker") stickerCount++;
+      if (el.type === "shape") shapeCount++;
+      if (el.type === "tool") toolCount++;
     }
   }
   const t = type.toLowerCase();
-  if (t === 'tshirt' || t === 't-shirt') {
-    if (customization.color && customization.color !== '#ffffff') extra += 100;
+  if (t === "tshirt" || t === "t-shirt") {
+    if (customization.color && customization.color !== "#ffffff") extra += 100;
     extra += textCount * 150;
     extra += imageCount * 300;
     extra += artCount * 220;
     extra += stickerCount * 180;
     extra += shapeCount * 120;
     extra += toolCount * 120;
-  } else if (t === 'mug') {
-    if (customization.color && customization.color !== '#ffffff') extra += 60;
+  } else if (t === "mug") {
+    if (customization.color && customization.color !== "#ffffff") extra += 60;
     extra += textCount * 120;
     extra += imageCount * 220;
     extra += artCount * 180;
     extra += stickerCount * 150;
     extra += shapeCount * 90;
     extra += toolCount * 90;
-  } else if (t === 'notebook') {
-    if (customization.color && customization.color !== '#ffffff') extra += 40;
+  } else if (t === "notebook") {
+    if (customization.color && customization.color !== "#ffffff") extra += 40;
     extra += textCount * 80;
     extra += imageCount * 150;
     extra += artCount * 100;
     extra += stickerCount * 100;
     extra += shapeCount * 60;
     extra += toolCount * 60;
-  } else if (t === 'frame') {
-    if (customization.color && customization.color !== '#ffffff') extra += 80;
+  } else if (t === "frame") {
+    if (customization.color && customization.color !== "#ffffff") extra += 80;
     extra += textCount * 140;
     extra += imageCount * 250;
     extra += artCount * 200;
     extra += stickerCount * 160;
     extra += shapeCount * 100;
     extra += toolCount * 100;
-  } else if (t === 'keychain') {
-    if (customization.color && customization.color !== '#ffffff') extra += 30;
+  } else if (t === "keychain") {
+    if (customization.color && customization.color !== "#ffffff") extra += 30;
     extra += textCount * 60;
     extra += imageCount * 120;
     extra += artCount * 80;
     extra += stickerCount * 80;
     extra += shapeCount * 40;
     extra += toolCount * 40;
-  } else if (t === 'waterbottle') {
-    if (customization.color && customization.color !== '#ffffff') extra += 50;
+  } else if (t === "waterbottle") {
+    if (customization.color && customization.color !== "#ffffff") extra += 50;
     extra += textCount * 100;
     extra += imageCount * 180;
     extra += artCount * 120;
     extra += stickerCount * 120;
     extra += shapeCount * 70;
     extra += toolCount * 70;
-  } else if (t === 'cap') {
-    if (customization.color && customization.color !== '#ffffff') extra += 50;
+  } else if (t === "cap") {
+    if (customization.color && customization.color !== "#ffffff") extra += 50;
     extra += textCount * 100;
     extra += imageCount * 180;
     extra += artCount * 120;
     extra += stickerCount * 120;
     extra += shapeCount * 70;
     extra += toolCount * 70;
-  } else if (t === 'pen') {
-    if (customization.color && customization.color !== '#ffffff') extra += 20;
+  } else if (t === "pen") {
+    if (customization.color && customization.color !== "#ffffff") extra += 20;
     extra += textCount * 40;
     extra += imageCount * 80;
     extra += artCount * 60;
     extra += stickerCount * 60;
     extra += shapeCount * 30;
     extra += toolCount * 30;
-  } else if (t === 'phonecase') {
-    if (customization.color && customization.color !== '#ffffff') extra += 70;
+  } else if (t === "phonecase") {
+    if (customization.color && customization.color !== "#ffffff") extra += 70;
     extra += textCount * 130;
     extra += imageCount * 240;
     extra += artCount * 180;
     extra += stickerCount * 160;
     extra += shapeCount * 90;
     extra += toolCount * 90;
-  } else if (t === 'pillowcase') {
-    if (customization.color && customization.color !== '#ffffff') extra += 60;
+  } else if (t === "pillowcase") {
+    if (customization.color && customization.color !== "#ffffff") extra += 60;
     extra += textCount * 120;
     extra += imageCount * 220;
     extra += artCount * 180;
@@ -588,7 +592,7 @@ function calculateCustomizationPrice(basePrice: number, type: string, customizat
     extra += shapeCount * 90;
     extra += toolCount * 90;
   } else {
-    if (customization.color && customization.color !== '#ffffff') extra += 50;
+    if (customization.color && customization.color !== "#ffffff") extra += 50;
     extra += textCount * 100;
     extra += imageCount * 200;
     extra += artCount * 150;
@@ -601,7 +605,9 @@ function calculateCustomizationPrice(basePrice: number, type: string, customizat
 
 // Helper to fetch product by category and name from backend
 async function fetchProductId(category: string, name: string) {
-  const res = await fetch(`/api/products/find?category=${category}&name=${encodeURIComponent(name)}`);
+  const res = await fetch(
+    `/api/products/find?category=${category}&name=${encodeURIComponent(name)}`
+  );
   if (res.ok) {
     const product = await res.json();
     return product._id;
@@ -610,10 +616,18 @@ async function fetchProductId(category: string, name: string) {
 }
 
 // Add this helper function near the top of the file:
-function getStarPoints(width: number, height: number, spikes: number, cx: number, cy: number, outerRadius: number, innerRadius: number) {
+function getStarPoints(
+  width: number,
+  height: number,
+  spikes: number,
+  cx: number,
+  cy: number,
+  outerRadius: number,
+  innerRadius: number
+) {
   const step = Math.PI / spikes;
-  let points = '';
-  let rotation = Math.PI / 2 * 3;
+  let points = "";
+  let rotation = (Math.PI / 2) * 3;
   let x = cx;
   let y = cy;
   for (let i = 0; i < spikes; i++) {
@@ -635,34 +649,46 @@ interface ProductCustomizeProps {
   typeOverride?: string | null;
 }
 
-const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, typeOverride }) => {
+const ProductCustomize: React.FC<ProductCustomizeProps> = ({
+  categoryOverride,
+  typeOverride,
+}) => {
   // Use categoryOverride if provided, else useParams
-  const { category: urlCategory, type: urlType } = useParams<{ category: string, type?: string }>();
-  const category = categoryOverride || urlCategory || 'phonecases';
+  const { category: urlCategory, type: urlType } = useParams<{
+    category: string;
+    type?: string;
+  }>();
+  const category = categoryOverride || urlCategory || "phonecases";
   const selectedType = typeOverride || urlType || null;
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
   // Generate a unique customizationId for this session
-  const [customizationId] = useState(() => `${category}-${Date.now()}-${Math.floor(Math.random() * 100000)}`);
+  const [customizationId] = useState(
+    () => `${category}-${Date.now()}-${Math.floor(Math.random() * 100000)}`
+  );
 
   // Determine product type and base price from category
-  const productType = category.replace(/s$/, '');
+  const productType = category.replace(/s$/, "");
   // For products with variants, use selectedType to pick the correct image/label/price
   let baseProduct = products.find((p) => p.category === category);
   let basePrice = baseProduct ? baseProduct.price : 1000;
-  let baseImage = baseProduct ? baseProduct.image : '';
+  let baseImage = baseProduct ? baseProduct.image : "";
 
   // For keychains, phonecases, etc., override image/label/price by type
-  if (selectedType && productType === 'keychain') {
+  if (selectedType && productType === "keychain") {
     // Map type to image and label
-    
-    
+
     const typeInfo = keychainTypeMap[selectedType];
     if (typeInfo) {
       baseImage = typeInfo.image;
       basePrice = typeInfo.price || basePrice;
-      baseProduct = { ...baseProduct, name: typeInfo.name, price: typeInfo.price || basePrice, image: typeInfo.image };
+      baseProduct = {
+        ...baseProduct,
+        name: typeInfo.name,
+        price: typeInfo.price || basePrice,
+        image: typeInfo.image,
+      };
     }
   }
   // Add similar logic for phonecases, etc. as needed
@@ -778,16 +804,23 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
   };
 
   // Check if the current product has back or side views defined (for object type)
-  const isProductViewObject = typeof productImages[productType as keyof typeof productImages] === "object" && !Array.isArray(productImages[productType as keyof typeof productImages]);
+  const isProductViewObject =
+    typeof productImages[productType as keyof typeof productImages] ===
+      "object" &&
+    !Array.isArray(productImages[productType as keyof typeof productImages]);
 
   const hasBackView =
     isProductViewObject &&
-    (productImages[productType as keyof typeof productImages] as ProductView)?.back !== undefined;
+    (productImages[productType as keyof typeof productImages] as ProductView)
+      ?.back !== undefined;
   const hasSideView =
     isProductViewObject &&
-    (productImages[productType as keyof typeof productImages] as ProductView)?.side !== undefined;
+    (productImages[productType as keyof typeof productImages] as ProductView)
+      ?.side !== undefined;
   const hasMultipleViews = hasBackView || hasSideView;
-  const hasArrayViews = Array.isArray(productImages[productType as keyof typeof productImages]);
+  const hasArrayViews = Array.isArray(
+    productImages[productType as keyof typeof productImages]
+  );
 
   const handleColorClick = (event: React.MouseEvent<HTMLElement>) => {
     setColorAnchorEl(event.currentTarget);
@@ -809,27 +842,27 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     const reader = new FileReader();
     reader.onload = (f) => {
       const url = f.target?.result as string;
-    if (url) {
-      const newElement: Element = {
-        id: Date.now().toString(),
-        type: "image",
+      if (url) {
+        const newElement: Element = {
+          id: Date.now().toString(),
+          type: "image",
           content: url, // Store as data URL
-        x: 50,
-        y: 50,
-        width: 120,
-        height: 120,
-        shape: "rectangle",
-        imageOffsetX: 0,
-        imageOffsetY: 0,
-        imageScale: 1,
-      };
-      setElements([...elements, newElement]);
-      setSnackbar({
-        open: true,
-        message: "Image uploaded successfully!",
-        severity: "success",
-      });
-    }
+          x: 50,
+          y: 50,
+          width: 120,
+          height: 120,
+          shape: "rectangle",
+          imageOffsetX: 0,
+          imageOffsetY: 0,
+          imageScale: 1,
+        };
+        setElements([...elements, newElement]);
+        setSnackbar({
+          open: true,
+          message: "Image uploaded successfully!",
+          severity: "success",
+        });
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -838,7 +871,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
     if (text) {
       const newElement: Element = {
         id: Date.now().toString(),
-        type: 'text',
+        type: "text",
         content: text,
         x: 50,
         y: 50,
@@ -846,7 +879,7 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
         height: 50,
         fontFamily: selectedFont,
         textStyle,
-        fontSize: fontSize !== 'auto' ? fontSize : undefined,
+        fontSize: fontSize !== "auto" ? fontSize : undefined,
         fontWeight,
         isBold,
         isItalic,
@@ -904,60 +937,101 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
   async function exportPreviewImage() {
     // The main preview area is the CanvasBox. Give it a ref and use html2canvas.
     if (!previewRef.current) return null;
-    const canvas = await html2canvas(previewRef.current, {backgroundColor: null, useCORS: true, scale: 2});
-    return canvas.toDataURL('image/png');
+    const canvas = await html2canvas(previewRef.current, {
+      backgroundColor: null,
+      useCORS: true,
+      scale: 2,
+    });
+    return canvas.toDataURL("image/png");
   }
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('giftcraftToken');
+      const token = localStorage.getItem("giftcraftToken");
       const previewImage = await exportPreviewImage();
       const payload = {
         customizationId,
         category: productType,
         productType,
         type: selectedType || "", // always send a string
-        size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", // always send a string
+        size:
+          selectedTshirtSize ||
+          selectedNotebookSize ||
+          selectedWaterBottleSize ||
+          "", // always send a string
         color,
         elements,
         image: previewImage || currentImage,
-        price: calculateCustomizationPrice(basePrice, productType, { customizationId, category: productType, productType, type: selectedType || "", size: selectedTshirtSize || selectedNotebookSize || selectedWaterBottleSize || "", color, elements, image: previewImage || currentImage }),
+        price: calculateCustomizationPrice(basePrice, productType, {
+          customizationId,
+          category: productType,
+          productType,
+          type: selectedType || "",
+          size:
+            selectedTshirtSize ||
+            selectedNotebookSize ||
+            selectedWaterBottleSize ||
+            "",
+          color,
+          elements,
+          image: previewImage || currentImage,
+        }),
       };
-      const res = await fetch('/api/auth/customizations', {
-        method: 'POST',
+      const res = await fetch("/api/auth/customizations", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
       if (res.ok) {
         setIsSaved(true);
-        setSnackbar({ open: true, message: 'Customization saved to MongoDB!', severity: 'success' });
+        setSnackbar({
+          open: true,
+          message: "Customization saved!",
+          severity: "success",
+        });
       } else {
-      setSnackbar({ open: true, message: 'Failed to save customization.', severity: 'error' });
+        setSnackbar({
+          open: true,
+          message: "Failed to save customization.",
+          severity: "error",
+        });
       }
     } catch (err) {
-      setSnackbar({ open: true, message: 'Error saving customization.', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: "Error saving customization.",
+        severity: "error",
+      });
     }
   };
 
   // --- Get the correct product name for the selected variant (for backend lookup) ---
   function getSelectedProductName() {
     // For products with multiple variants (array views), use the productImageInfo name
-    if (hasArrayViews && productImageInfo[productType] && productImageInfo[productType][currentArrayIndex]) {
+    if (
+      hasArrayViews &&
+      productImageInfo[productType] &&
+      productImageInfo[productType][currentArrayIndex]
+    ) {
       return productImageInfo[productType][currentArrayIndex].name;
     }
     // For single-variant products, fallback to productData?.name
-    return baseProduct?.name || '';
+    return baseProduct?.name || "";
   }
 
   // Dedicated add-to-cart for custom products
   const handleAddToCartCustom = async () => {
     if (!isSaved) {
-      setSnackbar({ open: true, message: 'Please save your customization before adding to cart.', severity: 'error' });
-        return;
-      }
+      setSnackbar({
+        open: true,
+        message: "Please save your customization before adding to cart.",
+        severity: "error",
+      });
+      return;
+    }
     const previewImage = await exportPreviewImage();
     // Build the customization object from current state
     const customization = {
@@ -967,19 +1041,23 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
       type: selectedType,
       viewIndex: hasArrayViews ? currentArrayIndex : currentView,
       size:
-        productType === 'notebook'
+        productType === "notebook"
           ? selectedNotebookSize
-          : productType === 'tshirt'
+          : productType === "tshirt"
           ? selectedTshirtSize
-          : productType === 'waterbottle'
+          : productType === "waterbottle"
           ? selectedWaterBottleSize
           : undefined,
       color: color,
       elements: elements,
       image: previewImage || currentImage,
     };
-    const token = localStorage.getItem('giftcraftToken');
-    const customPrice = calculateCustomizationPrice(basePrice, productType, customization);
+    const token = localStorage.getItem("giftcraftToken");
+    const customPrice = calculateCustomizationPrice(
+      basePrice,
+      productType,
+      customization
+    );
     const payload = {
       customizationId,
       category,
@@ -990,44 +1068,59 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
       quantity: 1,
     };
     try {
-      const res = await fetch('/api/auth/customization/cart', {
-        method: 'POST',
+      const res = await fetch("/api/auth/customization/cart", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
       if (res.ok) {
-      setSnackbar({ open: true, message: 'Added to cart!', severity: 'success' });
+        setSnackbar({
+          open: true,
+          message: "Added to cart!",
+          severity: "success",
+        });
         setTimeout(() => {
-      navigate('/cart');
+          navigate("/cart");
         }, 1500);
       } else {
-        setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
+        setSnackbar({
+          open: true,
+          message: "Failed to add to cart.",
+          severity: "error",
+        });
       }
     } catch (err) {
-      setSnackbar({ open: true, message: 'Failed to add to cart.', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: "Failed to add to cart.",
+        severity: "error",
+      });
     }
   };
 
   const handleBuyNow = async () => {
     const previewImage = await exportPreviewImage();
     // Always generate a new unique customizationId for each checkout
-    const newCustomizationId = `${productType}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    const newCustomizationId = `${productType}-${Date.now()}-${Math.floor(
+      Math.random() * 100000
+    )}`;
     // Build the customized item object
     const customItem = {
       customizationId: customizationId || Date.now().toString(),
       category,
       productType,
       type: selectedType,
-      size: productType === 'notebook'
-              ? selectedNotebookSize
-        : productType === 'tshirt'
-              ? selectedTshirtSize
-        : productType === 'waterbottle'
-              ? selectedWaterBottleSize
-              : undefined,
+      size:
+        productType === "notebook"
+          ? selectedNotebookSize
+          : productType === "tshirt"
+          ? selectedTshirtSize
+          : productType === "waterbottle"
+          ? selectedWaterBottleSize
+          : undefined,
       color,
       elements,
       image: previewImage || currentImage,
@@ -1037,36 +1130,39 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
         category,
         productType,
         type: selectedType,
-        size: productType === 'notebook'
+        size:
+          productType === "notebook"
             ? selectedNotebookSize
-          : productType === 'tshirt'
+            : productType === "tshirt"
             ? selectedTshirtSize
-            : productType === 'waterbottle'
+            : productType === "waterbottle"
             ? selectedWaterBottleSize
             : undefined,
         color,
         elements,
         image: previewImage || currentImage,
       }),
-      total: calculateCustomizationPrice(basePrice, productType, {
-        customizationId: newCustomizationId,
-        category,
-        productType,
-        type: selectedType,
-        size: productType === 'notebook'
-          ? selectedNotebookSize
-          : productType === 'tshirt'
-          ? selectedTshirtSize
-          : productType === 'waterbottle'
-          ? selectedWaterBottleSize
-          : undefined,
-        color,
-        elements,
-        image: previewImage || currentImage,
-      }) * quantity,
+      total:
+        calculateCustomizationPrice(basePrice, productType, {
+          customizationId: newCustomizationId,
+          category,
+          productType,
+          type: selectedType,
+          size:
+            productType === "notebook"
+              ? selectedNotebookSize
+              : productType === "tshirt"
+              ? selectedTshirtSize
+              : productType === "waterbottle"
+              ? selectedWaterBottleSize
+              : undefined,
+          color,
+          elements,
+          image: previewImage || currentImage,
+        }) * quantity,
     };
     navigate(`/checkout?singleItemId=${customItem.customizationId}`, {
-      state: { items: [customItem] }
+      state: { items: [customItem] },
     });
   };
 
@@ -1119,31 +1215,32 @@ const ProductCustomize: React.FC<ProductCustomizeProps> = ({ categoryOverride, t
   }, [productType, navigate, hasArrayViews]); // Added hasArrayViews to dependencies
 
   // Determine the current image based on selected product and view
- 
-  let currentImage = '';
-if (productType === "phonecase") {
-  // For phonecase, use the array and index
-  const imagesArray = productImages["phonecase"] as string[];
-  currentImage = imagesArray[currentArrayIndex] || "/placeholder.png";
-} else if (Array.isArray(productImages[productType])) {
-  // For other products with multiple images (like keychain, frame, etc.)
-  const imagesArray = productImages[productType] as string[];
-  currentImage = imagesArray[currentArrayIndex] || imagesArray[0] || "/placeholder.png";
-} else if (
-  typeof productImages[productType] === "object" &&
-  (productImages[productType] as ProductView).front
-) {
-  // For products with front/back/side views
-  const viewObj = productImages[productType] as ProductView;
-  if (currentView === "back" && viewObj.back) {
-    currentImage = viewObj.back;
-  } else if (currentView === "side" && viewObj.side) {
-    currentImage = viewObj.side;
-  } else {
-    currentImage = viewObj.front;
+
+  let currentImage = "";
+  if (productType === "phonecase") {
+    // For phonecase, use the array and index
+    const imagesArray = productImages["phonecase"] as string[];
+    currentImage = imagesArray[currentArrayIndex] || "/placeholder.png";
+  } else if (Array.isArray(productImages[productType])) {
+    // For other products with multiple images (like keychain, frame, etc.)
+    const imagesArray = productImages[productType] as string[];
+    currentImage =
+      imagesArray[currentArrayIndex] || imagesArray[0] || "/placeholder.png";
+  } else if (
+    typeof productImages[productType] === "object" &&
+    (productImages[productType] as ProductView).front
+  ) {
+    // For products with front/back/side views
+    const viewObj = productImages[productType] as ProductView;
+    if (currentView === "back" && viewObj.back) {
+      currentImage = viewObj.back;
+    } else if (currentView === "side" && viewObj.side) {
+      currentImage = viewObj.side;
+    } else {
+      currentImage = viewObj.front;
+    }
   }
-}
-if (!currentImage) currentImage = baseImage;
+  if (!currentImage) currentImage = baseImage;
 
   const [color, setColor] = useState("#ffffff");
   const [text, setText] = useState("");
@@ -1334,7 +1431,7 @@ if (!currentImage) currentImage = baseImage;
     e.preventDefault();
     const startX = e.clientX;
     const startY = e.clientY;
-    const el = elements.find(el => el.id === id);
+    const el = elements.find((el) => el.id === id);
     const origX = el?.imageOffsetX || 0;
     const origY = el?.imageOffsetY || 0;
     function onMove(moveEvent: MouseEvent) {
@@ -1346,19 +1443,21 @@ if (!currentImage) currentImage = baseImage;
       });
     }
     function onUp() {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
     }
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
   }
 
   // Add state for alignment and line height
-  const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
+  const [textAlign, setTextAlign] = useState<
+    "left" | "center" | "right" | "justify"
+  >("center");
   const [lineHeight, setLineHeight] = useState(1.1);
 
   // Add these inside the ProductCustomize component, near the other useState hooks:
-  const [fontSize, setFontSize] = useState<'auto' | number>('auto');
+  const [fontSize, setFontSize] = useState<"auto" | number>("auto");
   const [fontWeight, setFontWeight] = useState<number | 400 | 600 | 700>(400);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -1366,34 +1465,39 @@ if (!currentImage) currentImage = baseImage;
   // 1. When a text element is selected, load its content into the input box
   useEffect(() => {
     if (selectedElementId) {
-      const el = elements.find(e => e.id === selectedElementId && e.type === 'text');
+      const el = elements.find(
+        (e) => e.id === selectedElementId && e.type === "text"
+      );
       if (el) {
         setText(el.content);
       }
     } else {
-      setText('');
+      setText("");
     }
   }, [selectedElementId, elements]);
 
   // 2. When the input changes and a text element is selected, update the element's content
   const handleTextInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
-    if (selectedElementId) updateElement(selectedElementId, { content: e.target.value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { content: e.target.value });
   };
 
   // 1. When a text element is selected, update controls to match its style
   useEffect(() => {
     if (selectedElementId) {
-      const el = elements.find(e => e.id === selectedElementId && e.type === 'text');
+      const el = elements.find(
+        (e) => e.id === selectedElementId && e.type === "text"
+      );
       if (el) {
-        setFontSize(el.fontSize ?? 'auto');
+        setFontSize(el.fontSize ?? "auto");
         setFontWeight(el.fontWeight ?? 400);
         setIsBold(!!el.isBold);
         setIsItalic(!!el.isItalic);
-        setSelectedFont(el.fontFamily ?? 'Arial');
-        setTextStyle(el.textStyle ?? 'straight');
+        setSelectedFont(el.fontFamily ?? "Arial");
+        setTextStyle(el.textStyle ?? "straight");
         setLineHeight(el.lineHeight ?? 1.1);
-        setTextAlign(el.textAlign ?? 'center');
+        setTextAlign(el.textAlign ?? "center");
       }
     }
   }, [selectedElementId, elements]);
@@ -1401,11 +1505,13 @@ if (!currentImage) currentImage = baseImage;
   // 2. When a control is changed and a text element is selected, update the element's style
   const handleFontSizeChange = (value: number) => {
     setFontSize(value);
-    if (selectedElementId) updateElement(selectedElementId, { fontSize: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { fontSize: value });
   };
   const handleFontWeightChange = (value: number) => {
     setFontWeight(value);
-    if (selectedElementId) updateElement(selectedElementId, { fontWeight: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { fontWeight: value });
   };
   const handleBoldChange = (value: boolean) => {
     setIsBold(value);
@@ -1413,122 +1519,262 @@ if (!currentImage) currentImage = baseImage;
   };
   const handleItalicChange = (value: boolean) => {
     setIsItalic(value);
-    if (selectedElementId) updateElement(selectedElementId, { isItalic: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { isItalic: value });
   };
   const handleFontChange = (value: string) => {
     setSelectedFont(value);
-    if (selectedElementId) updateElement(selectedElementId, { fontFamily: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { fontFamily: value });
   };
-  const handleTextStyleChange = (value: 'straight' | 'arcUp' | 'arcDown' | 'wavy') => {
+  const handleTextStyleChange = (
+    value: "straight" | "arcUp" | "arcDown" | "wavy"
+  ) => {
     setTextStyle(value);
-    if (selectedElementId) updateElement(selectedElementId, { textStyle: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { textStyle: value });
   };
   const handleLineHeightChange = (value: number) => {
     setLineHeight(value);
-    if (selectedElementId) updateElement(selectedElementId, { lineHeight: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { lineHeight: value });
   };
-  const handleTextAlignChange = (value: 'left' | 'center' | 'right' | 'justify') => {
+  const handleTextAlignChange = (
+    value: "left" | "center" | "right" | "justify"
+  ) => {
     setTextAlign(value);
-    if (selectedElementId) updateElement(selectedElementId, { textAlign: value });
+    if (selectedElementId)
+      updateElement(selectedElementId, { textAlign: value });
   };
   // Use these handlers in your controls instead of setState directly.
 
   // Add this near the top of the ProductCustomize component:
   const shapes = [
     {
-      label: 'Square',
-      value: 'rectangle',
-      icon: <Box sx={{ width: 28, height: 28, bgcolor: shapeFill ? shapeColor : 'transparent', border: `2px solid ${shapeBorderColor}`, borderRadius: 2 }} />,
-    },
-    {
-      label: 'Circle',
-      value: 'circle',
-      icon: <Box sx={{ width: 28, height: 28, bgcolor: shapeFill ? shapeColor : 'transparent', border: `2px solid ${shapeBorderColor}`, borderRadius: '50%' }} />,
-    },
-    {
-      label: 'Line',
-      value: 'line-h',
-      icon: <Box sx={{ width: 28, height: 4, bgcolor: shapeBorderColor, borderRadius: 1 }} />,
-    },
-    {
-      label: 'Vertical Line',
-      value: 'line-v',
-      icon: <Box sx={{ width: 4, height: 28, bgcolor: shapeBorderColor, borderRadius: 1 }} />,
-    },
-    {
-      label: 'Triangle',
-      value: 'triangle',
+      label: "Square",
+      value: "rectangle",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            bgcolor: shapeFill ? shapeColor : "transparent",
+            border: `2px solid ${shapeBorderColor}`,
+            borderRadius: 2,
+          }}
+        />
+      ),
+    },
+    {
+      label: "Circle",
+      value: "circle",
+      icon: (
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            bgcolor: shapeFill ? shapeColor : "transparent",
+            border: `2px solid ${shapeBorderColor}`,
+            borderRadius: "50%",
+          }}
+        />
+      ),
+    },
+    {
+      label: "Line",
+      value: "line-h",
+      icon: (
+        <Box
+          sx={{
+            width: 28,
+            height: 4,
+            bgcolor: shapeBorderColor,
+            borderRadius: 1,
+          }}
+        />
+      ),
+    },
+    {
+      label: "Vertical Line",
+      value: "line-v",
+      icon: (
+        <Box
+          sx={{
+            width: 4,
+            height: 28,
+            bgcolor: shapeBorderColor,
+            borderRadius: 1,
+          }}
+        />
+      ),
+    },
+    {
+      label: "Triangle",
+      value: "triangle",
+      icon: (
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <polygon points="12,4 22,20 2,20" fill={shapeFill ? shapeColor : 'transparent'} stroke={shapeBorderColor} strokeWidth={2} />
+            <polygon
+              points="12,4 22,20 2,20"
+              fill={shapeFill ? shapeColor : "transparent"}
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
           </svg>
         </Box>
       ),
     },
     {
-      label: 'Arrow',
-      value: 'arrow',
+      label: "Arrow",
+      value: "arrow",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <line x1="4" y1="12" x2="20" y2="12" stroke={shapeBorderColor} strokeWidth={2} />
+            <line
+              x1="4"
+              y1="12"
+              x2="20"
+              y2="12"
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
             <polygon points="16,8 20,12 16,16" fill={shapeBorderColor} />
           </svg>
         </Box>
       ),
     },
     {
-      label: 'Star',
-      value: 'star',
+      label: "Star",
+      value: "star",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <polygon points="12,2 15,9 22,9 17,14 18,21 12,17 6,21 7,14 2,9 9,9" fill={shapeFill ? shapeColor : 'transparent'} stroke={shapeBorderColor} strokeWidth={2} />
+            <polygon
+              points="12,2 15,9 22,9 17,14 18,21 12,17 6,21 7,14 2,9 9,9"
+              fill={shapeFill ? shapeColor : "transparent"}
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
           </svg>
         </Box>
       ),
     },
     {
-      label: 'Heart',
-      value: 'heart',
+      label: "Heart",
+      value: "heart",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <path d="M12 21s-6-4.35-9-8.5C-1.5 7.5 4.5 3 12 10.5 19.5 3 25.5 7.5 21 12.5c-3 4.15-9 8.5-9 8.5z" fill={shapeFill ? shapeColor : 'transparent'} stroke={shapeBorderColor} strokeWidth={2} />
+            <path
+              d="M12 21s-6-4.35-9-8.5C-1.5 7.5 4.5 3 12 10.5 19.5 3 25.5 7.5 21 12.5c-3 4.15-9 8.5-9 8.5z"
+              fill={shapeFill ? shapeColor : "transparent"}
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
           </svg>
         </Box>
       ),
     },
     {
-      label: 'Diamond',
-      value: 'diamond',
+      label: "Diamond",
+      value: "diamond",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <polygon points="12,2 22,12 12,22 2,12" fill={shapeFill ? shapeColor : 'transparent'} stroke={shapeBorderColor} strokeWidth={2} />
+            <polygon
+              points="12,2 22,12 12,22 2,12"
+              fill={shapeFill ? shapeColor : "transparent"}
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
           </svg>
         </Box>
       ),
     },
     {
-      label: 'Pentagon',
-      value: 'pentagon',
+      label: "Pentagon",
+      value: "pentagon",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <polygon points="12,2 22,9 18,22 6,22 2,9" fill={shapeFill ? shapeColor : 'transparent'} stroke={shapeBorderColor} strokeWidth={2} />
+            <polygon
+              points="12,2 22,9 18,22 6,22 2,9"
+              fill={shapeFill ? shapeColor : "transparent"}
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
           </svg>
         </Box>
       ),
     },
     {
-      label: 'Hexagon',
-      value: 'hexagon',
+      label: "Hexagon",
+      value: "hexagon",
       icon: (
-        <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <svg width={24} height={24} viewBox="0 0 24 24">
-            <polygon points="6,2 18,2 22,12 18,22 6,22 2,12" fill={shapeFill ? shapeColor : 'transparent'} stroke={shapeBorderColor} strokeWidth={2} />
+            <polygon
+              points="6,2 18,2 22,12 18,22 6,22 2,12"
+              fill={shapeFill ? shapeColor : "transparent"}
+              stroke={shapeBorderColor}
+              strokeWidth={2}
+            />
           </svg>
         </Box>
       ),
@@ -1538,111 +1784,191 @@ if (!currentImage) currentImage = baseImage;
   // Pillowcase shape info
   const pillowcaseShapeInfo = [
     {
-      name: 'Circle Pillow',
-      description: 'A soft, round pillow for cozy comfort.'
+      name: "Circle Pillow",
+      description: "A soft, round pillow for cozy comfort.",
     },
     {
-      name: 'Heart Pillow',
-      description: 'A lovely heart-shaped pillow for special moments.'
+      name: "Heart Pillow",
+      description: "A lovely heart-shaped pillow for special moments.",
     },
     {
-      name: 'Star Pillow',
-      description: 'A star-shaped pillow to brighten any room.'
+      name: "Star Pillow",
+      description: "A star-shaped pillow to brighten any room.",
     },
     {
-      name: 'Square Pillow',
-      description: 'A classic square pillow for everyday use.'
-    }
+      name: "Square Pillow",
+      description: "A classic square pillow for everyday use.",
+    },
   ];
 
   // Product image info for each product type with multiple images
-  const productImageInfo: Record<string, { name: string; description: string }[]> = {
+  const productImageInfo: Record<
+    string,
+    { name: string; description: string }[]
+  > = {
     pen: [
-      { name: 'Classic Pen', description: 'A sleek, classic pen for everyday writing.' },
-      { name: 'Modern Pen', description: 'A modern pen with a stylish design.' },
+      {
+        name: "Classic Pen",
+        description: "A sleek, classic pen for everyday writing.",
+      },
+      {
+        name: "Modern Pen",
+        description: "A modern pen with a stylish design.",
+      },
     ],
     frame: [
-      { name: 'White Plain Frame', description: 'A luxurious frame for your cherished memories.' },
-      { name: 'Square Retro Frame', description: 'A bold frame for a modern look.' },
-      { name: 'Circular Retro Frame', description: 'A warm frame for a natural touch.' },
-      { name: 'Circular 90s Frame', description: 'A timeless classic frame for any photo.' },
+      {
+        name: "White Plain Frame",
+        description: "A luxurious frame for your cherished memories.",
+      },
+      {
+        name: "Square Retro Frame",
+        description: "A bold frame for a modern look.",
+      },
+      {
+        name: "Circular Retro Frame",
+        description: "A warm frame for a natural touch.",
+      },
+      {
+        name: "Circular 90s Frame",
+        description: "A timeless classic frame for any photo.",
+      },
     ],
     phonecase: [
-      { name: 'iPhone 8 Plus Phone Case', description: 'Premium case for iPhone 8 Plus.' },
-      { name: 'iPhone 10 Phone Case', description: 'Premium case for iPhone 10.' },
-      { name: 'iPhone 11 Phone Case', description: 'Premium case for iPhone 11.' },
-      { name: 'iPhone 12 Phone Case', description: 'Premium case for iPhone 12.' },
-      { name: 'iPhone 13 Pro Max / 12 Pro Max Phone Case', description: 'Premium case for iPhone 13 Pro Max or 12 Pro Max.' },
-      { name: 'iPhone 14 Phone Case', description: 'Premium case for iPhone 14.' },
-      { name: 'Samsung S21 Ultra Phone Case', description: 'Premium case for Samsung S21 Ultra.' },
-      { name: 'Samsung S23 Ultra Phone Case', description: 'Premium case for Samsung S23 Ultra.' },
+      {
+        name: "iPhone 8 Plus Phone Case",
+        description: "Premium case for iPhone 8 Plus.",
+      },
+      {
+        name: "iPhone 10 Phone Case",
+        description: "Premium case for iPhone 10.",
+      },
+      {
+        name: "iPhone 11 Phone Case",
+        description: "Premium case for iPhone 11.",
+      },
+      {
+        name: "iPhone 12 Phone Case",
+        description: "Premium case for iPhone 12.",
+      },
+      {
+        name: "iPhone 13 Pro Max / 12 Pro Max Phone Case",
+        description: "Premium case for iPhone 13 Pro Max or 12 Pro Max.",
+      },
+      {
+        name: "iPhone 14 Phone Case",
+        description: "Premium case for iPhone 14.",
+      },
+      {
+        name: "Samsung S21 Ultra Phone Case",
+        description: "Premium case for Samsung S21 Ultra.",
+      },
+      {
+        name: "Samsung S23 Ultra Phone Case",
+        description: "Premium case for Samsung S23 Ultra.",
+      },
     ],
     keychain: [
-      { name: 'Classic Keychain', description: 'A simple and classic keychain.' },
-      { name: 'White Keychain', description: 'A stylish white keychain.' },
-      { name: 'Metal Keychain', description: 'A durable metal keychain.' },
-      { name: 'Metal Keychain 2', description: 'A second style of metal keychain.' },
-      { name: 'Circle Keychain', description: 'A round keychain for a unique look.' },
-      { name: 'Leather Keychain', description: 'A premium leather keychain.' },
+      {
+        name: "Classic Keychain",
+        description: "A simple and classic keychain.",
+      },
+      { name: "White Keychain", description: "A stylish white keychain." },
+      { name: "Metal Keychain", description: "A durable metal keychain." },
+      {
+        name: "Metal Keychain 2",
+        description: "A second style of metal keychain.",
+      },
+      {
+        name: "Circle Keychain",
+        description: "A round keychain for a unique look.",
+      },
+      { name: "Leather Keychain", description: "A premium leather keychain." },
     ],
     waterbottle: [
-      { name: 'White Bottle 1', description: 'A classic white water bottle.' },
-      { name: 'White Bottle 2', description: 'A modern white water bottle.' },
-      { name: 'White Bottle 3', description: 'A stylish white water bottle.' },
+      { name: "White Bottle 1", description: "A classic white water bottle." },
+      { name: "White Bottle 2", description: "A modern white water bottle." },
+      { name: "White Bottle 3", description: "A stylish white water bottle." },
     ],
     pillowcase: [
-      { name: 'Circle Pillow', description: 'A soft, round pillow for cozy comfort.' },
-      { name: 'Heart Pillow', description: 'A lovely heart-shaped pillow for special moments.' },
-      { name: 'Star Pillow', description: 'A star-shaped pillow to brighten any room.' },
-      { name: 'Square Pillow', description: 'A classic square pillow for everyday use.' },
+      {
+        name: "Circle Pillow",
+        description: "A soft, round pillow for cozy comfort.",
+      },
+      {
+        name: "Heart Pillow",
+        description: "A lovely heart-shaped pillow for special moments.",
+      },
+      {
+        name: "Star Pillow",
+        description: "A star-shaped pillow to brighten any room.",
+      },
+      {
+        name: "Square Pillow",
+        description: "A classic square pillow for everyday use.",
+      },
     ],
     notebook: [
-      { name: 'Notebook Front', description: 'Notebook with customizable front cover.' },
-      { name: 'Notebook Back', description: 'Notebook with customizable back cover.' },
+      {
+        name: "Notebook Front",
+        description: "Notebook with customizable front cover.",
+      },
+      {
+        name: "Notebook Back",
+        description: "Notebook with customizable back cover.",
+      },
     ],
   };
 
   // Defensive: If productType or baseProduct is missing, show a friendly error
-  if (!productType || !baseProduct || !productImages[productType as keyof typeof productImages]) {
+  if (
+    !productType ||
+    !baseProduct ||
+    !productImages[productType as keyof typeof productImages]
+  ) {
     return (
       <Container maxWidth="sm" sx={{ py: 8 }}>
         <Alert severity="error" sx={{ mt: 4 }}>
-          Sorry, this product category is not available for customization. Please go back and choose another category.
+          Sorry, this product category is not available for customization.
+          Please go back and choose another category.
         </Alert>
       </Container>
     );
   }
 
-  const keychainTypeInfo: Record<string, { image: string; name: string; description: string }> = {
+  const keychainTypeInfo: Record<
+    string,
+    { image: string; name: string; description: string }
+  > = {
     CircleKeychain: {
       image: circleKeychain,
-      name: 'Circle Keychain',
-      description: 'Classic round keychain for your custom design.'
+      name: "Circle Keychain",
+      description: "Classic round keychain for your custom design.",
     },
     RectangleKeychain: {
       image: squareFront,
-      name: 'Rectangle Keychain',
-      description: 'Sleek rectangle keychain for photos or text.'
+      name: "Rectangle Keychain",
+      description: "Sleek rectangle keychain for photos or text.",
     },
     StarKeychain: {
       image: starshapedBack,
-      name: 'Star Keychain',
-      description: 'Fun star-shaped keychain for a unique look.'
+      name: "Star Keychain",
+      description: "Fun star-shaped keychain for a unique look.",
     },
     RectangleMetalKeychain: {
       image: planemetalkeychain,
-      name: 'Rectangle Metal Keychain',
-      description: 'Premium metal keychain for durability.'
+      name: "Rectangle Metal Keychain",
+      description: "Premium metal keychain for durability.",
     },
     OvalKeychain: {
       image: planewhitekeychain,
-      name: 'Oval Keychain',
-      description: 'Elegant oval keychain for your design.'
+      name: "Oval Keychain",
+      description: "Elegant oval keychain for your design.",
     },
     LeatherKeychain: {
       image: keychainLeather,
-      name: 'Leather Keychain',
-      description: 'Luxurious leather keychain for a classic touch.'
+      name: "Leather Keychain",
+      description: "Luxurious leather keychain for a classic touch.",
     },
   };
 
@@ -1654,28 +1980,54 @@ if (!currentImage) currentImage = baseImage;
 
   // Move these to the top of the component, before any use of them:
 
-
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 4 }}>
-        <Typography variant="h4" fontWeight={900} gutterBottom align="center" sx={{ fontSize: { xs: '1.7rem', md: '2.1rem' }, fontWeight: 800, letterSpacing: 0.5 }}>
-          Customize Your {selectedType ? selectedType.replace(/([A-Z])/g, ' $1').trim() : (productType ? productType.charAt(0).toUpperCase() + productType.slice(1).replace("-", " ") : "Product")}
+        <Typography
+          variant="h4"
+          fontWeight={900}
+          gutterBottom
+          align="center"
+          sx={{
+            fontSize: { xs: "1.7rem", md: "2.1rem" },
+            fontWeight: 800,
+            letterSpacing: 0.5,
+          }}
+        >
+          Customize Your{" "}
+          {selectedType
+            ? selectedType.replace(/([A-Z])/g, " $1").trim()
+            : productType
+            ? productType.charAt(0).toUpperCase() +
+              productType.slice(1).replace("-", " ")
+            : "Product"}
         </Typography>
-        <Box sx={{ width: 60, height: 3, bgcolor: '#F46A6A', borderRadius: 2, mx: 'auto', mb: 3 }} />
+        <Box
+          sx={{
+            width: 60,
+            height: 3,
+            bgcolor: "#F46A6A",
+            borderRadius: 2,
+            mx: "auto",
+            mb: 3,
+          }}
+        />
 
         {/* Phonecase type dropdown - moved above the canvas/image area */}
         {productType === "phonecase" && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
             <FormControl size="medium" sx={{ minWidth: 140, maxWidth: 180 }}>
               <InputLabel>Phonecase Model</InputLabel>
               <Select
                 value={currentArrayIndex}
                 label="Phonecase Model"
-                onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+                onChange={(e) => setCurrentArrayIndex(Number(e.target.value))}
                 sx={{ minWidth: 180, maxWidth: 220, mb: 2 }}
               >
                 {productImageInfo.phonecase.map((info, idx) => (
-                  <MenuItem key={info.name} value={idx}>{info.name}</MenuItem>
+                  <MenuItem key={info.name} value={idx}>
+                    {info.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -1683,7 +2035,7 @@ if (!currentImage) currentImage = baseImage;
         )}
 
         {productType === "phonecase" && (
-          <Box sx={{ textAlign: 'center', mb: 2 }}>
+          <Box sx={{ textAlign: "center", mb: 2 }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
               {productImageInfo.phonecase[currentArrayIndex]?.name}
             </Typography>
@@ -1728,18 +2080,24 @@ if (!currentImage) currentImage = baseImage;
               }}
             >
               <ToggleButton value="front">Front</ToggleButton>
-              {(productImages[productType as keyof typeof productImages] as ProductView)?.back && (
-                <ToggleButton value="back">Back</ToggleButton>
-              )}
-              {(productImages[productType as keyof typeof productImages] as ProductView)?.side && (
-                <ToggleButton value="side">Side</ToggleButton>
-              )}
+              {(
+                productImages[
+                  productType as keyof typeof productImages
+                ] as ProductView
+              )?.back && <ToggleButton value="back">Back</ToggleButton>}
+              {(
+                productImages[
+                  productType as keyof typeof productImages
+                ] as ProductView
+              )?.side && <ToggleButton value="side">Side</ToggleButton>}
             </ToggleButtonGroup>
           </Box>
         ) : null}
 
         {/* Size, Frame Type, and Keychain Type Selection - Now inline */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}
+        >
           {productType === "notebook" && (
             <TextField
               select
@@ -1774,7 +2132,7 @@ if (!currentImage) currentImage = baseImage;
               select
               label="Pen Type"
               value={currentArrayIndex}
-              onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+              onChange={(e) => setCurrentArrayIndex(Number(e.target.value))}
               sx={{ minWidth: 150 }}
             >
               {productImageInfo.pen.map((info, idx) => (
@@ -1785,14 +2143,28 @@ if (!currentImage) currentImage = baseImage;
             </TextField>
           )}
           {productType === "waterbottle" && hasArrayViews && (
-            <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-
-              <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+            <Box
+              sx={{
+                mb: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  mt: 1,
+                }}
+              >
                 <TextField
                   select
                   label="Bottle Type"
                   value={currentArrayIndex}
-                  onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+                  onChange={(e) => setCurrentArrayIndex(Number(e.target.value))}
                   sx={{ minWidth: 180 }}
                 >
                   {productImageInfo.waterbottle.map((info, idx) => (
@@ -1802,14 +2174,22 @@ if (!currentImage) currentImage = baseImage;
                   ))}
                 </TextField>
               </Box>
-         
+
               {/* Size dropdown for waterbottle */}
-              <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2, mt:2}}>
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  mb: 2,
+                  mt: 2,
+                }}
+              >
                 <TextField
                   select
                   label="Size"
                   value={selectedWaterBottleSize}
-                  onChange={e => setSelectedWaterBottleSize(e.target.value)}
+                  onChange={(e) => setSelectedWaterBottleSize(e.target.value)}
                   sx={{ minWidth: 120 }}
                 >
                   <MenuItem value="1 Liter">1 Liter</MenuItem>
@@ -1823,7 +2203,7 @@ if (!currentImage) currentImage = baseImage;
               select
               label="Frame Type"
               value={selectedFrameIndex}
-              onChange={e => {
+              onChange={(e) => {
                 setSelectedFrameIndex(Number(e.target.value));
                 setCurrentArrayIndex(Number(e.target.value));
               }}
@@ -1840,7 +2220,7 @@ if (!currentImage) currentImage = baseImage;
               select
               label="Keychain Type"
               value={currentArrayIndex}
-              onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+              onChange={(e) => setCurrentArrayIndex(Number(e.target.value))}
               sx={{ minWidth: 150 }}
             >
               <MenuItem value={0}>Circle Keychain</MenuItem>
@@ -1854,14 +2234,21 @@ if (!currentImage) currentImage = baseImage;
         </Box>
 
         {/* Pillowcase shape dropdown (right-aligned below current view) */}
-        {productType === 'pillowcase' && hasArrayViews && (
+        {productType === "pillowcase" && hasArrayViews && (
           <>
-            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-end",
+                mb: 2,
+              }}
+            >
               <TextField
                 select
                 label="Pillowcase Shape"
                 value={currentArrayIndex}
-                onChange={e => setCurrentArrayIndex(Number(e.target.value))}
+                onChange={(e) => setCurrentArrayIndex(Number(e.target.value))}
                 sx={{ minWidth: 200 }}
               >
                 <MenuItem value={0}>Circle</MenuItem>
@@ -1870,7 +2257,7 @@ if (!currentImage) currentImage = baseImage;
                 <MenuItem value={3}>Square</MenuItem>
               </TextField>
             </Box>
-            <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Box sx={{ textAlign: "center", mb: 2 }}>
               <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
                 {pillowcaseShapeInfo[currentArrayIndex]?.name}
               </Typography>
@@ -1911,51 +2298,64 @@ if (!currentImage) currentImage = baseImage;
               }}
             />
           ) : (
-            <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#f8d7da", color: "#721c24", borderRadius: 2 }}>
-              <Typography variant="h6">Image not available for this phonecase model. Check the console for details.</Typography>
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "#f8d7da",
+                color: "#721c24",
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="h6">
+                Image not available for this phonecase model. Check the console
+                for details.
+              </Typography>
             </Box>
           )}
           {/* Color overlay as tint for all products, but mask for phonecase */}
-          {color !== "#ffffff" && (
-            productType === "phonecase" ? (
-            <Box
-              sx={{
+          {color !== "#ffffff" &&
+            (productType === "phonecase" ? (
+              <Box
+                sx={{
                   position: "absolute",
                   top: 0,
                   left: 0,
-                width: "100%",
-                height: "100%",
+                  width: "100%",
+                  height: "100%",
                   zIndex: 2,
                   pointerEvents: "none",
                   background: color,
                   opacity: 0.32,
                   WebkitMaskImage: `url(${currentImage})`,
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskSize: 'contain',
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskSize: "contain",
                   maskImage: `url(${currentImage})`,
-                  maskRepeat: 'no-repeat',
-                  maskSize: 'contain',
-                  borderRadius: 'inherit',
+                  maskRepeat: "no-repeat",
+                  maskSize: "contain",
+                  borderRadius: "inherit",
                 }}
               />
             ) : (
               <Box
                 sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
                   width: "100%",
                   height: "100%",
                   zIndex: 2,
-                pointerEvents: "none",
+                  pointerEvents: "none",
                   background: color,
                   opacity: 0.32,
                   mixBlendMode: "multiply",
                   borderRadius: "inherit",
                 }}
               />
-            )
-          )}
+            ))}
           {tab === 6 && (
             <Box
               sx={{
@@ -2023,8 +2423,12 @@ if (!currentImage) currentImage = baseImage;
                 if (el.type === "text") setEditText(el.content);
               }}
             >
-              {el.type === "image" && (
-                el.shape === "heart" || el.shape === "star" || el.shape === "circle" || el.shape === "oval" || el.shape === "square" ? (
+              {el.type === "image" &&
+                (el.shape === "heart" ||
+                el.shape === "star" ||
+                el.shape === "circle" ||
+                el.shape === "oval" ||
+                el.shape === "square" ? (
                   <svg
                     width={el.width}
                     height={el.height}
@@ -2034,27 +2438,61 @@ if (!currentImage) currentImage = baseImage;
                     <defs>
                       {el.shape === "heart" && (
                         <clipPath id={`heart-clip-${el.id}`}>
-                          <path d={`M ${el.width/2},${el.height*0.3} C ${el.width*0.35},${el.height*0.0} ${el.width*0.0},${el.height*0.25} ${el.width/2},${el.height*0.8} C ${el.width},${el.height*0.25} ${el.width*0.65},${el.height*0.0} ${el.width/2},${el.height*0.3} Z`} />
+                          <path
+                            d={`M ${el.width / 2},${el.height * 0.3} C ${
+                              el.width * 0.35
+                            },${el.height * 0.0} ${el.width * 0.0},${
+                              el.height * 0.25
+                            } ${el.width / 2},${el.height * 0.8} C ${
+                              el.width
+                            },${el.height * 0.25} ${el.width * 0.65},${
+                              el.height * 0.0
+                            } ${el.width / 2},${el.height * 0.3} Z`}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "star" && (
                         <clipPath id={`star-clip-${el.id}`}>
-                          <polygon points={getStarPoints(el.width, el.height, 5, el.width/2, el.height/2, Math.min(el.width,el.height)/2, Math.min(el.width,el.height)/4)} />
+                          <polygon
+                            points={getStarPoints(
+                              el.width,
+                              el.height,
+                              5,
+                              el.width / 2,
+                              el.height / 2,
+                              Math.min(el.width, el.height) / 2,
+                              Math.min(el.width, el.height) / 4
+                            )}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "circle" && (
                         <clipPath id={`circle-clip-${el.id}`}>
-                          <circle cx={el.width/2} cy={el.height/2} r={Math.min(el.width,el.height)/2} />
+                          <circle
+                            cx={el.width / 2}
+                            cy={el.height / 2}
+                            r={Math.min(el.width, el.height) / 2}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "oval" && (
                         <clipPath id={`oval-clip-${el.id}`}>
-                          <ellipse cx={el.width/2} cy={el.height/2} rx={el.width/2} ry={el.height/2} />
+                          <ellipse
+                            cx={el.width / 2}
+                            cy={el.height / 2}
+                            rx={el.width / 2}
+                            ry={el.height / 2}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "square" && (
                         <clipPath id={`square-clip-${el.id}`}>
-                          <rect x={0} y={0} width={el.width} height={el.height} />
+                          <rect
+                            x={0}
+                            y={0}
+                            width={el.width}
+                            height={el.height}
+                          />
                         </clipPath>
                       )}
                     </defs>
@@ -2073,7 +2511,9 @@ if (!currentImage) currentImage = baseImage;
                     component="img"
                     src={el.content}
                     alt="uploaded"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
                     sx={{
                       width: "100%",
                       height: "100%",
@@ -2082,63 +2522,135 @@ if (!currentImage) currentImage = baseImage;
                       borderRadius: el.shape === "circle" ? "50%" : 0,
                       clipPath:
                         el.shape === "oval"
-                          ? `ellipse(${(el.shapeSize || 100) / 2}% ${(el.shapeSize || 100) * 0.4 / 1}% at 50% 50%)`
+                          ? `ellipse(${(el.shapeSize || 100) / 2}% ${
+                              ((el.shapeSize || 100) * 0.4) / 1
+                            }% at 50% 50%)`
                           : undefined,
                     }}
                   />
-                )
-              )}
+                ))}
               {el.type === "text" && (
                 <Box
                   sx={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
                   }}
                 >
-                  {el.textStyle === 'arcUp' ? (
-                    <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                  {el.textStyle === "arcUp" ? (
+                    <svg
+                      width={el.width}
+                      height={el.height}
+                      viewBox={`0 0 ${el.width} ${el.height}`}
+                      style={{ width: "100%", height: "100%" }}
+                    >
                       <defs>
-                        <path id={`arcUp-preview-${el.id}`} d={`M20,${el.height - 20} Q${el.width / 2},${-el.height / 2} ${el.width - 20},${el.height - 20}`} fill="none" />
+                        <path
+                          id={`arcUp-preview-${el.id}`}
+                          d={`M20,${el.height - 20} Q${el.width / 2},${
+                            -el.height / 2
+                          } ${el.width - 20},${el.height - 20}`}
+                          fill="none"
+                        />
                       </defs>
                       <text
                         fill={el.color || textColor}
                         fontWeight="700"
-                        fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: 'straight', lineHeight })}
+                        fontSize={getAutoFitFontSize({
+                          text: el.content,
+                          fontFamily: el.fontFamily,
+                          boxWidth: el.width,
+                          boxHeight: el.height,
+                          textStyle: "straight",
+                          lineHeight,
+                        })}
                         textAnchor="middle"
                       >
-                        <textPath xlinkHref={`#arcUp-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
+                        <textPath
+                          xlinkHref={`#arcUp-preview-${el.id}`}
+                          startOffset="50%"
+                        >
+                          {el.content}
+                        </textPath>
                       </text>
                     </svg>
-                  ) : el.textStyle === 'arcDown' ? (
-                    <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                  ) : el.textStyle === "arcDown" ? (
+                    <svg
+                      width={el.width}
+                      height={el.height}
+                      viewBox={`0 0 ${el.width} ${el.height}`}
+                      style={{ width: "100%", height: "100%" }}
+                    >
                       <defs>
-                        <path id={`arcDown-preview-${el.id}`} d={`M20,20 Q${el.width / 2},${el.height * 1.2} ${el.width - 20},20`} fill="none" />
+                        <path
+                          id={`arcDown-preview-${el.id}`}
+                          d={`M20,20 Q${el.width / 2},${el.height * 1.2} ${
+                            el.width - 20
+                          },20`}
+                          fill="none"
+                        />
                       </defs>
                       <text
                         fill={el.color || textColor}
                         fontWeight="700"
-                        fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle, lineHeight })}
+                        fontSize={getAutoFitFontSize({
+                          text: el.content,
+                          fontFamily: el.fontFamily,
+                          boxWidth: el.width,
+                          boxHeight: el.height,
+                          textStyle: el.textStyle,
+                          lineHeight,
+                        })}
                         textAnchor="middle"
                       >
-                        <textPath xlinkHref={`#arcDown-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
+                        <textPath
+                          xlinkHref={`#arcDown-preview-${el.id}`}
+                          startOffset="50%"
+                        >
+                          {el.content}
+                        </textPath>
                       </text>
                     </svg>
-                  ) : el.textStyle === 'wavy' ? (
-                    <svg width={el.width} height={el.height} viewBox={`0 0 ${el.width} ${el.height}`} style={{ width: '100%', height: '100%' }}>
+                  ) : el.textStyle === "wavy" ? (
+                    <svg
+                      width={el.width}
+                      height={el.height}
+                      viewBox={`0 0 ${el.width} ${el.height}`}
+                      style={{ width: "100%", height: "100%" }}
+                    >
                       <defs>
-                        <path id={`wavy-preview-${el.id}`} d={`M20,${el.height / 2} Q${el.width / 4},${el.height / 2 - 20} ${el.width / 2},${el.height / 2} T${el.width - 20},${el.height / 2}`} fill="none" />
+                        <path
+                          id={`wavy-preview-${el.id}`}
+                          d={`M20,${el.height / 2} Q${el.width / 4},${
+                            el.height / 2 - 20
+                          } ${el.width / 2},${el.height / 2} T${
+                            el.width - 20
+                          },${el.height / 2}`}
+                          fill="none"
+                        />
                       </defs>
                       <text
                         fill={el.color || textColor}
                         fontWeight="700"
-                        fontSize={getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle, lineHeight })}
+                        fontSize={getAutoFitFontSize({
+                          text: el.content,
+                          fontFamily: el.fontFamily,
+                          boxWidth: el.width,
+                          boxHeight: el.height,
+                          textStyle: el.textStyle,
+                          lineHeight,
+                        })}
                         textAnchor="middle"
                       >
-                        <textPath xlinkHref={`#wavy-preview-${el.id}`} startOffset="50%">{el.content}</textPath>
+                        <textPath
+                          xlinkHref={`#wavy-preview-${el.id}`}
+                          startOffset="50%"
+                        >
+                          {el.content}
+                        </textPath>
                       </text>
                     </svg>
                   ) : (
@@ -2147,19 +2659,26 @@ if (!currentImage) currentImage = baseImage;
                         color: el.color || textColor,
                         fontWeight: 700,
                         textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         textAlign: textAlign,
                         fontFamily: el.fontFamily || "Arial, sans-serif",
-                        fontSize: getAutoFitFontSize({ text: el.content, fontFamily: el.fontFamily, boxWidth: el.width, boxHeight: el.height, textStyle: el.textStyle, lineHeight }),
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-line',
+                        fontSize: getAutoFitFontSize({
+                          text: el.content,
+                          fontFamily: el.fontFamily,
+                          boxWidth: el.width,
+                          boxHeight: el.height,
+                          textStyle: el.textStyle,
+                          lineHeight,
+                        }),
+                        wordBreak: "break-word",
+                        whiteSpace: "pre-line",
                         lineHeight: lineHeight,
-                        overflow: 'hidden',
-                        fontStyle: isItalic ? 'italic' : 'normal',
+                        overflow: "hidden",
+                        fontStyle: isItalic ? "italic" : "normal",
                       }}
                     >
                       {el.content}
@@ -2182,8 +2701,12 @@ if (!currentImage) currentImage = baseImage;
                   {el.content}
                 </Typography>
               )}
-              {el.type === "art" && (
-                el.shape === "heart" || el.shape === "star" || el.shape === "circle" || el.shape === "oval" || el.shape === "square" ? (
+              {el.type === "art" &&
+                (el.shape === "heart" ||
+                el.shape === "star" ||
+                el.shape === "circle" ||
+                el.shape === "oval" ||
+                el.shape === "square" ? (
                   <svg
                     width={el.width}
                     height={el.height}
@@ -2193,27 +2716,61 @@ if (!currentImage) currentImage = baseImage;
                     <defs>
                       {el.shape === "heart" && (
                         <clipPath id={`heart-clip-${el.id}`}>
-                          <path d={`M ${el.width/2},${el.height*0.3} C ${el.width*0.35},${el.height*0.0} ${el.width*0.0},${el.height*0.25} ${el.width/2},${el.height*0.8} C ${el.width},${el.height*0.25} ${el.width*0.65},${el.height*0.0} ${el.width/2},${el.height*0.3} Z`} />
+                          <path
+                            d={`M ${el.width / 2},${el.height * 0.3} C ${
+                              el.width * 0.35
+                            },${el.height * 0.0} ${el.width * 0.0},${
+                              el.height * 0.25
+                            } ${el.width / 2},${el.height * 0.8} C ${
+                              el.width
+                            },${el.height * 0.25} ${el.width * 0.65},${
+                              el.height * 0.0
+                            } ${el.width / 2},${el.height * 0.3} Z`}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "star" && (
                         <clipPath id={`star-clip-${el.id}`}>
-                          <polygon points={getStarPoints(el.width, el.height, 5, el.width/2, el.height/2, Math.min(el.width,el.height)/2, Math.min(el.width,el.height)/4)} />
+                          <polygon
+                            points={getStarPoints(
+                              el.width,
+                              el.height,
+                              5,
+                              el.width / 2,
+                              el.height / 2,
+                              Math.min(el.width, el.height) / 2,
+                              Math.min(el.width, el.height) / 4
+                            )}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "circle" && (
                         <clipPath id={`circle-clip-${el.id}`}>
-                          <circle cx={el.width/2} cy={el.height/2} r={Math.min(el.width,el.height)/2} />
+                          <circle
+                            cx={el.width / 2}
+                            cy={el.height / 2}
+                            r={Math.min(el.width, el.height) / 2}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "oval" && (
                         <clipPath id={`oval-clip-${el.id}`}>
-                          <ellipse cx={el.width/2} cy={el.height/2} rx={el.width/2} ry={el.height/2} />
+                          <ellipse
+                            cx={el.width / 2}
+                            cy={el.height / 2}
+                            rx={el.width / 2}
+                            ry={el.height / 2}
+                          />
                         </clipPath>
                       )}
                       {el.shape === "square" && (
                         <clipPath id={`square-clip-${el.id}`}>
-                          <rect x={0} y={0} width={el.width} height={el.height} />
+                          <rect
+                            x={0}
+                            y={0}
+                            width={el.width}
+                            height={el.height}
+                          />
                         </clipPath>
                       )}
                     </defs>
@@ -2232,7 +2789,9 @@ if (!currentImage) currentImage = baseImage;
                     component="img"
                     src={el.content}
                     alt="art"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
                     sx={{
                       width: "100%",
                       height: "100%",
@@ -2241,14 +2800,15 @@ if (!currentImage) currentImage = baseImage;
                       borderRadius: el.shape === "circle" ? "50%" : 0,
                       clipPath:
                         el.shape === "oval"
-                          ? `ellipse(${(el.shapeSize || 100) / 2}% ${(el.shapeSize || 100) * 0.4 / 1}% at 50% 50%)`
+                          ? `ellipse(${(el.shapeSize || 100) / 2}% ${
+                              ((el.shapeSize || 100) * 0.4) / 1
+                            }% at 50% 50%)`
                           : undefined,
                     }}
                   />
-                )
-              )}
-              {el.type === "shape" && (
-                el.content === "rectangle" ? (
+                ))}
+              {el.type === "shape" &&
+                (el.content === "rectangle" ? (
                   <Box
                     sx={{
                       width: "100%",
@@ -2317,8 +2877,20 @@ if (!currentImage) currentImage = baseImage;
                   />
                 ) : el.content === "arrow" ? (
                   <svg width="100%" height="100%" viewBox="0 0 100 100">
-                    <line x1="10" y1="50" x2="70" y2="50" stroke={el.borderColor} strokeWidth="8" />
-                    <polygon points="70,35 95,50 70,65" fill={el.fill ? el.color : el.borderColor} stroke={el.borderColor} strokeWidth="4" />
+                    <line
+                      x1="10"
+                      y1="50"
+                      x2="70"
+                      y2="50"
+                      stroke={el.borderColor}
+                      strokeWidth="8"
+                    />
+                    <polygon
+                      points="70,35 95,50 70,65"
+                      fill={el.fill ? el.color : el.borderColor}
+                      stroke={el.borderColor}
+                      strokeWidth="4"
+                    />
                   </svg>
                 ) : el.content === "pentagon" ? (
                   <svg width="100%" height="100%" viewBox="0 0 100 100">
@@ -2367,13 +2939,21 @@ if (!currentImage) currentImage = baseImage;
                   </svg>
                 ) : el.content === "square" ? (
                   <svg width="100%" height="100%" viewBox="0 0 100 100">
-                    <rect x={0} y={0} width={100} height={100} fill={el.fill ? el.color : "transparent"} />
+                    <rect
+                      x={0}
+                      y={0}
+                      width={100}
+                      height={100}
+                      fill={el.fill ? el.color : "transparent"}
+                    />
                   </svg>
                 ) : null)}
               <Button
                 size="small"
                 color="error"
-                onClick={() => setElements(elements.filter((e) => e.id !== el.id))}
+                onClick={() =>
+                  setElements(elements.filter((e) => e.id !== el.id))
+                }
                 sx={{
                   position: "absolute",
                   top: -8,
@@ -2468,15 +3048,15 @@ if (!currentImage) currentImage = baseImage;
               {selectedElementId === el.id && (
                 <div
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
-                    width: '100%',
-                    height: '100%',
-                    cursor: 'grab',
+                    width: "100%",
+                    height: "100%",
+                    cursor: "grab",
                     zIndex: 10,
                   }}
-                  onMouseDown={e => startPanImage(e, el.id)}
+                  onMouseDown={(e) => startPanImage(e, el.id)}
                 />
               )}
             </Rnd>
@@ -2644,12 +3224,12 @@ if (!currentImage) currentImage = baseImage;
               borderRadius: 8,
               fontWeight: 700,
               px: 4,
-              bgcolor: '#e05555',
-              color: 'white',
+              bgcolor: "#e05555",
+              color: "white",
               boxShadow: 2,
               mb: 2,
-              '&:hover': {
-                bgcolor: '#c94444',
+              "&:hover": {
+                bgcolor: "#c94444",
                 boxShadow: 3,
               },
             }}
@@ -2665,11 +3245,11 @@ if (!currentImage) currentImage = baseImage;
           centered
           sx={{
             mb: 2,
-            '& .MuiTabs-indicator': {
-              backgroundColor: '#222', // black underline
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#222", // black underline
             },
-            '& .Mui-selected': {
-              color: '#222 !important', // black text for selected tab
+            "& .Mui-selected": {
+              color: "#222 !important", // black text for selected tab
             },
           }}
         >
@@ -2730,34 +3310,63 @@ if (!currentImage) currentImage = baseImage;
           </Box>
         )}
         {tab === 1 && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Paper elevation={6} sx={{
-              p: { xs: 2, sm: 3 }, // reduce padding
-              borderRadius: 5,
-              minWidth: { xs: '100%', sm: 400 },
-              maxWidth: 650,
-              width: '100%',
-              minHeight: 200, // reduce minHeight
-              pb: 6, // less bottom padding
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              background: '#fff',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-              border: '1.5px solid #f3f3f3',
-              gap: 0,
-            }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+            <Paper
+              elevation={6}
+              sx={{
+                p: { xs: 2, sm: 3 }, // reduce padding
+                borderRadius: 5,
+                minWidth: { xs: "100%", sm: 400 },
+                maxWidth: 650,
+                width: "100%",
+                minHeight: 200, // reduce minHeight
+                pb: 6, // less bottom padding
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                background: "#fff",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                border: "1.5px solid #f3f3f3",
+                gap: 0,
+              }}
+            >
               {/* Live Preview */}
               {text && (
-                <Box sx={{ mb: 3, width: '100%', textAlign: 'center', p: 2, borderRadius: 3, background: '#f8fafd', border: '1px solid #f0f0f0', minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(244,106,106,0.04)' }}>
+                <Box
+                  sx={{
+                    mb: 3,
+                    width: "100%",
+                    textAlign: "center",
+                    p: 2,
+                    borderRadius: 3,
+                    background: "#f8fafd",
+                    border: "1px solid #f0f0f0",
+                    minHeight: 48,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 2px 8px rgba(244,106,106,0.04)",
+                  }}
+                >
                   <Typography
                     sx={{
                       color: textColor,
                       fontFamily: selectedFont,
                       fontWeight: isBold ? 700 : fontWeight,
-                      fontStyle: isItalic ? 'italic' : 'normal',
-                      fontSize: fontSize !== 'auto' ? fontSize : getAutoFitFontSize({ text, fontFamily: selectedFont, boxWidth: 500, boxHeight: 60, textStyle, lineHeight }),
-                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      fontStyle: isItalic ? "italic" : "normal",
+                      fontSize:
+                        fontSize !== "auto"
+                          ? fontSize
+                          : getAutoFitFontSize({
+                              text,
+                              fontFamily: selectedFont,
+                              boxWidth: 500,
+                              boxHeight: 60,
+                              textStyle,
+                              lineHeight,
+                            }),
+                      textShadow: "0 1px 2px rgba(0,0,0,0.08)",
                     }}
                   >
                     {text}
@@ -2768,10 +3377,36 @@ if (!currentImage) currentImage = baseImage;
                 </Box>
               )}
               {/* Top row: font, style, alignment, line height (all in one line) */}
-              <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 1 }}> {/* reduce mb */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%', mb: 1 }}> {/* reduce mb */}
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  mb: 1,
+                }}
+              >
+                {" "}
+                {/* reduce mb */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 2,
+                    width: "100%",
+                    mb: 1,
+                  }}
+                >
+                  {" "}
+                  {/* reduce mb */}
                   {/* Font Family */}
-                  <Select size="small" value={selectedFont} onChange={e => setSelectedFont(e.target.value)} sx={{ minWidth: 140, height: 44 }}>
+                  <Select
+                    size="small"
+                    value={selectedFont}
+                    onChange={(e) => setSelectedFont(e.target.value)}
+                    sx={{ minWidth: 140, height: 44 }}
+                  >
                     <MenuItem value="Arial">Arial</MenuItem>
                     <MenuItem value="Times New Roman">Times New Roman</MenuItem>
                     <MenuItem value="Comic Sans MS">Comic Sans MS</MenuItem>
@@ -2779,29 +3414,99 @@ if (!currentImage) currentImage = baseImage;
                     <MenuItem value="Cursive">Cursive</MenuItem>
                   </Select>
                   {/* Style */}
-                  <Select size="small" value={textStyle} onChange={e => setTextStyle(e.target.value as any)} sx={{ minWidth: 120, height: 44 }}>
+                  <Select
+                    size="small"
+                    value={textStyle}
+                    onChange={(e) => setTextStyle(e.target.value as any)}
+                    sx={{ minWidth: 120, height: 44 }}
+                  >
                     <MenuItem value="straight">Straight</MenuItem>
                     <MenuItem value="arcUp">Arc Up</MenuItem>
                     <MenuItem value="arcDown">Arc Down</MenuItem>
                     <MenuItem value="wavy">Wavy</MenuItem>
                   </Select>
                   {/* Alignment */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fafbfc', borderRadius: 2, p: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                    <IconButton size="small" color={textAlign === 'left' ? 'primary' : 'default'} onClick={() => setTextAlign('left')}><FormatAlignLeft /></IconButton>
-                    <IconButton size="small" color={textAlign === 'center' ? 'primary' : 'default'} onClick={() => setTextAlign('center')}><FormatAlignCenter /></IconButton>
-                    <IconButton size="small" color={textAlign === 'right' ? 'primary' : 'default'} onClick={() => setTextAlign('right')}><FormatAlignRight /></IconButton>
-                    <IconButton size="small" color={textAlign === 'justify' ? 'primary' : 'default'} onClick={() => setTextAlign('justify')}><FormatAlignJustify /></IconButton>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      bgcolor: "#fafbfc",
+                      borderRadius: 2,
+                      p: 0.5,
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <IconButton
+                      size="small"
+                      color={textAlign === "left" ? "primary" : "default"}
+                      onClick={() => setTextAlign("left")}
+                    >
+                      <FormatAlignLeft />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color={textAlign === "center" ? "primary" : "default"}
+                      onClick={() => setTextAlign("center")}
+                    >
+                      <FormatAlignCenter />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color={textAlign === "right" ? "primary" : "default"}
+                      onClick={() => setTextAlign("right")}
+                    >
+                      <FormatAlignRight />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color={textAlign === "justify" ? "primary" : "default"}
+                      onClick={() => setTextAlign("justify")}
+                    >
+                      <FormatAlignJustify />
+                    </IconButton>
                   </Box>
                   {/* Bold */}
-                  <Button variant={isBold ? 'contained' : 'outlined'} onClick={() => setIsBold(b => !b)} sx={{ minWidth: 36, height: 44, fontWeight: 700 }}>B</Button>
+                  <Button
+                    variant={isBold ? "contained" : "outlined"}
+                    onClick={() => setIsBold((b) => !b)}
+                    sx={{ minWidth: 36, height: 44, fontWeight: 700 }}
+                  >
+                    B
+                  </Button>
                   {/* Italic */}
-                  <Button variant={isItalic ? 'contained' : 'outlined'} onClick={() => setIsItalic(i => !i)} sx={{ minWidth: 36, height: 44, fontStyle: 'italic', fontWeight: 500 }}>/</Button>
+                  <Button
+                    variant={isItalic ? "contained" : "outlined"}
+                    onClick={() => setIsItalic((i) => !i)}
+                    sx={{
+                      minWidth: 36,
+                      height: 44,
+                      fontStyle: "italic",
+                      fontWeight: 500,
+                    }}
+                  >
+                    /
+                  </Button>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%' }}> {/* reduce mb */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 2,
+                    width: "100%",
+                  }}
+                >
+                  {" "}
+                  {/* reduce mb */}
                   {/* Line Height */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Height sx={{ color: '#bdbdbd' }} />
-                    <Select size="small" value={lineHeight} onChange={e => setLineHeight(Number(e.target.value))} sx={{ minWidth: 70, height: 44 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Height sx={{ color: "#bdbdbd" }} />
+                    <Select
+                      size="small"
+                      value={lineHeight}
+                      onChange={(e) => setLineHeight(Number(e.target.value))}
+                      sx={{ minWidth: 70, height: 44 }}
+                    >
                       <MenuItem value={1}>1</MenuItem>
                       <MenuItem value={1.2}>1.2</MenuItem>
                       <MenuItem value={1.5}>1.5</MenuItem>
@@ -2809,14 +3514,36 @@ if (!currentImage) currentImage = baseImage;
                     </Select>
                   </Box>
                   {/* Font Size */}
-                  <Select size="small" value={fontSize} onChange={e => setFontSize(e.target.value === 'auto' ? 'auto' : Number(e.target.value))} sx={{ minWidth: 70, height: 44 }}>
+                  <Select
+                    size="small"
+                    value={fontSize}
+                    onChange={(e) =>
+                      setFontSize(
+                        e.target.value === "auto"
+                          ? "auto"
+                          : Number(e.target.value)
+                      )
+                    }
+                    sx={{ minWidth: 70, height: 44 }}
+                  >
                     <MenuItem value="auto">Auto</MenuItem>
-                    {[8, 10, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72].map(size => (
-                      <MenuItem key={size} value={size}>{size}</MenuItem>
-                    ))}
+                    {[8, 10, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72].map(
+                      (size) => (
+                        <MenuItem key={size} value={size}>
+                          {size}
+                        </MenuItem>
+                      )
+                    )}
                   </Select>
                   {/* Font Weight */}
-                  <Select size="small" value={fontWeight} onChange={e => setFontWeight(Number(e.target.value) as 400 | 600 | 700)} sx={{ minWidth: 90, height: 44 }}>
+                  <Select
+                    size="small"
+                    value={fontWeight}
+                    onChange={(e) =>
+                      setFontWeight(Number(e.target.value) as 400 | 600 | 700)
+                    }
+                    sx={{ minWidth: 90, height: 44 }}
+                  >
                     <MenuItem value={400}>Regular</MenuItem>
                     <MenuItem value={600}>Semi-Bold</MenuItem>
                     <MenuItem value={700}>Bold</MenuItem>
@@ -2824,36 +3551,62 @@ if (!currentImage) currentImage = baseImage;
                 </Box>
               </Box>
               {/* Middle row: text input and color palette */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%', mb: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 2,
+                  width: "100%",
+                  mb: 2,
+                }}
+              >
                 <TextField
                   placeholder="Enter your text"
                   value={text}
                   onChange={handleTextInputChange}
                   size="small"
                   variant="outlined"
-                  sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 2, background: '#fafbfc', borderRadius: 2, input: { textAlign: 'center', fontWeight: 500 } }}
+                  sx={{
+                    minWidth: { xs: "100%", sm: 200 },
+                    flex: 2,
+                    background: "#fafbfc",
+                    borderRadius: 2,
+                    input: { textAlign: "center", fontWeight: 500 },
+                  }}
                   InputProps={{ style: { height: 40 } }}
                 />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 0.5,
+                  }}
+                >
                   <Box
                     sx={{
                       width: 36,
                       height: 36,
-                      borderRadius: '50%',
-                      overflow: 'hidden',
-                      border: '2px solid #eee',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: '#fafbfc',
-                      boxShadow: '0 2px 6px rgba(244,106,106,0.08)',
-                      cursor: 'pointer',
-                      position: 'relative',
-                      color: '#bdbdbd',
-                      transition: 'box-shadow 0.2s',
-                      '&:hover': { boxShadow: '0 4px 12px rgba(244,106,106,0.15)' },
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      border: "2px solid #eee",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#fafbfc",
+                      boxShadow: "0 2px 6px rgba(244,106,106,0.08)",
+                      cursor: "pointer",
+                      position: "relative",
+                      color: "#bdbdbd",
+                      transition: "box-shadow 0.2s",
+                      "&:hover": {
+                        boxShadow: "0 4px 12px rgba(244,106,106,0.15)",
+                      },
                     }}
-                    onClick={() => document.getElementById('text-color-input')?.click()}
+                    onClick={() =>
+                      document.getElementById("text-color-input")?.click()
+                    }
                   >
                     <Palette sx={{ fontSize: 28 }} />
                     <input
@@ -2861,7 +3614,18 @@ if (!currentImage) currentImage = baseImage;
                       type="color"
                       value={textColor}
                       onChange={(e) => setTextColor(e.target.value)}
-                      style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', padding: 0, position: 'absolute', top: 0, left: 0, opacity: 0 }}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        border: "none",
+                        background: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        opacity: 0,
+                      }}
                     />
                   </Box>
                 </Box>
@@ -2873,22 +3637,21 @@ if (!currentImage) currentImage = baseImage;
                 onClick={handleAddText}
                 sx={{
                   mt: 1,
-                  bgcolor: '#e0e0e0',
-                  color: '#888',
+                  bgcolor: "#e0e0e0",
+                  color: "#888",
                   fontWeight: 400,
                   boxShadow: 0,
-                  cursor: !text.trim() ? 'not-allowed' : 'pointer',
-                  '&:hover': {
-                    bgcolor: '#e0e0e0',
-                    color: '#888',
+                  cursor: !text.trim() ? "not-allowed" : "pointer",
+                  "&:hover": {
+                    bgcolor: "#e0e0e0",
+                    color: "#888",
                   },
                   width: 180,
-                  mx: 'auto',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s',
-                  
+                  mx: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s",
                 }}
               >
                 <TextFields sx={{ fontSize: 24, mr: 1 }} />
@@ -2898,10 +3661,23 @@ if (!currentImage) currentImage = baseImage;
           </Box>
         )}
         {tab === 2 && (
-         <Box sx={{ flexGrow: 1, width: '150%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
-         <Box sx={{ maxWidth: 700, minWidth: 400, width: '100%' }}>
-           <Picker data={data} onEmojiSelect={emoji => handleAddSticker(emoji.native)} style={{ width: '100%' }} />
-         </Box>
+          <Box
+            sx={{
+              flexGrow: 1,
+              width: "150%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "auto",
+            }}
+          >
+            <Box sx={{ maxWidth: 700, minWidth: 400, width: "100%" }}>
+              <Picker
+                data={data}
+                onEmojiSelect={(emoji) => handleAddSticker(emoji.native)}
+                style={{ width: "100%" }}
+              />
+            </Box>
           </Box>
         )}
         {tab === 3 && (
@@ -2911,21 +3687,26 @@ if (!currentImage) currentImage = baseImage;
               component="label"
               startIcon={<AddPhotoAlternate />}
               sx={{
-                borderColor: 'rgb(0, 0, 0, 0.26)',
-                color: 'rgb(0, 0, 0, 0.26)',
+                borderColor: "rgb(0, 0, 0, 0.26)",
+                color: "rgb(0, 0, 0, 0.26)",
                 fontWeight: 700,
                 borderRadius: 2,
                 px: 3,
                 py: 1.2,
                 boxShadow: 1,
-                '&:hover': {
-                  bgcolor: 'rgb(0, 0, 0, 0.08)',
-                  borderColor: 'rgb(0, 0, 0, 0.26)',
+                "&:hover": {
+                  bgcolor: "rgb(0, 0, 0, 0.08)",
+                  borderColor: "rgb(0, 0, 0, 0.26)",
                 },
               }}
             >
               Upload Image
-              <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageUpload}
+              />
             </Button>
             {uploadedImage && (
               <Button
@@ -2994,59 +3775,108 @@ if (!currentImage) currentImage = baseImage;
           </Box>
         )}
         {tab === 5 && (
-          <Box sx={{ width: '100%', mt: 2 }}>
+          <Box sx={{ width: "100%", mt: 2 }}>
             {/* Color pickers and toggle row */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                mb: 3,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <span style={{ fontWeight: 600 }}>Fill:</span>
-                <input type="color" value={shapeColor} onChange={e => setShapeColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: 'none', cursor: 'pointer' }} />
+                <input
+                  type="color"
+                  value={shapeColor}
+                  onChange={(e) => setShapeColor(e.target.value)}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    border: "none",
+                    borderRadius: 6,
+                    background: "none",
+                    cursor: "pointer",
+                  }}
+                />
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <span style={{ fontWeight: 600 }}>Border:</span>
-                <input type="color" value={shapeBorderColor} onChange={e => setShapeBorderColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: 'none', cursor: 'pointer' }} />
+                <input
+                  type="color"
+                  value={shapeBorderColor}
+                  onChange={(e) => setShapeBorderColor(e.target.value)}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    border: "none",
+                    borderRadius: 6,
+                    background: "none",
+                    cursor: "pointer",
+                  }}
+                />
               </Box>
               <ToggleButton
                 value="filled"
                 selected={shapeFill}
-                onChange={() => setShapeFill(f => !f)}
+                onChange={() => setShapeFill((f) => !f)}
                 sx={{
-                  bgcolor: shapeFill ? 'rgb(244,106,106)' : '#f3f3f3',
-                  color: '#888 !important', // force grey text
+                  bgcolor: shapeFill ? "rgb(244,106,106)" : "#f3f3f3",
+                  color: "#888 !important", // force grey text
                   fontWeight: 700,
                   borderRadius: 2,
                   px: 3,
                   py: 1,
                   boxShadow: 1,
-                  '&:hover': { bgcolor: shapeFill ? 'rgb(224,85,85)' : '#f3f3f3' },
+                  "&:hover": {
+                    bgcolor: shapeFill ? "rgb(224,85,85)" : "#f3f3f3",
+                  },
                 }}
               >
-                <span style={{ color: '#888' }}>{shapeFill ? "Filled" : "No Fill"}</span>
+                <span style={{ color: "#888" }}>
+                  {shapeFill ? "Filled" : "No Fill"}
+                </span>
               </ToggleButton>
             </Box>
             {/* Shapes grid */}
-            <Grid container spacing={2} justifyContent="center" alignItems="center">
+            <Grid
+              container
+              spacing={2}
+              justifyContent="center"
+              alignItems="center"
+            >
               {shapes.map((shape, i) => (
                 <Grid item key={i}>
                   <Tooltip title={shape.label} arrow>
                     <Box
-                      onClick={() => handleAddShape(shape.value, shapeFill, shapeColor, shapeBorderColor)}
+                      onClick={() =>
+                        handleAddShape(
+                          shape.value,
+                          shapeFill,
+                          shapeColor,
+                          shapeBorderColor
+                        )
+                      }
                       sx={{
                         width: 48,
                         height: 48,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         borderRadius: 2,
                         boxShadow: 1,
-                        bgcolor: '#fff',
-                        cursor: 'pointer',
-                        transition: 'transform 0.18s, box-shadow 0.18s',
-                        '&:hover': {
-                          transform: 'scale(1.13)',
+                        bgcolor: "#fff",
+                        cursor: "pointer",
+                        transition: "transform 0.18s, box-shadow 0.18s",
+                        "&:hover": {
+                          transform: "scale(1.13)",
                           boxShadow: 4,
-                          bgcolor: '#f8f8f8',
+                          bgcolor: "#f8f8f8",
                         },
-                        border: '1.5px solid #eee',
+                        border: "1.5px solid #eee",
                       }}
                     >
                       {shape.icon}
@@ -3058,12 +3888,49 @@ if (!currentImage) currentImage = baseImage;
           </Box>
         )}
         {tab === 6 && (
-          <Box sx={{ width: '100%', mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Paper elevation={2} sx={{ p: 2, borderRadius: 3, mb: 2, minWidth: 320, maxWidth: 420, width: '100%', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <Typography variant="subtitle1" fontWeight={600} mb={1} sx={{ textAlign: 'center', color: '#444' }}>
+          <Box
+            sx={{
+              width: "100%",
+              mt: 2,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Paper
+              elevation={2}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                mb: 2,
+                minWidth: 320,
+                maxWidth: 420,
+                width: "100%",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                fontWeight={600}
+                mb={1}
+                sx={{ textAlign: "center", color: "#444" }}
+              >
                 Draw on your product
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 1.5, width: '100%' }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1.5,
+                  width: "100%",
+                }}
+              >
                 <Button
                   startIcon={<Brush />}
                   variant="contained"
@@ -3071,10 +3938,10 @@ if (!currentImage) currentImage = baseImage;
                     minWidth: 100,
                     fontWeight: 600,
                     borderRadius: 2,
-                    bgcolor: '#e0e0e0',
-                    color: '#888',
+                    bgcolor: "#e0e0e0",
+                    color: "#888",
                     boxShadow: 0,
-                    '&:hover': { bgcolor: '#e0e0e0', color: '#888' },
+                    "&:hover": { bgcolor: "#e0e0e0", color: "#888" },
                   }}
                 >
                   Paint Brush
@@ -3086,10 +3953,10 @@ if (!currentImage) currentImage = baseImage;
                     minWidth: 70,
                     fontWeight: 600,
                     borderRadius: 2,
-                    bgcolor: '#e0e0e0',
-                    color: '#888',
+                    bgcolor: "#e0e0e0",
+                    color: "#888",
                     boxShadow: 0,
-                    '&:hover': { bgcolor: '#e0e0e0', color: '#888' },
+                    "&:hover": { bgcolor: "#e0e0e0", color: "#888" },
                   }}
                 >
                   Pen
@@ -3101,26 +3968,47 @@ if (!currentImage) currentImage = baseImage;
                     minWidth: 80,
                     fontWeight: 600,
                     borderRadius: 2,
-                    bgcolor: '#e0e0e0',
-                    color: '#888',
+                    bgcolor: "#e0e0e0",
+                    color: "#888",
                     boxShadow: 0,
-                    '&:hover': { bgcolor: '#e0e0e0', color: '#888' },
+                    "&:hover": { bgcolor: "#e0e0e0", color: "#888" },
                   }}
                 >
                   Pencil
                 </Button>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#888', fontWeight: 600 }}>Color:</Typography>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "#888", fontWeight: 600 }}
+                  >
+                    Color:
+                  </Typography>
                   <input
                     type="color"
                     value={drawingColor}
                     onChange={(e) => setDrawingColor(e.target.value)}
-                    style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', borderRadius: 6 }}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      borderRadius: 6,
+                    }}
                     title="Pick color"
                   />
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#888', fontWeight: 600 }}>Size:</Typography>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "#888", fontWeight: 600 }}
+                  >
+                    Size:
+                  </Typography>
                   <Slider
                     min={1}
                     max={30}
@@ -3129,21 +4017,66 @@ if (!currentImage) currentImage = baseImage;
                     valueLabelDisplay="auto"
                     sx={{ width: 80, mx: 1 }}
                   />
-                  <Typography variant="caption" sx={{ color: '#888', minWidth: 20 }}> {brushSize}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "#888", minWidth: 20 }}
+                  >
+                    {" "}
+                    {brushSize}
+                  </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1 }}>
-                  <Button variant="outlined" size="small" sx={{ fontWeight: 600, borderRadius: 2, color: '#888', borderColor: '#888', bgcolor: 'transparent', boxShadow: 0, '&:hover': { bgcolor: 'transparent', color: '#888', borderColor: '#888' } }} onClick={() => canvasRef?.undo()}>UNDO</Button>
-                  <Button variant="outlined" size="small" sx={{ fontWeight: 600, borderRadius: 2, color: '#888', borderColor: '#888', bgcolor: 'transparent', boxShadow: 0, '&:hover': { bgcolor: 'transparent', color: '#888', borderColor: '#888' } }} onClick={() => canvasRef?.clear()}>CLEAR</Button>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}
+                >
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      color: "#888",
+                      borderColor: "#888",
+                      bgcolor: "transparent",
+                      boxShadow: 0,
+                      "&:hover": {
+                        bgcolor: "transparent",
+                        color: "#888",
+                        borderColor: "#888",
+                      },
+                    }}
+                    onClick={() => canvasRef?.undo()}
+                  >
+                    UNDO
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      color: "#888",
+                      borderColor: "#888",
+                      bgcolor: "transparent",
+                      boxShadow: 0,
+                      "&:hover": {
+                        bgcolor: "transparent",
+                        color: "#888",
+                        borderColor: "#888",
+                      },
+                    }}
+                    onClick={() => canvasRef?.clear()}
+                  >
+                    CLEAR
+                  </Button>
                 </Box>
               </Box>
             </Paper>
           </Box>
         )}
         {/* Add to Cart and Buy Now buttons at the bottom */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
           <Button
-          variant="outlined"
-            
+            variant="outlined"
             startIcon={<ShoppingCart />}
             onClick={handleAddToCartCustom}
             disabled={!isSaved}
@@ -3154,16 +4087,16 @@ if (!currentImage) currentImage = baseImage;
               fontWeight: 700,
               minWidth: 200,
               height: 48,
-              color: 'rgb(255,106,106)',
-              borderColor: 'rgb(255,106,106)',
-              backgroundColor: 'white',
-              '&:hover': {
-                backgroundColor: 'rgba(220,80,80,0.30)',
-                borderColor: 'rgb(255,100,100)',
-                color: 'rgb(220,80,80)',
+              color: "rgb(255,106,106)",
+              borderColor: "rgb(255,106,106)",
+              backgroundColor: "white",
+              "&:hover": {
+                backgroundColor: "rgba(220,80,80,0.30)",
+                borderColor: "rgb(255,100,100)",
+                color: "rgb(220,80,80)",
               },
             }}
-            title={!isSaved ? 'Please save your customization first' : ''}
+            title={!isSaved ? "Please save your customization first" : ""}
           >
             Add to Cart
           </Button>
@@ -3178,15 +4111,14 @@ if (!currentImage) currentImage = baseImage;
               fontWeight: 700,
               minWidth: 200,
               height: 48,
-              color: 'white',
-              backgroundColor: 'rgb(255,106,106)',
-              '&:hover': {
-                backgroundColor: 'rgb(220,80,80)',
-                color: 'white',
-              
+              color: "white",
+              backgroundColor: "rgb(255,106,106)",
+              "&:hover": {
+                backgroundColor: "rgb(220,80,80)",
+                color: "white",
               },
             }}
-            title={!isSaved ? 'Please save your customization first' : ''}
+            title={!isSaved ? "Please save your customization first" : ""}
           >
             Buy Now
           </Button>
@@ -3197,9 +4129,13 @@ if (!currentImage) currentImage = baseImage;
         open={snackbar.open}
         autoHideDuration={2500}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

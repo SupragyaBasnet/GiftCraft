@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
@@ -9,30 +9,29 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import AboutUs from './pages/AboutUs';
 import Cart from './pages/Cart';
+import CheckoutPage from './pages/CheckoutPage';
+import Contact from './pages/Contact';
+import Customize from './pages/Customize';
 import ForgotPassword from './pages/ForgotPassword';
+import Help from './pages/Help';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import OrderConfirmed from './pages/orderconfirmed';
+import PaymentFailure from './pages/payment-failure';
+import PaymentSuccess from './pages/payment-success';
 import ProductCustomize from './pages/ProductCustomize';
 import ProductDetails from './pages/ProductDetails';
 import Products from './pages/Products';
-import Register from './pages/Register';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import Help from './pages/Help';
-import Contact from './pages/Contact';
-import ResetPassword from './pages/ResetPassword';
-import VerifyOtp from './pages/VerifyOtp';
-import SetNewPassword from './pages/SetNewPassword';
-import PaymentSuccess from './pages/payment-success';
-import PaymentFailure from './pages/payment-failure';
-import OrderConfirmed from './pages/orderconfirmed';
-import Customize from './pages/Customize';
-import ProfileLayout from './pages/ProfileLayout';
-import ProfileImage from './pages/ProfileImage';
-import ProfileOverview from './pages/ProfileOverview';
-import ProfileOrders from './pages/ProfileOrders';
 import ProfileAddresses from './pages/ProfileAddresses';
+import ProfileImage from './pages/ProfileImage';
+import ProfileLayout from './pages/ProfileLayout';
+import ProfileOrders from './pages/ProfileOrders';
+import ProfileOverview from './pages/ProfileOverview';
 import ProfileSettings from './pages/ProfileSettings';
+import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
+import SetNewPassword from './pages/SetNewPassword';
+import VerifyOtp from './pages/VerifyOtp';
 
 const theme = createTheme({
   palette: {
@@ -103,6 +102,7 @@ const App: React.FC = () => {
                     <Route path="addresses" element={<ProfileAddresses />} />
                     <Route path="settings" element={<ProfileSettings />} />
                   </Route>
+                 
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />

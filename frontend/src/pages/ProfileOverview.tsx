@@ -31,7 +31,24 @@ const ProfileOverview: React.FC = () => {
     e.preventDefault();
     setSnackbar({ open: false, message: '', severity: 'success' });
     try {
-      setUser && setUser((prev: any) => ({ ...prev, name, email, phone: '+977' + phone }));
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('giftcraftToken')}`,
+        },
+        body: JSON.stringify({ name, email, phone: '+977' + phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update profile');
+      setUser && setUser((prev: any) => ({ ...prev, name: data.name, email: data.email, phone: data.phone }));
+      // Update localStorage for login consistency
+      const userData = JSON.parse(localStorage.getItem('giftcraftUser') || '{}');
+      localStorage.setItem('giftcraftUser', JSON.stringify({ ...userData, name: data.name, email: data.email, phone: data.phone }));
+      // If a new token is returned (e.g., after email change), update it
+      if (data.token) {
+        localStorage.setItem('giftcraftToken', data.token);
+      }
       setSnackbar({ open: true, message: 'Profile updated!', severity: 'success' });
       setEditMode(false);
     } catch (err: any) {
