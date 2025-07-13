@@ -107,7 +107,13 @@ const CheckoutPage: React.FC = () => {
 
   // Calculate subtotal and total
   const subtotal = itemsToCheckout.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-  const total = subtotal + deliveryCharge;
+  
+  // Apply 20% discount for purchases of 5000 or more
+  const discountThreshold = 5000;
+  const discountPercentage = 0.20; // 20%
+  const discountAmount = subtotal >= discountThreshold ? subtotal * discountPercentage : 0;
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  const total = subtotalAfterDiscount + deliveryCharge;
 
   // Address and payment logic
   const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -330,6 +336,22 @@ const CheckoutPage: React.FC = () => {
                 <Typography variant="body1">Subtotal:</Typography>
                 <Typography variant="body1">Rs. {subtotal}</Typography>
               </Box>
+              {discountAmount > 0 && (
+                <>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                    <Typography variant="body1" color="success.main" fontWeight={600}>
+                      Discount (20% off on Rs. 5000+):
+                    </Typography>
+                    <Typography variant="body1" color="success.main" fontWeight={600}>
+                      -Rs. {discountAmount}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                    <Typography variant="body1">Subtotal after discount:</Typography>
+                    <Typography variant="body1">Rs. {subtotalAfterDiscount}</Typography>
+                  </Box>
+                </>
+              )}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
                 <Typography variant="body1">Delivery Charge:</Typography>
                 <Typography variant="body1">Rs. {deliveryCharge}</Typography>
@@ -338,6 +360,20 @@ const CheckoutPage: React.FC = () => {
                 <Typography variant="h6" fontWeight={700}>Total:</Typography>
                 <Typography variant="h6" fontWeight={700}>Rs. {total}</Typography>
               </Box>
+              {discountAmount > 0 && (
+                <Box sx={{ 
+                  mt: 2, 
+                  p: 2, 
+                  bgcolor: 'success.light', 
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'success.main'
+                }}>
+                  <Typography variant="body2" color="success.dark" fontWeight={600}>
+                    🎉 You saved Rs. {discountAmount} with our 20% discount offer!
+                  </Typography>
+                </Box>
+              )}
             </Box>
             {/* Address Section */}
             <Box sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>

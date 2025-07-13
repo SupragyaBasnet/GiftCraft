@@ -18,6 +18,7 @@ import photoframe1 from '../assets/photoframe1.jpg';
 
 
 import tshirt1 from '../assets/tshirt1.jpg';
+import yellowOrangeBanner from '../assets/Yellow and Orange Modern Summer Sale Etsy shop cover.png';
 
 import { products } from '../data/products';
 import RotatingHeroSection from './RotatingHeroSection';
@@ -158,6 +159,43 @@ const Home: React.FC = () => {
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       {/* Hero Section */}
       <RotatingHeroSection />
+
+      {/* Promotional Banner Section */}
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Paper
+          elevation={4}
+          sx={{
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: 4,
+            p: 0,
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate('/products')}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              height: { xs: 180, md: 260 },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              component="img"
+              src={yellowOrangeBanner}
+              alt="Sale Banner"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </Box>
+        </Paper>
+      </Container>
 
       {/* Why Choose Us Section */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
