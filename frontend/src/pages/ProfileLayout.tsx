@@ -27,6 +27,13 @@ export default function ProfileLayout() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false); // Prevent double delete
+
+  // Debug: log dialog state
+  React.useEffect(() => {
+    console.log('Delete dialog open:', showDeleteConfirm);
+  }, [showDeleteConfirm]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -123,6 +130,84 @@ export default function ProfileLayout() {
       }
     }
   };
+
+  const handleDeleteAccount = async () => {
+    if (deleting) return; // Prevent double execution
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('giftcraftToken');
+  
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: 'You are not logged in.',
+          severity: 'error',
+        });
+        setDeleting(false);
+        return;
+      }
+  
+      const res = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        // ✅ Success: Remove token, clear user, redirect
+        localStorage.removeItem('giftcraftToken');
+        setUser(null);
+        // Store flag in sessionStorage to show success message after redirect
+        sessionStorage.setItem('accountDeleted', '1');
+        setSnackbar({
+          open: true,
+          message: data.message || 'Account deleted successfully. Redirecting...',
+          severity: 'success',
+        });
+  
+        // Redirect after short delay
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1200);
+      } else {
+        console.error('Delete account failed:', data);
+        setSnackbar({
+          open: true,
+          message: data.message || 'Failed to delete account.',
+          severity: 'error',
+        });
+        setDeleting(false);
+      }
+    } catch (err) {
+      console.error('Delete account error:', err);
+      setSnackbar({
+        open: true,
+        message: 'Server error while deleting account.',
+        severity: 'error',
+      });
+      setDeleting(false);
+    }
+  
+    setShowDeleteConfirm(false);
+  };
+  
+  // Show account deleted message if redirected to register page
+  React.useEffect(() => {
+    if (window.location.pathname === '/register' && sessionStorage.getItem('accountDeleted')) {
+      setSnackbar({
+        open: true,
+        message: 'Account deleted successfully.',
+        severity: 'success',
+      });
+      sessionStorage.removeItem('accountDeleted');
+    }
+  }, []);
+  
+  
 
   return (
     <Box
@@ -264,6 +349,48 @@ export default function ProfileLayout() {
             </ListItem>
           ))}
         </List>
+        <Button
+          variant="outlined"
+          color="error"
+          fullWidth
+          sx={{
+            mt: 2,
+            borderRadius: 3,
+            fontWeight: 700,
+            borderColor: themeColor,
+            color: themeColor,
+            '&:hover': {
+              backgroundColor: themeColorLight,
+              borderColor: themeColor,
+              color: themeColor,
+            },
+          }}
+          onClick={() => {
+            setShowDeleteConfirm(true);
+            console.log('Delete Account button clicked, dialog should open');
+          }}
+        >
+          Delete Account
+        </Button>
+        <Dialog open={showDeleteConfirm} onClose={() => {
+          setShowDeleteConfirm(false);
+          console.log('Dialog closed by clicking outside or cancel');
+        }}>
+          <DialogTitle>Delete Account</DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to delete your account? This action cannot be undone.</Typography>
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+            <Button color="error" variant="contained" onClick={() => {
+              handleDeleteAccount();
+              console.log('Delete confirmed, handleDeleteAccount called');
+            }} disabled={deleting}>Delete</Button>
+            <Button onClick={() => {
+              setShowDeleteConfirm(false);
+              console.log('Delete cancelled, dialog closed');
+            }}>Cancel</Button>
+          </DialogActions>
+        </Dialog>
         {/* Upload/Capture Menu and Dialogs */}
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
           <MenuItem onClick={handleGalleryUpload}>

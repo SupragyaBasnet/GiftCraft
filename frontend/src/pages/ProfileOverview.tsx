@@ -57,7 +57,7 @@ const ProfileOverview: React.FC = () => {
   };
 
   return (
-    <Paper sx={{ borderRadius: 5, p: 4, minWidth: 350, maxWidth: 520, minHeight: 510, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', mx: 'auto', width: '100%' }}>
+    <Paper sx={{ borderRadius: 5, p: 4, minWidth: 350, maxWidth: 520, minHeight: 560, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', mx: 'auto', width: '100%' }}>
       <Typography variant="h5" fontWeight={700} gutterBottom>Profile Overview</Typography>
       <Box component="form" onSubmit={handleProfileSubmit}>
         <TextField

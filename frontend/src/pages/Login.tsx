@@ -28,6 +28,18 @@ const Login: React.FC = () => {
   // Add state for snackbar
   const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success'|'error'}>({open: false, message: '', severity: 'success'});
 
+  // Show account deleted message if redirected here
+  React.useEffect(() => {
+    if (sessionStorage.getItem('accountDeleted')) {
+      setSnackbar({
+        open: true,
+        message: 'Account deleted successfully.',
+        severity: 'success',
+      });
+      sessionStorage.removeItem('accountDeleted');
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

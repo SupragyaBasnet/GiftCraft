@@ -480,6 +480,8 @@ const Profile: React.FC = () => {
               <Tab icon={<LocalShipping />} iconPosition="start" label="Orders" />
               <Tab icon={<LocationOn />} iconPosition="start" label="Addresses" />
               <Tab icon={<SettingsIcon />} iconPosition="start" label="Settings" />
+              <Tab icon={<Delete />} iconPosition="start" label="Delete Account" />
+              
             </Tabs>
           </Box>
           {/* Main content */}

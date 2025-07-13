@@ -36,6 +36,18 @@ const Register: React.FC = () => {
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
+  // Show account deleted message if redirected here
+  React.useEffect(() => {
+    if (sessionStorage.getItem('accountDeleted')) {
+      setSnackbar({
+        open: true,
+        message: 'Account deleted successfully.',
+        severity: 'success',
+      });
+      sessionStorage.removeItem('accountDeleted');
+    }
+  }, []);
+
   const validateEmail = (email: string) => {
     // Simple email regex
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

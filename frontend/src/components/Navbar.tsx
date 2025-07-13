@@ -29,6 +29,10 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import React, { useState } from "react";
@@ -49,6 +53,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -59,8 +64,16 @@ const Navbar: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    setShowLogoutDialog(true);
     handleClose();
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutDialog(false);
+  };
+  const cancelLogout = () => {
+    setShowLogoutDialog(false);
   };
 
   const isActive = (path: string) => {
@@ -630,6 +643,17 @@ const Navbar: React.FC = () => {
           </>
         )}
       </Toolbar>
+      {/* Logout confirmation dialog */}
+      <Dialog open={showLogoutDialog} onClose={cancelLogout}>
+        <DialogTitle>Logout</DialogTitle>
+        <DialogContent>
+          <Typography>Do you want to logout?</Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+          <Button color="error" variant="contained" onClick={confirmLogout}>Yes</Button>
+          <Button onClick={cancelLogout}>No</Button>
+        </DialogActions>
+      </Dialog>
     </AppBar>
   );
 };

@@ -65,8 +65,8 @@ const ProfileAddresses: React.FC = () => {
         p: 4,
         minWidth: 350,
         maxWidth: 520,
-        minHeight: 510,
-        maxHeight: 510, // Fix the height
+        minHeight: 560,
+        maxHeight: 560, // Fix the height
         boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
         mx: "auto",
         width: "100%",
